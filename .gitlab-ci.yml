@@ -1,0 +1,19 @@
+stages:
+  - build
+  - test
+  - deploy
+
+build_docker_image:
+  stage: build
+  script:
+    - make
+
+execute_tests:
+  stage: test
+  script:
+    - make test_server
+
+code_quality:
+  stage: test
+  script:
+    - make quality

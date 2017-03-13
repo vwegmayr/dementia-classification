@@ -1,0 +1,15 @@
+%YAML 1.2
+---
+
+Parameters:
+   module: 'numpy.random'
+   class: 'RandomState'
+   list:
+   - config1:
+     weight: 0.2
+     module: 'numpy.random'
+     class: 'RandomState'
+   - config2:
+     weight: 0.1
+     module: 'numpy.random'
+     class: 'RandomState'

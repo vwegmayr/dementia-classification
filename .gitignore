@@ -1,0 +1,24 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+
+
+# Setuptools distribution folder.
+/dist/
+
+# Python egg metadata, regenerated from source files by setuptools.
+/*.egg-info
+/*.egg
+
+# Vim swap files
+*.swp
+
+# local PyCharm configuration
+.idea/
+
+# built docs
+docs/build/
+# Docs autobuild dir
+docs/source/source/
