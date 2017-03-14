@@ -1,9 +1,6 @@
 project-skeleton
 ----------------
 
-This repository provides a barebone for student projects.
-In order to get started, fork the project to the ise-squad namespace.
-There change the project name and path for the new project.
 
 
 
@@ -44,3 +41,13 @@ Run the code quality control tools:
 
     make quality
 
+Remarks for admin
+----------------
+
+This repository provides a barebone for student projects.
+
+In order to get started, fork the project to the ise-squad namespace.
+
+There change the project name and path for the new project.
+
+Make sure the ise-squad-runner is enabled.
