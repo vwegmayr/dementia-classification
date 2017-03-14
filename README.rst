@@ -2,8 +2,10 @@ project-skeleton
 ----------------
 
 This repository provides a barebone for student projects.
-
 In order to get started, fork the project to the ise-squad namespace.
+There change the project name and path for the new project.
+
+
 
 Before doing anything you need to build the container:
 
