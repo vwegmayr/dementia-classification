@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# PROJECT documentation build configuration file, created by
+# project_name documentation build configuration file, created by
 # sphinx-quickstart on Sat Feb 18 21:51:02 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -51,7 +51,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'PROJECT'
+project = 'project_name'
 copyright = '2017, AUTHOR'
 author = 'AUTHOR'
 
@@ -105,7 +105,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'PROJECTdoc'
+htmlhelp_basename = 'project_namedoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -132,7 +132,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'PROJECT.tex', 'PROJECT Documentation',
+    (master_doc, 'project_name.tex', 'project_name Documentation',
      'AUTHOR', 'manual'),
 ]
 
@@ -142,7 +142,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'PROJECT', 'PROJECT Documentation',
+    (master_doc, 'project_name', 'project_name Documentation',
      [author], 1)
 ]
 
@@ -153,8 +153,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'PROJECT', 'PROJECT Documentation',
-     author, 'PROJECT', 'One line description of project.',
+    (master_doc, 'project_name', 'project_name Documentation',
+     author, 'project_name', 'One line description of project.',
      'Miscellaneous'),
 ]
 
@@ -175,7 +175,7 @@ def run_apidoc(_):
     base_path = (os.path.join(os.path.dirname(__file__), '../..'))
     sys.path.append(base_path)
 
-    module = base_path + '/PROJECT'
+    module = base_path + '/project_name'
     current_directory = os.path.abspath(os.path.dirname(__file__))
     output_path = os.path.join(current_directory, 'source')
     main(['-e', '-o', output_path, module, '--force'])

@@ -6,7 +6,7 @@ def readme():
         return f.read()
 
 
-setup(name='PROJECT',
+setup(name='project_name',
       version='0.0.1',
       description='Tools for subtype identification in structured and image data',
       long_description=readme(),
@@ -21,14 +21,14 @@ setup(name='PROJECT',
       author='AUTHOR',
       author_email='author@gmail.com',
       license='MIT',
-      packages=['PROJECT',
+      packages=['project_name',
       ],
       install_requires=[
           'PyYAML',
       ],
       #tests_require=[] in case test have specific requirements
       entry_points={
-          'console_scripts': ['yourcommand=PROJECT.command_line:main'],
+          'console_scripts': ['yourcommand=project_name.command_line:main'],
       },
       include_package_data=True,
       zip_safe=False)
