@@ -46,9 +46,9 @@ sphinx and readthedocs in the folder docs.
 
 Python Packaging
 ----------------
-
+.. _packaging: https://python-packaging.readthedocs.io/en/latest/
 The skeleton is structured in a way which supports the creation of a python package.
-Read more about .. _packaging: https://python-packaging.readthedocs.io/en/latest/
+Read more about packaging_.
 
 
 Remarks for admin
