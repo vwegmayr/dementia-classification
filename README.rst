@@ -21,6 +21,17 @@ Run the code quality checks:
 .. code-block:: shell
 
     make && make quality
+    
+Alternatively, you can run tests and quality checks from the repo root without docker:
+
+.. code-block:: shell
+    
+    python -m unittest
+
+    flake8 project_name
+    pylint project_name
+    
+However, this assumes you have everything installed locally (e.g. flake8 & pylint).
 
 Remarks for admin
 ----------------
