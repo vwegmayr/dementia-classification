@@ -1,5 +1,9 @@
 project-skeleton
---------------
+----------------
+
+This repository provides a barebone for student projects.
+
+In order to get started, fork the project.
 
 Before doing anything (like running tests or the actual program)
 you need to build the container:
