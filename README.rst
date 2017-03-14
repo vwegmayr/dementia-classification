@@ -8,42 +8,19 @@ of "AUTHOR" and "project_name".
 
 Additionally, you have to modify the setup.py file according to your wishes.
 
-Before doing anything you need to build the container:
+The main components of this skeleton are the test and quality checks.
+
+In order to run the tests:
 
 .. code-block:: shell
 
-    make
+    make && make test
 
-
-**Before running any of the following commands you need to build the container first**
-
-
-Run the tracking:
+Run the code quality checks:
 
 .. code-block:: shell
 
-    make run
-
-
-Running tests requires a TTY(hint: you have one, the gitlab-ci server does not):
-
-.. code-block:: shell
-
-    make test
-
-
-To run the test without a TTY(as for example on the gitlab-ci server):
-
-.. code-block:: shell
-
-    make test_server
-
-
-Run the code quality control tools:
-
-.. code-block:: shell
-
-    make quality
+    make && make quality
 
 Remarks for admin
 ----------------
