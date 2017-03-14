@@ -1,7 +1,7 @@
-Globaltracking
+Subtype Identification
 --------------
 
-Before doing anything(like running tests or the actual program)
+Before doing anything (like running tests or the actual program)
 you need to build the container:
 
 .. code-block:: shell
@@ -38,17 +38,4 @@ Run the code quality control tools:
 .. code-block:: shell
 
     make quality
-
-
-To get a shell in the container:
-
-.. code-block:: shell
-
-    docker run -it --rm tracking /bin/bash
-
-
-To use (with caution) from python code, simply do::
-
-    >>> import globaltracking
-    >>> globaltracking.start()
 

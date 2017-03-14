@@ -1,9 +1,9 @@
-.. Globaltracking documentation master file, created by
+.. subtyping documentation master file, created by
    sphinx-quickstart on Sat Feb 18 21:51:02 2017.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Globaltracking's documentation!
+Welcome to subtyping's documentation!
 ==========================================
 
 .. toctree::

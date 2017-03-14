@@ -1,14 +1,14 @@
 all: build
 
 build:
-	docker build -t tracking .
+	docker build -t subtyping .
 run:
-	docker run --rm tracking fiber-tracking
+	docker run --rm subtyping subtyping
 test:
-	docker run -it --rm tracking python -m unittest
+	docker run -it --rm subtyping python -m unittest
 test_server:
-	docker run --rm tracking python -m unittest
+	docker run --rm subtyping python -m unittest
 quality:
-	docker run --rm tracking flake8 globaltracking
-	docker run --rm tracking pylint globaltracking
+	docker run --rm subtyping flake8 subtyping
+	docker run --rm subtyping pylint subtyping
 

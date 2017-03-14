@@ -3,7 +3,7 @@
 import unittest
 import yaml
 import numpy
-from parkinson_clustering.config_wrapper import Config
+from subtyping.config_wrapper import Config
 
 
 class TestConfigWrapper(unittest.TestCase):

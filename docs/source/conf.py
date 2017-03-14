@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Globaltracking documentation build configuration file, created by
+# subtyping documentation build configuration file, created by
 # sphinx-quickstart on Sat Feb 18 21:51:02 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -51,9 +51,9 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'Globaltracking'
-copyright = '2017, Luca Wolf, Viktor Wegmayr'
-author = 'Luca Wolf, Viktor Wegmayr'
+project = 'subtyping'
+copyright = '2017, AUTHOR'
+author = 'AUTHOR'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -105,7 +105,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Globaltrackingdoc'
+htmlhelp_basename = 'subtypingdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -132,8 +132,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'Globaltracking.tex', 'Globaltracking Documentation',
-     'Luca Wolf, Viktor Wegmayr', 'manual'),
+    (master_doc, 'subtyping.tex', 'subtyping Documentation',
+     'AUTHOR', 'manual'),
 ]
 
 
@@ -142,7 +142,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'globaltracking', 'Globaltracking Documentation',
+    (master_doc, 'subtyping', 'subtyping Documentation',
      [author], 1)
 ]
 
@@ -153,8 +153,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'Globaltracking', 'Globaltracking Documentation',
-     author, 'Globaltracking', 'One line description of project.',
+    (master_doc, 'subtyping', 'subtyping Documentation',
+     author, 'subtyping', 'One line description of project.',
      'Miscellaneous'),
 ]
 
@@ -175,7 +175,7 @@ def run_apidoc(_):
     base_path = (os.path.join(os.path.dirname(__file__), '../..'))
     sys.path.append(base_path)
 
-    module = base_path + '/globaltracking'
+    module = base_path + '/subtyping'
     current_directory = os.path.abspath(os.path.dirname(__file__))
     output_path = os.path.join(current_directory, 'source')
     main(['-e', '-o', output_path, module, '--force'])

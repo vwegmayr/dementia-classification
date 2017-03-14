@@ -6,29 +6,29 @@ def readme():
         return f.read()
 
 
-setup(name='globaltracking',
+setup(name='subtyping',
       version='0.0.1',
-      description='Global tractography on multimodal diffusion data.',
+      description='Tools for subtype identification in structured and image data',
       long_description=readme(),
       classifiers=[
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 3.6',
-        'Topic :: Diffusion MRI Processing :: Tractography',
+        'Programming Language :: Python :: 3.5',
+        'Topic :: Clustering :: Structured Data :: Medical Image Analysis',
       ],
-      keywords='tractography mri diffusion',
+      keywords='embedding autoencoder clustering',
       url='http://github.com/storborg/funniest',
-      author='Luca Wolf',
-      author_email='luca.wolf@bluemail.ch',
+      author='AUTHOR',
+      author_email='author@gmail.com',
       license='MIT',
-      packages=['globaltracking',
-                'globaltracking.energy'],
+      packages=['subtyping',
+      ],
       install_requires=[
           'PyYAML',
       ],
       #tests_require=[] in case test have specific requirements
       entry_points={
-          'console_scripts': ['fiber-tracking=globaltracking.command_line:main'],
+          'console_scripts': ['sti=subtyping.command_line:main'],
       },
       include_package_data=True,
       zip_safe=False)
