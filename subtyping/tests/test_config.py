@@ -1,7 +1,6 @@
 """ This module tests the config_wrapper module. """
 
 import unittest
-import yaml
 import numbers
 from subtyping.config_wrapper import Config
 
@@ -13,25 +12,6 @@ class TestConfigWrapper(unittest.TestCase):
         """ Prepare for tests, so load prepared config. """
 
         Config.parse_config_file('example_config.yaml')
-        """
-        config_dict = yaml.load('''
-        Parameters:
-           module: 'numbers'
-           class: 'Number'
-           list:
-           - config1:
-             weight: 0.2
-             module: 'numbers'
-             class: 'Number'
-           - config2:
-             weight: 0.1
-             module: 'numbers'
-             class: 'Number'
-             ''')
-
-        Config.import_python_classes(config_dict)
-        Config.config = config_dict
-        """
 
     def test_config_dict_set(self):
         """ Config.config should not be the empty dict anymore """
@@ -43,7 +23,7 @@ class TestConfigWrapper(unittest.TestCase):
         params = Config.config['Parameters']
 
         self.assertEqual(params['module'], numbers)
-        self.assertEqual(params['list'][0]['module'],numbers)
+        self.assertEqual(params['list'][0]['module'], numbers)
 
     def test_classes_replaced(self):
         """ Test if the string from 'class' attributes correctly
