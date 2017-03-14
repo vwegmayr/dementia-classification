@@ -1,4 +1,4 @@
-Subtype Identification
+project-skeleton
 --------------
 
 Before doing anything (like running tests or the actual program)
