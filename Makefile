@@ -1,14 +1,14 @@
 all: build
 
 build:
-	docker build -t subtyping .
+	docker build -t PROJECT .
 run:
-	docker run --rm subtyping subtyping
+	docker run --rm PROJECT PROJECT
 test:
-	docker run -it --rm subtyping python -m unittest
+	docker run -it --rm PROJECT python -m unittest
 test_server:
-	docker run --rm subtyping python -m unittest
+	docker run --rm PROJECT python -m unittest
 quality:
-	docker run --rm subtyping flake8 subtyping
-	docker run --rm subtyping pylint subtyping
+	docker run --rm PROJECT flake8 PROJECT
+	docker run --rm PROJECT pylint PROJECT
 

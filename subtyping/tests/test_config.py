@@ -2,7 +2,7 @@
 
 import unittest
 import numbers
-from subtyping.config_wrapper import Config
+from PROJECT.config_wrapper import Config
 
 
 class TestConfigWrapper(unittest.TestCase):
