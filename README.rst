@@ -41,7 +41,14 @@ However, this assumes you have everything installed locally (e.g. flake8 & pylin
 Documentation
 -------------
 
-This skeleton also includes the basic parts that one needs for documentation with sphinx and readthedocs.
+This skeleton also includes the basic parts that one needs for documentation with
+sphinx and readthedocs in the folder docs.
+
+Python Packaging
+----------------
+
+The skeleton is structured in a way which supports the creation of a python package.
+Read more about _packaging: https://python-packaging.readthedocs.io/en/latest/
 
 
 Remarks for admin
