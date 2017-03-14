@@ -40,9 +40,10 @@ However, this assumes you have everything installed locally (e.g. flake8 & pylin
 
 Documentation
 -------------
-
+.. _sphinx: http://www.sphinx-doc.org/en/stable/
+.. _readthedocs: http://docs.readthedocs.io/en/latest/index.html
 This skeleton also includes the basic parts that one needs for documentation with
-sphinx and readthedocs in the folder docs.
+sphinx_ and readthedocs_ in the folder docs.
 
 Python Packaging
 ----------------
