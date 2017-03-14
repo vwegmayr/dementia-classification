@@ -1,8 +1,12 @@
 project-skeleton
-----------------
+================
 
+This project skeleton provides the starting point for your student project.
 
+Clone the repository, go to the repo root directory and find + replace all appearances
+of "AUTHOR" and "project_name".
 
+Additionally, you have to modify the setup.py file according to your wishes.
 
 Before doing anything you need to build the container:
 
@@ -44,9 +48,7 @@ Run the code quality control tools:
 Remarks for admin
 ----------------
 
-This repository provides a barebone for student projects.
-
-In order to get started, fork the project to the ise-squad namespace.
+In order to set up a new student project, fork the project to the ise-squad namespace.
 
 There change the project name and path for the new project.
 
