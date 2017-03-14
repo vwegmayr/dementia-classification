@@ -59,4 +59,4 @@ In order to set up a new student project, fork the project to the ise-squad name
 
 There change the project name and path for the new project.
 
-Make sure the ise-squad-runner is enabled.
+Make sure the ise-squad-runner is enabled and merging is only possible after a successful build.
