@@ -8,6 +8,11 @@ of "AUTHOR" and "project_name".
 
 Additionally, you have to modify the setup.py file according to your wishes.
 
+Of course, this readme should be modified as well.
+
+Tests and quality checks
+------------------------
+
 The main components of this skeleton are the test and quality checks.
 
 In order to run the tests:
@@ -32,6 +37,12 @@ Alternatively, you can run tests and quality checks from the repo root without d
     pylint project_name
     
 However, this assumes you have everything installed locally (e.g. flake8 & pylint).
+
+Documentation
+-------------
+
+This skeleton also includes the basic parts that one needs for documentation with sphinx and readthedocs.
+
 
 Remarks for admin
 ----------------
