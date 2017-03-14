@@ -55,8 +55,10 @@ Read more about packaging_.
 Remarks for admin
 ----------------
 
-In order to set up a new student project, fork the project to the ise-squad namespace.
+In order to set up a new student project, fork the project to the admin namespace.
 
 There change the project name and path for the new project.
+
+Finally transfer the project to the ise-squad namespace.
 
 Make sure the ise-squad-runner is enabled and merging is only possible after a successful build.
