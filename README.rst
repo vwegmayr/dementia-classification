@@ -48,7 +48,7 @@ Python Packaging
 ----------------
 
 The skeleton is structured in a way which supports the creation of a python package.
-Read more about _packaging: https://python-packaging.readthedocs.io/en/latest/
+Read more about .. _packaging: https://python-packaging.readthedocs.io/en/latest/
 
 
 Remarks for admin
