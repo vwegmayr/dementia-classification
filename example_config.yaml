@@ -2,14 +2,14 @@
 ---
 
 Parameters:
-   module: 'numpy.random'
-   class: 'RandomState'
+   module: 'numbers'
+   class: 'Number'
    list:
    - config1:
      weight: 0.2
-     module: 'numpy.random'
-     class: 'RandomState'
+     module: 'numbers'
+     class: 'Number'
    - config2:
      weight: 0.1
-     module: 'numpy.random'
-     class: 'RandomState'
+     module: 'numbers'
+     class: 'Number'

@@ -2,7 +2,7 @@
 
 import unittest
 import yaml
-import numpy
+import numbers
 from subtyping.config_wrapper import Config
 
 
@@ -16,17 +16,17 @@ class TestConfigWrapper(unittest.TestCase):
         """
         config_dict = yaml.load('''
         Parameters:
-           module: 'numpy.random'
-           class: 'RandomState'
+           module: 'numbers'
+           class: 'Number'
            list:
            - config1:
              weight: 0.2
-             module: 'numpy.random'
-             class: 'RandomState'
+             module: 'numbers'
+             class: 'Number'
            - config2:
              weight: 0.1
-             module: 'numpy.random'
-             class: 'RandomState'
+             module: 'numbers'
+             class: 'Number'
              ''')
 
         Config.import_python_classes(config_dict)
@@ -42,13 +42,13 @@ class TestConfigWrapper(unittest.TestCase):
         have been replaced with python modules"""
         params = Config.config['Parameters']
 
-        self.assertEqual(params['module'], numpy.random)
-        self.assertEqual(params['list'][0]['module'],numpy.random)
+        self.assertEqual(params['module'], numbers)
+        self.assertEqual(params['list'][0]['module'],numbers)
 
     def test_classes_replaced(self):
         """ Test if the string from 'class' attributes correctly
         have been replaced with the corresponding python class """
         params = Config.config['Parameters']
 
-        self.assertEqual(params['class'], numpy.random.RandomState)
-        self.assertEqual(params['list'][1]['class'], numpy.random.RandomState)
+        self.assertEqual(params['class'], numbers.Number)
+        self.assertEqual(params['list'][1]['class'], numbers.Number)
