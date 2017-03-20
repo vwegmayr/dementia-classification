@@ -50,6 +50,6 @@ In addition to the basic functionality outlined above, the skeleton provides a c
 
 `estimator <project/examples/estimator.py>`_
 
-`sphinx <project/doc/example_templates>`_
+`sphinx <doc/example_templates>`_
 
 `config file <project/examples/example_config.yaml>`_
