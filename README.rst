@@ -10,8 +10,11 @@ First you need to install miniconda_ on your system.
 
 Next, configure the settings.py file and set values for PROJECT, AUTHOR and EMAIL.
 
-Then simply run :code:`make`, which will rename the project folder and create
-an initial conda environment.
+Then rename the project folder and create an initial conda environment with
+
+.. code-block:: shell
+
+    make
 
 Having created the environment, start it up with
 
@@ -21,12 +24,32 @@ Having created the environment, start it up with
 
 Make sure you replace **project** with the value you set for PROJECT in settings.py.
 
-In order to test your setup, run :code:`make test` and :code:`make quality`.
+In order to test your setup, run
+
+.. code-block:: shell
+
+    make test && make quality
+
 They should both run OK.
 
-You can also build the initial documentation with :code:`make doc` and view it with :code:`make view`.
+You can also build and view the initial documentation with
+
+.. code-block:: shell
+
+    make doc && make view
+    
+The inital documentation also tries to give some insight into using sphinx.
 
 Examples
 --------
 In addition to the basic functionality outlined above, the skeleton provides a couple of examples:
+
 `doctest <project/examples/doctest.py>`_
+
+`docstrings <project/examples/sphinx.py>`_
+
+`estimator <project/examples/estimator.py>`_
+
+`sphinx <project/doc/example_templates>`_
+
+`config file <project/examples/example_config.yaml>`_
