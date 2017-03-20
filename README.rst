@@ -5,10 +5,15 @@ This project skeleton provides the starting point for your student project.
 
 Getting Started
 ---------------
+.. _miniconda: https://conda.io/docs/install/quick.html#linux-miniconda-install
+First you need to install miniconda_ on your system.
 
-Configure the settings.py file and set values for PROJECT, AUTHOR and EMAIL.
+Next, configure the settings.py file and set values for PROJECT, AUTHOR and EMAIL.
 
-Then simply run :code:`make`.
+Then simply run :code:`make`, which will rename the project folder and create
+an initial conda environment.
+
+
 
 Tests and quality checks
 ------------------------
