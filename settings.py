@@ -1,7 +1,7 @@
 """Configure the settings for the project"""
 
-AUTHOR="author_name"
+PROJECT="project"
 
-PROJECT="project_name"
+AUTHOR="author"
 
-EMAIL="author_email"
+EMAIL="email"
