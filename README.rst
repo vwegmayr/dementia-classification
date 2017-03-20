@@ -3,12 +3,12 @@ project-skeleton
 
 This project skeleton provides the starting point for your student project.
 
-Clone the repository, go to the repo root directory and find + replace all appearances
-of "AUTHOR" and "project_name".
+Getting Started
+---------------
 
-Additionally, you have to modify the setup.py file according to your wishes.
+Configure the settings.py file and set values for PROJECT, AUTHOR and EMAIL.
 
-Of course, this readme should be modified as well.
+Then simply run `make`.
 
 Tests and quality checks
 ------------------------
