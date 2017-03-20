@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# project_name documentation build configuration file, created by
+# project documentation build configuration file, created by
 # sphinx-quickstart on Sat Feb 18 21:51:02 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -17,16 +17,17 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
-
+#import os
+#import sys
+#sys.path.insert(0, os.path.abspath('.'))
+import os
+PROJECT = os.environ["PROJECT"]
 
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #
-needs_sphinx = '1.5.2'
+needs_sphinx = '1.5.1'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -36,7 +37,10 @@ extensions = ['sphinx.ext.autodoc',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.imgmath',
-    'sphinx.ext.viewcode']
+    'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon']
+
+napoleon_include_init_with_doc = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -51,7 +55,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'project_name'
+project = PROJECT
 copyright = '2017, AUTHOR'
 author = 'AUTHOR'
 
@@ -88,7 +92,8 @@ todo_include_todos = True
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+#html_theme = 'alabaster'
+html_theme = "default"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -105,7 +110,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'project_namedoc'
+htmlhelp_basename = PROJECT+'doc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -132,7 +137,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'project_name.tex', 'project_name Documentation',
+    (master_doc, PROJECT+'.tex', PROJECT+' Documentation',
      'AUTHOR', 'manual'),
 ]
 
@@ -142,7 +147,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'project_name', 'project_name Documentation',
+    (master_doc, PROJECT, PROJECT+' Documentation',
      [author], 1)
 ]
 
@@ -153,8 +158,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'project_name', 'project_name Documentation',
-     author, 'project_name', 'One line description of project.',
+    (master_doc, PROJECT, PROJECT+' Documentation',
+     author, PROJECT, 'One line description of project.',
      'Miscellaneous'),
 ]
 
@@ -175,7 +180,7 @@ def run_apidoc(_):
     base_path = (os.path.join(os.path.dirname(__file__), '../..'))
     sys.path.append(base_path)
 
-    module = base_path + '/project_name'
+    module = base_path + '/'+PROJECT
     current_directory = os.path.abspath(os.path.dirname(__file__))
     output_path = os.path.join(current_directory, 'source')
     main(['-e', '-o', output_path, module, '--force'])

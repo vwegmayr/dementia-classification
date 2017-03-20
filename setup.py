@@ -1,4 +1,5 @@
 from setuptools import setup
+from settings import AUTHOR, EMAIL, PROJECT
 
 
 def readme():
@@ -6,29 +7,29 @@ def readme():
         return f.read()
 
 
-setup(name='project_name',
+setup(name=PROJECT,
       version='0.0.1',
-      description='Tools for subtype identification in structured and image data',
+      description='Description',
       long_description=readme(),
       classifiers=[
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3.5',
-        'Topic :: Clustering :: Structured Data :: Medical Image Analysis',
+        'Topic :: topic1 :: topic2 :: topic3',
       ],
-      keywords='embedding autoencoder clustering',
+      keywords='kw1 kw2 kw3',
       url='http://github.com/storborg/funniest',
-      author='AUTHOR',
-      author_email='author@gmail.com',
+      author=AUTHOR,
+      author_email=EMAIL,
       license='MIT',
-      packages=['project_name',
+      packages=[PROJECT,
       ],
       install_requires=[
           'PyYAML',
       ],
       #tests_require=[] in case test have specific requirements
       entry_points={
-          'console_scripts': ['yourcommand=project_name.command_line:main'],
+          'console_scripts': ['yourcommand='+PROJECT+'.command_line:main'],
       },
       include_package_data=True,
       zip_safe=False)

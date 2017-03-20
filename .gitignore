@@ -4,7 +4,6 @@ __pycache__/
 *$py.class
 
 
-
 # Setuptools distribution folder.
 /dist/
 
@@ -18,7 +17,7 @@ __pycache__/
 # local PyCharm configuration
 .idea/
 
-# built docs
-docs/build/
+# built doc
+doc/build/
 # Docs autobuild dir
-docs/source/source/
+doc/source/source/

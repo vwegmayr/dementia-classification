@@ -6,7 +6,7 @@ stages:
 build_docker_image:
   stage: build
   script:
-    - make
+    - make build_server
 
 execute_tests:
   stage: test
@@ -16,4 +16,4 @@ execute_tests:
 code_quality:
   stage: test
   script:
-    - make quality
+    - make quality_server
