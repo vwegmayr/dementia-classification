@@ -17,7 +17,7 @@ Having created the environment, start it up with
 
 .. code-block:: shell
 
-    source activate **project**
+    source activate project
 
 Make sure you replace **project** with the value you set for PROJECT in settings.py.
 
