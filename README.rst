@@ -8,7 +8,7 @@ Getting Started
 
 Configure the settings.py file and set values for PROJECT, AUTHOR and EMAIL.
 
-Then simply run `make`.
+Then simply run :code:`make`.
 
 Tests and quality checks
 ------------------------
