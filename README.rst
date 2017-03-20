@@ -17,7 +17,9 @@ Having created the environment, start it up with
 
 .. code-block:: shell
 
-    source activate _project_
+    source activate **project**
+
+Make sure you replace **project** with the value you set for PROJECT in settings.py.
 
 In order to test your setup, run :code:`make test` and :code:`make quality`.
 They should both run OK.
