@@ -13,6 +13,11 @@ Next, configure the settings.py file and set values for PROJECT, AUTHOR and EMAI
 Then simply run :code:`make`, which will rename the project folder and create
 an initial conda environment.
 
+In order to test your setup, run :code:`make test` and :code:`make quality`.
+They should both run OK.
+
+You can also build the initial documentation with :code:`make doc` and view it with :code:`make view`.
+
 
 
 Tests and quality checks
