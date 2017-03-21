@@ -7,7 +7,7 @@ all:
 	conda env create -f environment.yml -n $(PROJECT)
 
 test:
-	nosetests --with-doctest --with-coverage --cover-package=$(PROJECT) -v
+	nosetests --with-doctest --with-coverage --cover-package=$(PROJECT) -v --doctest-tests
 	rm .coverage
 
 quality:
