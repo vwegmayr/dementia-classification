@@ -1,5 +1,5 @@
-PROJECT=$(shell grep -o 'PROJECT.*' settings.py | sed -e 's/PROJECT="\(.*\)"/\1/')
-AUTHOR=$(shell grep -o 'AUTHOR.*' settings.py | sed -e 's/AUTHOR="\(.*\)"/\1/')
+export PROJECT=$(shell grep -o 'PROJECT.*' settings.py | sed -e 's/PROJECT="\(.*\)"/\1/')
+export AUTHOR=$(shell grep -o 'AUTHOR.*' settings.py | sed -e 's/AUTHOR="\(.*\)"/\1/')
 MAKEFLAGS="B"
 
 all:
