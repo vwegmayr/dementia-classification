@@ -8,7 +8,7 @@ all:
 
 test:
 	nosetests -v --with-doctest --doctest-tests \
-              --with-coverage --cover-package=$(PROJECT)
+	--with-coverage --cover-package=$(PROJECT)
 	rm .coverage
 
 quality:
