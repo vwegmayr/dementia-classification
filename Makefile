@@ -3,7 +3,7 @@ export AUTHOR=$(shell grep -o 'AUTHOR.*' settings.py | sed -e 's/AUTHOR="\(.*\)"
 MAKEFLAGS="B"
 
 all:
-	mv PROJECT $(PROJECT)
+	mv project $(PROJECT)
 	conda env create -f environment.yml -n $(PROJECT)
 
 test:
