@@ -1,5 +1,5 @@
-export PROJECT=$(shell grep -o -P '(?<=PROJECT=")(.*)(?=")' settings.py)
-export AUTHOR=$(shell grep -o -P '(?<=AUTHOR=")(.*)(?=")' settings.py)
+PROJECT=$(shell grep -o 'PROJECT.*' settings.py | sed -e 's/PROJECT="\(.*\)"/\1/')
+AUTHOR=$(shell grep -o 'AUTHOR.*' settings.py | sed -e 's/AUTHOR="\(.*\)"/\1/')
 MAKEFLAGS="B"
 
 all:
@@ -9,7 +9,7 @@ all:
 test:
 	nosetests --with-doctest --with-coverage --cover-package=$(PROJECT) -v
 	rm .coverage
-	
+
 quality:
 	flake8 $(PROJECT)
 	pylint $(PROJECT)
@@ -36,7 +36,7 @@ run_server:
 
 test_server:
 	docker run --rm $(PROJECT) python -m unittest
-	
+
 quality_server:
 	docker run --rm $(PROJECT) flake8 $(PROJECT)
 	docker run --rm $(PROJECT) pylint $(PROJECT)
