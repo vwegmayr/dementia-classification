@@ -17,7 +17,7 @@ class Config:
     config = {}
 
     @staticmethod
-    def parse_config_file(filename):
+    def parse(filename):
         """ Read and parse yaml config file, initialized Config.config.
         Parses a yaml config file and returns a ConfigWrapper object
         with the attributes from the config file but with classes
