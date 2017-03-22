@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 from settings import AUTHOR, EMAIL, PROJECT
 
 
@@ -22,8 +22,7 @@ setup(name=PROJECT,
       author=AUTHOR,
       author_email=EMAIL,
       license='MIT',
-      packages=[PROJECT,
-      ],
+      packages=find_packages(),
       install_requires=[
           'PyYAML',
       ],
