@@ -1,12 +1,27 @@
 """ provide command line functionality """
-import importlib
-from settings import PROJECT
-CONFIG_WRAPPER = importlib.import_module(PROJECT + ".config_wrapper")
-CONFIG = CONFIG_WRAPPER.Config
+import argparse
+from .config_wrapper import Config
 
 
 def main():
     """Command Line Interface"""
-    CONFIG.parse_config_file(PROJECT + "/examples/example_config.yaml")
 
-    print('Nothing to see here.')
+    parser = argparse.ArgumentParser(
+        description='Description of your commandline tool'
+    )
+
+    parser.add_argument(
+        "configfile",
+        type=str,
+        help="Path to configuration file"
+    )
+
+    args = parser.parse_args()
+
+    Config.parse(args.configfile)
+
+    print("======================================")
+    print("Take a look at the example config.yml:")
+    print("======================================")
+    print(Config.config)
+    print("======================================")
