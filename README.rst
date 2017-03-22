@@ -14,7 +14,7 @@ Then rename the project folder and create an initial conda environment with
 
 .. code-block:: shell
 
-    make
+    make folder && make env
 
 Having created the environment, start it up with
 
