@@ -2,11 +2,11 @@ export PROJECT=$(shell grep -o 'PROJECT.*' settings.py | sed -e 's/PROJECT="\(.*
 export AUTHOR=$(shell grep -o 'AUTHOR.*' settings.py | sed -e 's/AUTHOR="\(.*\)"/\1/')
 MAKEFLAGS="B"
 
-all:
-	if [ -d project ]; then
-		mv project $(PROJECT)	
-		conda env create -f environment.yml -n $(PROJECT)
-	fi
+folder:
+	mv project $(PROJECT)
+
+env:
+	conda env create -f environment.yml -n $(PROJECT)
 
 test:
 	nosetests -v --with-doctest --doctest-tests \
