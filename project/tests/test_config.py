@@ -13,7 +13,7 @@ class TestConfigWrapper(unittest.TestCase):
     def setUp(self):
         """ Prepare for tests, so load prepared config. """
 
-        CONFIG.parse_config_file(PROJECT + '/examples/example_config.yaml')
+        CONFIG.parse_config_file(PROJECT + '/examples/config.yaml')
 
     def test_config_dict_set(self):
         """ Config.config should not be the empty dict anymore """
