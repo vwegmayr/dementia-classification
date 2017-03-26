@@ -2,16 +2,16 @@ Cross-Referencing
 =================
 
 This is a full cross-reference to
-:py:class:`project_name.examples.sphinx.DocStyles`.
+:py:class:`dementia_prediction.examples.sphinx.DocStyles`.
 
 This is a shorter cross-reference to
-:py:class:`~project_name.examples.sphinx.DocStyles`.
+:py:class:`~dementia_prediction.examples.sphinx.DocStyles`.
 
 This is a cross-reference to
-:py:class:`DocStyles<project_name.examples.sphinx.DocStyles>` with
+:py:class:`DocStyles<dementia_prediction.examples.sphinx.DocStyles>` with
 custom link text.
 
-.. py:currentmodule:: project_name.examples.sphinx
+.. py:currentmodule:: dementia_prediction.examples.sphinx
 
 This is a reference to :py:class:`DocStyles`, which uses the currentmodule
 directive.

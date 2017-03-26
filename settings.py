@@ -1,7 +1,7 @@
 """Configure the settings for the project"""
 
-PROJECT="project"
+PROJECT="dementia_prediction"
 
-AUTHOR="author"
+AUTHOR="Sai Aitharaju"
 
-EMAIL="email"
+EMAIL="aisai@student.ethz.ch"
