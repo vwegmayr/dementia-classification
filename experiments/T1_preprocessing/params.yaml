@@ -1,0 +1,10 @@
+
+parameters:
+  bet:
+    frac_intens_thres: 0.35
+  registration:
+    reference_image: 18
+    resample_size: 128
+    cost: 'normcorr'
+    searchcost: 'normcorr'
+    gauss_smooth_sigma: 1
