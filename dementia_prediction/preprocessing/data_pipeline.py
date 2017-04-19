@@ -162,7 +162,7 @@ class DataPipeline:
         regex = r"-T1_brain_avg_template_aligned\.nii\.gz$"
         split_on = "_avg_template_aligned.nii.gz"
         counter = 0
-        
+
         for directory in os.walk(self.input_folder):
             # Walk inside the directory
             for file in directory[2]:
