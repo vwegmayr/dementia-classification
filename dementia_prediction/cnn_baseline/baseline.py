@@ -9,7 +9,7 @@ import time
 import math
 import tensorflow as tf
 import numpy as np
-
+import sys
 
 class CNN:
     """
@@ -114,7 +114,7 @@ class CNN:
 
         return tf.nn.relu(features=pre_activation, name=scope.name)
 
-    def inference(self, images):
+    def inference(self, images, keep_prob):
         """
         This function builds the 3D Convolutional Neural Network architecture
         Args:
@@ -128,7 +128,7 @@ class CNN:
             conv1 = self.conv_relu(input_=images,
                                    kernel_shape=[5, 5, 5, 1, 8],
                                    biases_shape=[8],
-                                   decay_constant=0.001,
+                                   decay_constant=self.param['decay_const'],
                                    scope=scope)
 
         pool1 = tf.nn.max_pool3d(conv1,
@@ -140,7 +140,7 @@ class CNN:
             conv2 = self.conv_relu(input_=pool1,
                                    kernel_shape=[5, 5, 5, 8, 32],
                                    biases_shape=[32],
-                                   decay_constant=0.004,
+                                   decay_constant=self.param['decay_const'],
                                    scope=scope)
 
         pool2 = tf.nn.max_pool3d(conv2,
@@ -152,7 +152,7 @@ class CNN:
             conv3 = self.conv_relu(input_=pool2,
                                    kernel_shape=[5, 5, 5, 32, 64],
                                    biases_shape=[64],
-                                   decay_constant=0.004,
+                                   decay_constant=self.param['decay_const'],
                                    scope=scope)
 
         pool3 = tf.nn.max_pool3d(conv3,
@@ -164,7 +164,7 @@ class CNN:
             conv4 = self.conv_relu(input_=pool3,
                                    kernel_shape=[5, 5, 5, 64, 64],
                                    biases_shape=[64],
-                                   decay_constant=0.004,
+                                   decay_constant=self.param['decay_const'],
                                    scope=scope)
 
         pool4 = tf.nn.max_pool3d(conv4,
@@ -176,7 +176,7 @@ class CNN:
             conv5 = self.conv_relu(input_=pool4,
                                    kernel_shape=[5, 5, 5, 64, 128],
                                    biases_shape=[128],
-                                   decay_constant=0.004,
+                                   decay_constant=self.param['decay_const'],
                                    scope=scope)
 
         pool5 = tf.nn.max_pool3d(conv5,
@@ -189,34 +189,36 @@ class CNN:
                                           [self.param['batch_size'], -1])
             weights = self.weight_decay_variable(name="weights",
                                                  shape=[2304, 1024],
-                                                 decay_constant=0.004)
+                                   decay_constant=self.param['decay_const'])
             biases = self.variable_on_cpu(name="biases",
                                           shape=[1024],
                                           initializer=tf.constant_initializer(
                                               0.1))
             fullcn = tf.nn.relu(tf.matmul(vector_per_batch, weights) + biases,
                                 name=scope.name)
+            fullcn_drop = tf.nn.dropout(fullcn, keep_prob)
 
         with tf.variable_scope('fullcn2') as scope:
             weights = self.weight_decay_variable(name="weights",
                                                  shape=[1024, 64],
-                                                 decay_constant=0.004)
+                                   decay_constant=self.param['decay_const'])
             biases = self.variable_on_cpu(name="biases",
                                           shape=[64],
                                           initializer=tf.constant_initializer(
                                               0.1))
-            fullcn2 = tf.nn.relu(tf.matmul(fullcn, weights) + biases,
+            fullcn2 = tf.nn.relu(tf.matmul(fullcn_drop, weights) + biases,
                                  name=scope.name)
+            fullcn2_drop = tf.nn.dropout(fullcn2, keep_prob)
 
         with tf.variable_scope('logits') as scope:
             weights = self.weight_decay_variable(name="weights",
                                                  shape=[64, 2],
-                                                 decay_constant=0.001)
+                                   decay_constant=self.param['decay_const'])
             biases = self.variable_on_cpu(name='biases',
                                           shape=[2],
                                           initializer=tf.constant_initializer(
                                               0.1))
-            logits = tf.add(tf.matmul(fullcn2, weights), biases,
+            logits = tf.add(tf.matmul(fullcn2_drop, weights), biases,
                             name=scope.name)
 
         return logits
@@ -242,7 +244,7 @@ class CNN:
         tf.add_to_collection('losses', cross_entropy_mean)
         return tf.add_n(tf.get_collection('losses'), name='total_loss')
 
-    def evaluation(self, eval_op, dataset, images, labels):
+    def evaluation(self, eval_op, dataset, images, labels, keep_prob):
         """
         This function evaluates the accuracy of the model
         Args:
@@ -263,7 +265,8 @@ class CNN:
             predictions = eval_op.eval(
                 feed_dict={
                     images: image_data,
-                    labels: label_data
+                    labels: label_data,
+                    keep_prob: 1.0
                 })
             correct_predictions += predictions
             if step % 9 == 0:
@@ -294,6 +297,7 @@ class CNN:
                                            1])
             labels = tf.placeholder(dtype=tf.int8,
                                     shape=[None, 2])
+            keep_prob = tf.placeholder(tf.float32)
 
             global_step = tf.get_variable(name='global_step',
                                           shape=[],
@@ -301,8 +305,8 @@ class CNN:
                                               0),
                                           trainable=False)
             train_size = len(train_data.filenames)
-            num_batches = int(train_size / self.param['batch_size'])
-            num_steps = num_batches * self.param['num_epochs']
+            num_batches_epoch = int(train_size / self.param['batch_size'])
+            num_steps = num_batches_epoch * self.param['num_epochs']
 
             learn_rate = tf.train.exponential_decay(
                 self.param['learning_rate'], global_step,
@@ -315,7 +319,7 @@ class CNN:
 
             with tf.variable_scope(tf.get_variable_scope()):
                 with tf.name_scope('Train') as scope:
-                    logits = self.inference(images)
+                    logits = self.inference(images, keep_prob)
 
                     _ = self.inference_loss(logits, labels)
 
@@ -356,14 +360,16 @@ class CNN:
                          total_loss],
                         feed_dict={
                             images: image_data,
-                            labels: label_data
+                            labels: label_data,
+                            keep_prob: self.param['keep_prob']
                         }
                     )
                     if step % 10 == 0:
                         accuracy_ = sess.run(accuracy,
                                              feed_dict={
                                                  images: image_data,
-                                                 labels: label_data})
+                                                 labels: label_data,
+                                                 keep_prob: 1.0})
                         print("Train Batch Accuracy. %g step %d" % (accuracy_,
                                                                     step))
                     duration = time.time() - start_time
@@ -383,21 +389,25 @@ class CNN:
                     summary_writer.add_summary(summary_values, step)
 
                     # Saving Model Checkpoints for evaluation
-                    if step % num_batches == 0 or (step + 1) == num_steps:
-                        checkpoint_path = self.param['checkpoint_path'] + \
-                                          '/model.ckpt'
-                        saver.save(sess, checkpoint_path, global_step=step)
+                    if step % num_batches_epoch == 0 or (step + 1) == num_steps:
+                        if (step/num_batches_epoch) % 10 == 0 or (step+1) == num_steps:
+                            checkpoint_path = self.param['checkpoint_path'] + \
+                                              '/model.ckpt'
+                            saver.save(sess, checkpoint_path, global_step=step)
 
                         # Evaluate against the training data.
                         print("Step: %d Training accuracy: %g " %
                               (step, self.evaluation(eval_op=eval_op,
                                                      dataset=train_data,
                                                      images=images,
-                                                     labels=labels)))
+                                                     labels=labels,
+                                                     keep_prob=keep_prob)))
 
                         # Evaluate against the validation data
                         print("Step: %d Validation accuracy: %g" %
                               (step, self.evaluation(eval_op=eval_op,
                                                      dataset=validation_data,
                                                      images=images,
-                                                     labels=labels)))
+                                                     labels=labels,
+                                                     keep_prob=keep_prob)))
+                    sys.stdout.flush()

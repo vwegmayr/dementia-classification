@@ -50,8 +50,8 @@ class DataInput:
             mri_image = mri_image.get_data()
             mean = mri_image.mean()
             stddev = mri_image.std()
-            adjusted_stddev = max(stddev, 1.0 / math.sqrt(mri_image.size))
-            mri_image = (mri_image - mean) / adjusted_stddev
+            #adjusted_stddev = max(stddev, 1.0 / math.sqrt(mri_image.size))
+            mri_image = (mri_image - mean) / stddev
             mri_image = np.reshape(mri_image, [1, self.data['depth'],
                                                self.data['height'],
                                                self.data['width'], 1])

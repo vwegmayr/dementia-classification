@@ -2,13 +2,17 @@ from os import path
 import os
 import pickle
 import re
+import argparse
+import sys
 
 from dementia_prediction.config_wrapper import Config
 from dementia_prediction.cnn_baseline.data_input import DataInput
 from dementia_prediction.cnn_baseline.baseline import CNN
 
 config = Config()
-config.parse(path.abspath("params.yaml"))
+param_file = sys.argv[1]
+config.parse(path.abspath(param_file))
+
 
 paths = config.config.get('data_paths')
 regex = r"-T1_brain_smoothed\.nii\.gz$"

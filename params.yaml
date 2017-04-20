@@ -1,0 +1,20 @@
+
+parameters:
+  cnn:
+    depth: 176
+    height: 203
+    width: 200
+    batch_size: 8
+    num_epochs: 30
+    learning_rate: 0.0001
+    decay_factor: 0.9
+    decay_const: 0.1
+    checkpoint_path: '/local/home/saitharaju/Data/'
+    summary_path: '/local/home/saitharaju/Data/'
+    keep_prob: 0.5
+data_paths:
+  datadir: '/local/home/saitharaju/NIFTI/'
+  logdir: '/local/home/saitharaju/Data/'
+  class_labels: '/local/home/saitharaju/mri-fusion/experiments/T1_Baseline/patients.pkl'
+  validation_split: 0.15
+
