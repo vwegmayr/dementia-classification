@@ -14,6 +14,7 @@ References:
 import os
 import re
 import subprocess
+import random
 
 
 class DataPipeline:
@@ -182,6 +183,80 @@ class DataPipeline:
                                         shell=True)
                         counter += 1
                         print('File No.: '+str(counter) +
+                              ' Generated output: ' + output_file)
+
+    def subsample(self):
+        """
+        This function uses gaussian function with given parameter sigma to
+        smoothen all the aligned MR Images.
+
+        """
+        regex = r"-T1_brain_smoothed\.nii\.gz$"
+        split_on = "_smoothed.nii.gz"
+        counter = 0
+
+        for directory in os.walk(self.input_folder):
+            # Walk inside the directory
+            for file in directory[2]:
+                # Match all files ending with 'regex'
+                input_file = os.path.join(directory[0], file)
+                if re.search(regex, input_file):
+                    output_file = '{0}_subsampled.nii.gz'. \
+                        format(input_file.split(split_on)[0])
+
+                    if not os.path.exists(output_file):
+                        print("Subsampling image: " + input_file)
+                        subprocess.call('fslmaths {0} -subsamp2 {1}'
+                                        .format(input_file,
+                                                output_file),
+                                        shell=True)
+                        counter += 1
+                        print('File No.: ' + str(counter) +
+                              ' Generated output: ' + output_file)
+
+    def rotate(self):
+        """
+        This function uses gaussian function with given parameter sigma to
+        rotate all the aligned MR Images.
+
+        """
+        regex = r"-T1_brain_smoothed\.nii\.gz$"
+        split_on = "_smoothed.nii.gz"
+        counter = 0
+
+        for directory in os.walk(self.input_folder):
+            # Walk inside the directory
+            for file in directory[2]:
+                # Match all files ending with 'regex'
+                input_file = os.path.join(directory[0], file)
+                if re.search(regex, input_file):
+                    for direction in ['x', 'y', 'z']:
+                        x = y = z = 0
+                        if direction == 'x': x = 1
+                        if direction == 'y': y = 1
+                        if direction == 'z': z = 1
+
+                        output_file = '{0}_rotation_{1}.nii.gz'. \
+                            format(input_file.split(split_on)[0],
+                                   direction)
+                        rot_matrix = 'rot_{0}.mat'.format(direction)
+                        angle_rot = 10 if random.uniform(0,1) > 0.5 \
+                                    else -10
+                        print("Rotating image: " + input_file)
+                        subprocess.call('makerot -c {0} -a {1},{2},'
+                                        '{3} -t {4} -o {5}'
+                                        .format(input_file,
+                                                x, y, z, angle_rot,
+                                                rot_matrix),
+                                        shell=True)
+                        subprocess.call('flirt -in {0} -ref {1} -out '
+                                        '{2} -applyxfm -init {3}'
+                                        .format(input_file, input_file,
+                                                output_file,
+                                                rot_matrix),
+                                        shell=True)
+                        counter += 1
+                        print('File No.: ' + str(counter) +
                               ' Generated output: ' + output_file)
 
         return True
