@@ -15,7 +15,7 @@ args = parser.parse_args()
 # Initialise the Data preprocessing pipeline
 pipeline = DataPipeline(in_folder=args.path,
                         params=config.config.get('parameters'))
-
+"""
 if pipeline.brain_extraction():
     print("Extraction of brain from T1_weighted MRI is successful.")
 else:
@@ -33,3 +33,13 @@ if pipeline.gaussian_smoothing():
           "parameters.")
 else:
     print("Error in gaussian smoothing of brain images.")
+
+if pipeline.subsample():
+    print("Successfully subsampled.")
+else:
+    print("Error in subsampling")
+"""
+if pipeline.rotate():
+    print("Successfully rotated.")
+else:
+    print("Error rotating images.")
