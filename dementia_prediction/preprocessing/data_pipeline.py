@@ -187,9 +187,8 @@ class DataPipeline:
 
     def subsample(self):
         """
-        This function uses gaussian function with given parameter sigma to
-        smoothen all the aligned MR Images.
-
+        Given the gaussian smoothed images this function reduces
+        the dimensionality of the images by half.
         """
         regex = r"-T1_brain_smoothed\.nii\.gz$"
         split_on = "_smoothed.nii.gz"
@@ -216,9 +215,8 @@ class DataPipeline:
 
     def rotate(self):
         """
-        This function uses gaussian function with given parameter sigma to
-        rotate all the aligned MR Images.
-
+        Given input images, this function augments the dataset
+        by adding varying rotations to the MR Images.
         """
         regex = r"-T1_brain_smoothed\.nii\.gz$"
         split_on = "_smoothed.nii.gz"
