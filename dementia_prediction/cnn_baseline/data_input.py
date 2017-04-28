@@ -6,6 +6,7 @@ import math
 import random
 import numpy as np
 import nibabel as nb
+import scipy.ndimage as ndimage
 
 
 class DataInput:
@@ -35,7 +36,7 @@ class DataInput:
         end = start + self.data['batch_size']
         self.batch_index += self.data['batch_size']
 
-        if end >= len(self.filenames):
+        if end > len(self.filenames):
             # Reached end of epoch
             shuffle_indices = list(range(len(self.filenames)))
             random.shuffle(shuffle_indices)
@@ -52,12 +53,9 @@ class DataInput:
             stddev = mri_image.std()
             #adjusted_stddev = max(stddev, 1.0 / math.sqrt(mri_image.size))
             mri_image = (mri_image - mean) / stddev
-            mri_image = np.reshape(mri_image, [1, self.data['depth'],
+            mri_image = np.reshape(mri_image, [1,self.data['depth'],
                                                self.data['height'],
-                                               self.data['width'], 1])
-
-            # print("Shape of mri: " + str(mri_image.shape) + " type: "
-            # "" + str(mri_image.dtype) + " Mean: " + str(mri_image.mean()))
+                                               self.data['width'],1])
 
             if len(batch_images) == 0:
                 batch_images = mri_image
@@ -67,6 +65,6 @@ class DataInput:
             batch_labels[iterate][self.labels[i]] = 1
             iterate += 1
 
-        # print("Batch Index: " + str(self.batch_index))
+        # print("Batch Index: " + str(self.batch_index)+" batch labels: "+str(batch_labels))
 
         return batch_images, batch_labels

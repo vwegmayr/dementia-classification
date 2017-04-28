@@ -27,16 +27,21 @@ for directory in os.walk(paths['datadir']):
     for file in directory[2]:
         # Match all files ending with 'regex'
         input_file = os.path.join(directory[0], file)
-        if re.search(regex, input_file):
-            pat_code = input_file.rsplit('-T1_brain_smoothed.nii.gz')
-            patient_code = pat_code[0].rsplit('/', 1)[1]
-            if patient_code in patients_dict:
-                filenames.append(input_file)
-                labels.append(patients_dict[patient_code])
+        for rotation in ['x', 'y', 'z']:
+            regex = r"-T1_brain_rotation_{0}\.nii\.gz$".format(rotation)
+            if re.search(regex, input_file):
+                pat_code = input_file.rsplit('-T1_brain_rotation_{0}.nii.gz'
+                                             .format(rotation))
+                patient_code = pat_code[0].rsplit('/', 1)[1]
+                if patient_code in patients_dict:
+                    #print(input_file, patients_dict[patient_code])
+                    filenames.append(input_file)
+                    labels.append(patients_dict[patient_code])
 print("Total Number of patients: "+str(len(filenames)))
 print("Demented: "+str(sum(labels)))
 print("Stable: "+str((len(filenames) - sum(labels))))
-
+#filenames = filenames[1:55]
+#labels = labels[1:55]
 # Split data into training and validation
 split = int(len(filenames)*paths['validation_split'])
 train = (filenames[split:], labels[split:])
