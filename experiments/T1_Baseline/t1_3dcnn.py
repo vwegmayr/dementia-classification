@@ -16,7 +16,7 @@ config.parse(path.abspath(param_file))
 
 paths = config.config.get('data_paths')
 regex = r"-T1_brain_smoothed\.nii\.gz$"
-filep = open(paths['class_labels'], 'rb')
+filep = open(path.abspath(paths['class_labels']), 'rb')
 patients_dict = pickle.load(filep)
 
 filenames = []
