@@ -13,6 +13,7 @@ deep learning.
 Getting Started
 ---------------
 To get the latest project code, clone the project 'develop' branch
+
 .. code-block:: shell
 
     git clone -b develop git@gitlab.vis.ethz.ch:ise-squad/mri-fusion.git
@@ -49,20 +50,26 @@ You can also build and view the initial documentation with
 Experiments
 --------
 Before running any experiments, the MR Images dataset need to be downloaded and preprocessed
+
 ## Preprocessing
+
 Preprocessing script will extract the brain from an MR Image and align all the extracted brains
-to a study specific template. For this purpose, choose one of the patients code as the reference
-image in `params.yaml`
+to a study specific template. For this purpose, choose any one of the patients code as the reference
+image in `ref_path` of `experiments/T1_preprocessing/params.yaml`. (By default it is CON018)
 
 To preprocess the data, run
+
 .. code-block:: shell
 
         python experiments/T1_preprocessing/t1_preprocess.py experiments/T1_preprocessing/params.yaml
+
 The MR Images are downloaded to the local disk into a new 'Data' folder.
 
 ## 3D CNN
+
 Sumatra can be used to track the records of the experiments that are run on 3D CNN baseline model.
 To try the 3D CNN model, run
+
 .. code-block:: shell
 
 	smt run -m experiments/T1_Baseline/t1_3dcnn.py experiments/T1_Baseline/params.yaml
@@ -71,12 +78,12 @@ Examples
 --------
 In addition to the basic functionality outlined above, the skeleton provides a couple of examples:
 
-`doctest <project/examples/doctest.py>`_
+`doctest <dementia_prediction/examples/doctest.py>`_
 
-`docstrings <project/examples/sphinx.py>`_
+`docstrings <dementia_prediction/examples/sphinx.py>`_
 
-`estimator <project/examples/estimator.py>`_
+`estimator <dementia_prediction/examples/estimator.py>`_
 
 `sphinx <doc/example_templates>`_
 
-`config file <project/examples/example_config.yaml>`_
+`config file <dementia_prediction/examples/example_config.yaml>`_
