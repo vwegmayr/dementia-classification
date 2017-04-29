@@ -1,0 +1,19 @@
+
+parameters:
+  cnn:
+    depth: 176
+    height: 203
+    width: 200
+    batch_size: 2
+    num_epochs: 1
+    learning_rate: 0.0001
+    decay_factor: 0.9
+    decay_const: 0.001
+    checkpoint_path: './output/'
+    summary_path: './output/'
+    keep_prob: 0.75
+data_paths:
+  datadir: './Data/'
+  logdir: './'
+  class_labels: './experiments/T1_Baseline/patients.pkl'
+  validation_split: 0.15

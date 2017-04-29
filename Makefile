@@ -60,7 +60,7 @@ quality_server:
 	docker run --rm $(PROJECT) flake8 $(PROJECT)
 	docker run --rm $(PROJECT) pylint $(PROJECT)
 data:
-	wget -O Data.tar.gz "https://www.dropbox.com/s/0fz2ujqgmzj3iwb/Data.tar.gz?dl=0" 
+	wget -O Data.tar.gz "https://www.dropbox.com/s/juacxvix0rdqo09/Data.tar.gz?dl=0" 
 	tar -xzvf Data.tar.gz -C ./
 	rm Data.tar.gz
 	echo "MRI Data downloaded successfully to 'Data' folder"

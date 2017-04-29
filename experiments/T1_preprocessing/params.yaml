@@ -10,4 +10,4 @@ parameters:
     gauss_smooth_sigma: 1
 paths:
   data: './Data/'
-  ref: './Data/CON008/CON008-T1_brain.nii.gz'
+  ref: './Data/CON018/CON018-T1_brain.nii.gz'

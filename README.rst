@@ -49,13 +49,25 @@ You can also build and view the initial documentation with
     
 Experiments
 --------
-Before running any experiments, the MR Images dataset need to be downloaded and preprocessed
+Before running any experiments, the MR Images dataset need to be downloaded and preprocessed.
+Run
+
+.. code-block:: shell
+
+    make data
+
+The MR Images are downloaded to the local disk into a new 'Data' folder.
 
 ## Preprocessing
 
 Preprocessing script will extract the brain from an MR Image and align all the extracted brains
 to a study specific template. For this purpose, choose any one of the patients code as the reference
 image in `ref_path` of `experiments/T1_preprocessing/params.yaml`. (By default it is CON018)
+Preprocessing requires installation of FSL tool. Please follow the setup instructions
+`here https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation/Linux/>`_ to download and install FSL.
+Each image takes around 10minutes to complete the whole preprocessing pipeline. You can avoid
+the preprocessing step if your data folder already contains the `-T1_brain_rotation_x/y/z.nii.gz`
+images.
 
 To preprocess the data, run
 
@@ -63,7 +75,6 @@ To preprocess the data, run
 
         python experiments/T1_preprocessing/t1_preprocess.py experiments/T1_preprocessing/params.yaml
 
-The MR Images are downloaded to the local disk into a new 'Data' folder.
 
 ## 3D CNN
 
@@ -74,16 +85,4 @@ To try the 3D CNN model, run
 
 	smt run -m experiments/T1_Baseline/t1_3dcnn.py experiments/T1_Baseline/params.yaml
 
-Examples
---------
-In addition to the basic functionality outlined above, the skeleton provides a couple of examples:
-
-`doctest <dementia_prediction/examples/doctest.py>`_
-
-`docstrings <dementia_prediction/examples/sphinx.py>`_
-
-`estimator <dementia_prediction/examples/estimator.py>`_
-
-`sphinx <doc/example_templates>`_
-
-`config file <dementia_prediction/examples/example_config.yaml>`_
+The checkpoint and summary files can be viewed `here http://192.33.91.83:9183/dementia_prediction/>`_ 
