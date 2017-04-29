@@ -81,6 +81,12 @@ To preprocess the data, run
 ## 3D CNN
 
 Sumatra can be used to track the records of the experiments that are run on 3D CNN baseline model.
+Setup sumatra with
+
+.. code-block:: shell
+
+       make smt
+
 To try the 3D CNN model, run
 
 .. code-block:: shell

@@ -7,9 +7,10 @@ the input images to find spatial correlations along all three dimensions.
 from datetime import datetime
 import time
 import math
+import sys
 import tensorflow as tf
 import numpy as np
-import sys
+
 
 class CNN:
     """
@@ -73,8 +74,8 @@ class CNN:
                                            seed=1))
         if decay_constant > 0:
             weight_decay = tf.multiply(tf.nn.l2_loss(weights),
-                                   decay_constant,
-                                   name='weight_loss')
+                                       decay_constant,
+                                       name='weight_loss')
             tf.add_to_collection('losses', weight_decay)
         return weights
 
@@ -135,22 +136,17 @@ class CNN:
                                    scope=scope,
                                    padding='SAME', stride=2,
                                    is_training=is_training)
-            tf.summary.histogram('activations',conv1)
-        """
-        pool1 = tf.nn.max_pool3d(conv1,
-                                 ksize=[1, 2, 2, 2, 1],
-                                 strides=[1, 2, 2, 2, 1],
-                                 padding="SAME")
-        """
+            tf.summary.histogram('activations', conv1)
         with tf.variable_scope('conv_pool1') as scope:
             conv_pool1 = self.conv_relu(input_=conv1,
-                                   kernel_shape=[2, 2, 2, 10, 10],
-                                   biases_shape=[10],
-                                   decay_constant=self.param['decay_const'],
-                                   scope=scope,
-                                   padding='SAME', stride=2,
-                                   is_training=is_training)
-            print("conv_pool1:",conv_pool1.get_shape())
+                                        kernel_shape=[2, 2, 2, 10, 10],
+                                        biases_shape=[10],
+                                        decay_constant=self.param[
+                                            'decay_const'],
+                                        scope=scope,
+                                        padding='SAME', stride=2,
+                                        is_training=is_training)
+            print("conv_pool1:", conv_pool1.get_shape())
         with tf.variable_scope('conv2') as scope:
             conv2 = self.conv_relu(input_=conv_pool1,
                                    kernel_shape=[6, 6, 6, 10, 32],
@@ -159,22 +155,17 @@ class CNN:
                                    scope=scope,
                                    padding='SAME', stride=1,
                                    is_training=is_training)
-            tf.summary.histogram('activations',conv2)
+            tf.summary.histogram('activations', conv2)
         with tf.variable_scope('conv_pool2') as scope:
             conv_pool2 = self.conv_relu(input_=conv2,
-                                   kernel_shape=[2, 2, 2, 32, 32],
-                                   biases_shape=[32],
-                                   decay_constant=self.param['decay_const'],
-                                   scope=scope,
-                                   padding='SAME', stride=2,
-                                   is_training=is_training)
-            print("conv_pool2:",conv_pool2.get_shape())
-        """
-        pool2 = tf.nn.max_pool3d(conv2,
-                                 ksize=[1, 2, 2, 2, 1],
-                                 strides=[1, 2, 2, 2, 1],
-                                 padding="SAME")
-        """
+                                        kernel_shape=[2, 2, 2, 32, 32],
+                                        biases_shape=[32],
+                                        decay_constant=self.param[
+                                            'decay_const'],
+                                        scope=scope,
+                                        padding='SAME', stride=2,
+                                        is_training=is_training)
+            print("conv_pool2:", conv_pool2.get_shape())
         with tf.variable_scope('conv3') as scope:
             conv3 = self.conv_relu(input_=conv_pool2,
                                    kernel_shape=[5, 5, 5, 32, 64],
@@ -183,22 +174,17 @@ class CNN:
                                    scope=scope,
                                    padding='SAME', stride=1,
                                    is_training=is_training)
-            tf.summary.histogram('activations',conv3)
+            tf.summary.histogram('activations', conv3)
         with tf.variable_scope('conv_pool3') as scope:
             conv_pool3 = self.conv_relu(input_=conv3,
-                                   kernel_shape=[2, 2, 2, 64, 64],
-                                   biases_shape=[64],
-                                   decay_constant=self.param['decay_const'],
-                                   scope=scope,
-                                   padding='SAME', stride=2,
-                                   is_training=is_training)
-            print("conv_pool3:",conv_pool3.get_shape())
-        """
-        pool3 = tf.nn.max_pool3d(conv3,
-                                 ksize=[1, 2, 2, 2, 1],
-                                 strides=[1, 2, 2, 2, 1],
-                                 padding="SAME")
-        """
+                                        kernel_shape=[2, 2, 2, 64, 64],
+                                        biases_shape=[64],
+                                        decay_constant=self.param[
+                                            'decay_const'],
+                                        scope=scope,
+                                        padding='SAME', stride=2,
+                                        is_training=is_training)
+            print("conv_pool3:", conv_pool3.get_shape())
         with tf.variable_scope('conv4') as scope:
             conv4 = self.conv_relu(input_=conv_pool3,
                                    kernel_shape=[3, 3, 3, 64, 100],
@@ -207,23 +193,18 @@ class CNN:
                                    scope=scope,
                                    padding='SAME', stride=1,
                                    is_training=is_training)
-            tf.summary.histogram('activations',conv4)
+            tf.summary.histogram('activations', conv4)
 
         with tf.variable_scope('conv_pool4') as scope:
             conv_pool4 = self.conv_relu(input_=conv4,
-                                   kernel_shape=[2, 2, 2, 100, 100],
-                                   biases_shape=[100],
-                                   decay_constant=self.param['decay_const'],
-                                   scope=scope,
-                                   padding='SAME', stride=2,
-                                   is_training=is_training)
-            print("conv_pool4:",conv_pool4.get_shape())
-        """
-        pool4 = tf.nn.max_pool3d(conv4,
-                                 ksize=[1, 2, 2, 2, 1],
-                                 strides=[1, 2, 2, 2, 1],
-                                 padding="SAME")
-        """
+                                        kernel_shape=[2, 2, 2, 100, 100],
+                                        biases_shape=[100],
+                                        decay_constant=self.param[
+                                            'decay_const'],
+                                        scope=scope,
+                                        padding='SAME', stride=2,
+                                        is_training=is_training)
+            print("conv_pool4:", conv_pool4.get_shape())
         with tf.variable_scope('conv5') as scope:
             conv5 = self.conv_relu(input_=conv_pool4,
                                    kernel_shape=[3, 3, 3, 100, 128],
@@ -232,23 +213,18 @@ class CNN:
                                    scope=scope,
                                    padding='SAME', stride=1,
                                    is_training=is_training)
-            tf.summary.histogram('activations',conv5)
+            tf.summary.histogram('activations', conv5)
 
         with tf.variable_scope('conv_pool5') as scope:
             conv_pool5 = self.conv_relu(input_=conv5,
-                                   kernel_shape=[2, 2, 2, 128, 128],
-                                   biases_shape=[128],
-                                   decay_constant=self.param['decay_const'],
-                                   scope=scope,
-                                   padding='SAME', stride=2,
-                                   is_training=is_training)
-            print("convpool5:",conv_pool5.get_shape())
-        """
-        pool5 = tf.nn.max_pool3d(conv5,
-                                 ksize=[1, 2, 2, 2, 1],
-                                 strides=[1, 2, 2, 2, 1],
-                                 padding="SAME")
-        """
+                                        kernel_shape=[2, 2, 2, 128, 128],
+                                        biases_shape=[128],
+                                        decay_constant=self.param[
+                                            'decay_const'],
+                                        scope=scope,
+                                        padding='SAME', stride=2,
+                                        is_training=is_training)
+            print("convpool5:", conv_pool5.get_shape())
         with tf.variable_scope('conv6') as scope:
             conv6 = self.conv_relu(input_=conv_pool5,
                                    kernel_shape=[3, 3, 3, 128, 200],
@@ -257,22 +233,17 @@ class CNN:
                                    scope=scope,
                                    padding='SAME', stride=1,
                                    is_training=is_training)
-            tf.summary.histogram('activations',conv6)
+            tf.summary.histogram('activations', conv6)
         with tf.variable_scope('conv_pool6') as scope:
             conv_pool6 = self.conv_relu(input_=conv6,
-                                   kernel_shape=[2, 2, 2, 200, 200],
-                                   biases_shape=[200],
-                                   decay_constant=self.param['decay_const'],
-                                   scope=scope,
-                                   padding='SAME', stride=2,
-                                   is_training=is_training)
-            print("convpool6:",conv_pool6.get_shape())
-        """
-        pool6 = tf.nn.max_pool3d(conv6,
-                                 ksize=[1, 2, 2, 2, 1],
-                                 strides=[1, 2, 2, 2, 1],
-                                 padding="SAME")
-        """
+                                        kernel_shape=[2, 2, 2, 200, 200],
+                                        biases_shape=[200],
+                                        decay_constant=self.param[
+                                            'decay_const'],
+                                        scope=scope,
+                                        padding='SAME', stride=2,
+                                        is_training=is_training)
+            print("convpool6:", conv_pool6.get_shape())
         with tf.variable_scope('conv7') as scope:
             conv7 = self.conv_relu(input_=conv_pool6,
                                    kernel_shape=[3, 3, 3, 200, 256],
@@ -281,76 +252,52 @@ class CNN:
                                    scope=scope,
                                    padding='SAME', stride=1,
                                    is_training=is_training)
-            tf.summary.histogram('activations',conv7)
-        """
-        pool7 = tf.nn.max_pool3d(conv7,
-                                 ksize=[1, 2, 2, 2, 1],
-                                 strides=[1, 2, 2, 2, 1],
-                                 padding="SAME")
-        """
-        print("conv7",conv7.get_shape())
-        """
-        with tf.variable_scope('conv8') as scope:
-            conv8 = self.conv_relu(input_=conv7,
-                                   kernel_shape=[5, 5, 5, 256, 512],
-                                   biases_shape=[512],
-                                   decay_constant=self.param['decay_const'],
-                                   scope=scope,
-                                   padding='SAME', stride=1,
-                                   is_training=is_training)
-            tf.summary.histogram('activations',conv8)
-        with tf.variable_scope('conv_pool8') as scope:
-            conv_pool8 = self.conv_relu(input_=conv8,
-                                   kernel_shape=[2, 2, 2, 512, 512],
-                                   biases_shape=[512],
-                                   decay_constant=self.param['decay_const'],
-                                   scope=scope,
-                                   padding='SAME', stride=2,
-                                   is_training=is_training)
-            print("convpool8",conv_pool8.get_shape())
-        """
+            tf.summary.histogram('activations', conv7)
+        print("conv7", conv7.get_shape())
         with tf.variable_scope('fullcn') as scope:
             vector_per_batch = tf.reshape(conv7,
                                           [self.param['batch_size'], -1])
             weights = self.weight_decay_variable(name="weights",
                                                  shape=[2048, 1024],
-                                   decay_constant=0)
+                                                 decay_constant=0)
             biases = self.variable_on_cpu(name="biases",
                                           shape=[1024],
                                           initializer=tf.constant_initializer(
                                               0.1))
             fullcn = tf.nn.relu(tf.matmul(vector_per_batch, weights) + biases,
                                 name=scope.name)
-            h2 = tf.contrib.layers.batch_norm(fullcn,
-                                              center=True, scale=True,
-                                              is_training=is_training)
+            bnorm_1 = tf.contrib.layers.batch_norm(fullcn,
+                                                   center=True,
+                                                   scale=True,
+                                                   is_training=is_training)
             # Use dropout if network overfits
-            # fullcn_drop = tf.nn.dropout(h2, keep_prob)
+            # fullcn_drop = tf.nn.dropout(batch_norm_1, keep_prob)
 
         with tf.variable_scope('fullcn2') as scope:
             weights = self.weight_decay_variable(name="weights",
                                                  shape=[1024, 64],
-                                   decay_constant=0)
+                                                 decay_constant=0)
             biases = self.variable_on_cpu(name="biases",
                                           shape=[64],
                                           initializer=tf.constant_initializer(
                                               0.1))
-            fullcn2 = tf.nn.relu(tf.matmul(h2, weights) + biases,
+            fullcn2 = tf.nn.relu(tf.matmul(bnorm_1, weights) + biases,
                                  name=scope.name)
-            h3 = tf.contrib.layers.batch_norm(fullcn2,
-                                              center=True, scale=True,
-                                              is_training=is_training)
-            # fullcn2_drop = tf.nn.dropout(h3, keep_prob)
+            bnorm_2 = tf.contrib.layers.batch_norm(fullcn2,
+                                                   center=True,
+                                                   scale=True,
+                                                   is_training=is_training)
+            # fullcn2_drop = tf.nn.dropout(batch_norm_2, keep_prob)
 
         with tf.variable_scope('logits') as scope:
             weights = self.weight_decay_variable(name="weights",
                                                  shape=[64, 2],
-                                   decay_constant=0)
+                                                 decay_constant=0)
             biases = self.variable_on_cpu(name='biases',
                                           shape=[2],
                                           initializer=tf.constant_initializer(
                                               0.1))
-            logits = tf.add(tf.matmul(h3, weights), biases,
+            logits = tf.add(tf.matmul(bnorm_2, weights), biases,
                             name=scope.name)
 
         return logits
@@ -395,17 +342,18 @@ class CNN:
         for step in range(int(dataset_size / self.param['batch_size'])):
             image_data, label_data = dataset.next_batch()
             predictions, loss_ = sess.run([eval_op, loss],
-                feed_dict={
-                    images: image_data,
-                    labels: label_data,
-                    keep_prob: 1.0,
-                    is_training: 0
-                })
+                                          feed_dict={
+                                              images: image_data,
+                                              labels: label_data,
+                                              keep_prob: 1.0,
+                                              is_training: 0
+                                          })
             correct_predictions += predictions
             if step % 9 == 0:
                 total_seen = (step + 1) * self.param['batch_size']
-                print("Accuracy until "+str(total_seen)+" data points is: " +
-                      str(correct_predictions/total_seen))
+                print(
+                    "Accuracy until " + str(total_seen) + " data points is: " +
+                    str(correct_predictions / total_seen))
                 print("loss", loss_)
 
         accuracy = correct_predictions / dataset_size
@@ -424,9 +372,9 @@ class CNN:
         with tf.Graph().as_default():
 
             images = tf.placeholder(dtype=tf.float32,
-                                    shape=[None,self.param['depth'],
-                                         self.param['height'],
-                                         self.param['width'],
+                                    shape=[None, self.param['depth'],
+                                           self.param['height'],
+                                           self.param['width'],
                                            1])
             labels = tf.placeholder(dtype=tf.int8,
                                     shape=[None, 2])
@@ -440,11 +388,6 @@ class CNN:
             train_size = len(train_data.filenames)
             num_batches_epoch = int(train_size / self.param['batch_size'])
             num_steps = num_batches_epoch * self.param['num_epochs']
-
-            learn_rate = tf.train.exponential_decay(
-                self.param['learning_rate'], global_step,
-                decay_steps=num_steps, decay_rate=self.param['decay_factor'],
-                staircase=True)
             opt = tf.train.AdamOptimizer(
                 learning_rate=self.param['learning_rate'])
 
@@ -453,7 +396,7 @@ class CNN:
             with tf.variable_scope(tf.get_variable_scope()):
                 with tf.name_scope('Train') as scope:
                     logits = self.inference(images, keep_prob, is_training)
-                    #tf.summary.tensor_summary('logits', logits)
+                    # tf.summary.tensor_summary('logits', logits)
 
                     _ = self.inference_loss(logits, labels)
 
@@ -464,7 +407,8 @@ class CNN:
                     tf.summary.scalar('total_loss', total_loss)
                 update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
                 with tf.control_dependencies(update_ops):
-                    train_op = opt.minimize(total_loss, global_step=global_step)
+                    train_op = opt.minimize(total_loss,
+                                            global_step=global_step)
 
                 # Evaluation
                 correct_prediction = tf.equal(tf.argmax(labels, 1),
@@ -476,9 +420,9 @@ class CNN:
                 tf.summary.scalar('train_batch_accuracy', accuracy)
                 saver = tf.train.Saver()
                 init = tf.global_variables_initializer()
-                config=tf.ConfigProto()
-                config.gpu_options.allow_growth=True
-                config.allow_soft_placement=True
+                config = tf.ConfigProto()
+                config.gpu_options.allow_growth = True
+                config.allow_soft_placement = True
                 sess = tf.InteractiveSession(config=config)
                 sess.run(init)
 
@@ -492,11 +436,10 @@ class CNN:
                     start_time = time.time()
 
                     image_data, label_data = train_data.next_batch()
-                    summary_values, _, loss_value, logits_ = sess.run(
+                    summary_values, _, loss_value = sess.run(
                         [summary_op,
                          train_op,
-                         total_loss,
-                         logits],
+                         total_loss],
                         feed_dict={
                             images: image_data,
                             labels: label_data,
@@ -528,12 +471,14 @@ class CNN:
                                       'examples/sec; %.3f sec/batch)')
                         print(format_str % (datetime.now(), step, loss_value,
                                             examples_per_sec, sec_per_batch))
-                        #print(logits_)
+                        # print(logits_)
 
                     # Saving Model Checkpoints
-                    if step % num_batches_epoch == 0 or (step + 1) == num_steps:
+                    if step % num_batches_epoch == 0 or \
+                            (step + 1) == num_steps:
                         # After 15 epochs or before the last step
-                        if (step/num_batches_epoch) % 15 == 0 or (step+1) == num_steps:
+                        if (step / num_batches_epoch) % 15 == 0 or \
+                                        (step + 1) == num_steps:
                             checkpoint_path = self.param['checkpoint_path'] + \
                                               '/model.ckpt'
                             saver.save(sess, checkpoint_path, global_step=step)

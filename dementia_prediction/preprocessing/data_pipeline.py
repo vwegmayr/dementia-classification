@@ -31,6 +31,7 @@ class DataPipeline:
             CON018-T1_brain_avg_template_aligned.nii.gz
         Gaussian Smoothed Image: CON018-T1_brain_smoothed.nii.gz
     """
+
     def __init__(self, in_folder, params):
         """
 
@@ -145,7 +146,7 @@ class DataPipeline:
                 command += ' -add '.join(output_files)
                 command += ' -div ' + str(len(output_files)) + \
                            ' ' + avg_template
-                print("Number of Images: "+str(len(output_files)))
+                print("Number of Images: " + str(len(output_files)))
                 subprocess.call(command, shell=True)
                 print("Study specific average template: " + avg_template)
 
@@ -182,7 +183,7 @@ class DataPipeline:
                                                 output_file),
                                         shell=True)
                         counter += 1
-                        print('File No.: '+str(counter) +
+                        print('File No.: ' + str(counter) +
                               ' Generated output: ' + output_file)
 
     def subsample(self):
@@ -229,23 +230,26 @@ class DataPipeline:
                 input_file = os.path.join(directory[0], file)
                 if re.search(regex, input_file):
                     for direction in ['x', 'y', 'z']:
-                        x = y = z = 0
-                        if direction == 'x': x = 1
-                        if direction == 'y': y = 1
-                        if direction == 'z': z = 1
+                        x_axis = y_axis = z_axis = 0
+                        if direction == 'x':
+                            x_axis = 1
+                        if direction == 'y':
+                            y_axis = 1
+                        if direction == 'z':
+                            z_axis = 1
 
                         output_file = '{0}_rotation_{1}.nii.gz'. \
                             format(input_file.split(split_on)[0],
                                    direction)
                         rot_matrix = 'rot_{0}.mat'.format(direction)
-                        angle_rot = 10 if random.uniform(0,1) > 0.5 \
-                                    else -10
+                        angle_rot = 10 if random.uniform(0, 1) > 0.5 \
+                            else -10
                         print("Rotating image: " + input_file)
                         subprocess.call('makerot -c {0} -a {1},{2},'
                                         '{3} -t {4} -o {5}'
                                         .format(input_file,
-                                                x, y, z, angle_rot,
-                                                rot_matrix),
+                                                x_axis, y_axis, z_axis,
+                                                angle_rot, rot_matrix),
                                         shell=True)
                         subprocess.call('flirt -in {0} -ref {1} -out '
                                         '{2} -applyxfm -init {3}'

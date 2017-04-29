@@ -2,11 +2,9 @@
 This module contains functions to handle the input data to the CNN model.
 """
 
-import math
 import random
 import numpy as np
 import nibabel as nb
-import scipy.ndimage as ndimage
 
 
 class DataInput:
@@ -51,11 +49,11 @@ class DataInput:
             mri_image = mri_image.get_data()
             mean = mri_image.mean()
             stddev = mri_image.std()
-            #adjusted_stddev = max(stddev, 1.0 / math.sqrt(mri_image.size))
+            # adjusted_stddev = max(stddev, 1.0 / math.sqrt(mri_image.size))
             mri_image = (mri_image - mean) / stddev
-            mri_image = np.reshape(mri_image, [1,self.data['depth'],
+            mri_image = np.reshape(mri_image, [1, self.data['depth'],
                                                self.data['height'],
-                                               self.data['width'],1])
+                                               self.data['width'], 1])
 
             if len(batch_images) == 0:
                 batch_images = mri_image
@@ -65,6 +63,7 @@ class DataInput:
             batch_labels[iterate][self.labels[i]] = 1
             iterate += 1
 
-        # print("Batch Index: " + str(self.batch_index)+" batch labels: "+str(batch_labels))
+        # print("Batch Index: " + str(self.batch_index)+" batch labels: "+
+        # str(batch_labels))
 
         return batch_images, batch_labels
