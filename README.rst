@@ -63,8 +63,10 @@ The MR Images are downloaded to the local disk into a new 'Data' folder.
 Preprocessing script will extract the brain from an MR Image and align all the extracted brains
 to a study specific template. For this purpose, choose any one of the patients code as the reference
 image in `ref_path` of `experiments/T1_preprocessing/params.yaml`. (By default it is CON018)
+
 Preprocessing requires installation of FSL tool. Please follow the setup instructions
-`here https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation/Linux/>`_ to download and install FSL.
+`here <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation/Linux/>`_ to download and install FSL.
+
 Each image takes around 10minutes to complete the whole preprocessing pipeline. You can avoid
 the preprocessing step if your data folder already contains the `-T1_brain_rotation_x/y/z.nii.gz`
 images.
@@ -85,4 +87,4 @@ To try the 3D CNN model, run
 
 	smt run -m experiments/T1_Baseline/t1_3dcnn.py experiments/T1_Baseline/params.yaml
 
-The checkpoint and summary files can be viewed `here http://192.33.91.83:9183/dementia_prediction/>`_ 
+The checkpoint and summary files can be viewed `here <http://192.33.91.83:9183/dementia_prediction/>`_ 
