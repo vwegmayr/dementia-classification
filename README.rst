@@ -74,16 +74,4 @@ To try the 3D CNN model, run
 
 	smt run -m experiments/T1_Baseline/t1_3dcnn.py experiments/T1_Baseline/params.yaml
 
-Examples
---------
-In addition to the basic functionality outlined above, the skeleton provides a couple of examples:
-
-`doctest <dementia_prediction/examples/doctest.py>`_
-
-`docstrings <dementia_prediction/examples/sphinx.py>`_
-
-`estimator <dementia_prediction/examples/estimator.py>`_
-
-`sphinx <doc/example_templates>`_
-
-`config file <dementia_prediction/examples/example_config.yaml>`_
+The checkpoint and summary files can be viewed `here http://192.33.91.83:9183/dementia_prediction/>`_ 
