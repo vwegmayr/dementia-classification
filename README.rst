@@ -49,6 +49,13 @@ You can also build and view the initial documentation with
     
 Experiments
 --------
+Install the package with
+
+.. code-block:: shell
+
+    pip install -e .
+
+
 Before running any experiments, the MR Images dataset need to be downloaded and preprocessed.
 Run
 
