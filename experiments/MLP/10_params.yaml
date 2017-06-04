@@ -1,0 +1,30 @@
+
+parameters:
+  cnn:
+    depth: 88
+    height: 102
+    width: 100
+    batch_size: 10 
+    num_epochs: 40 
+    learning_rate: 0.0001
+    decay_factor: 0.9
+    decay_const: 0.001
+    checkpoint_path: './output/'
+    summary_path: './output/'
+    keep_prob: 1 
+    num_feat: 18822 
+  CBF_feat: '/local/home/saitharaju/mri-fusion/classical/features/mask/robust/CBF_features_10.0_robust_mask.pkl'
+  DTI_FA_feat: '/local/home/saitharaju/mri-fusion/classical/features/mask/robust/DTI_FA_features_10.0_robust_mask.pkl'
+  DTI_MD_feat: '/local/home/saitharaju/mri-fusion/classical/features/mask/robust/DTI_MD_features_10.0_robust_mask.pkl'
+  DTI_MO_feat: '/local/home/saitharaju/mri-fusion/classical/features/mask/robust/DTI_MO_features_10.0_robust_mask.pkl'
+  T1_feat: '/local/home/saitharaju/mri-fusion/classical/features/mask/robust/T1_brain_features_10.0_robust_mask.pkl'
+data_paths:
+  datadir: '/local/home/saitharaju/NIFTI/CBF_subsampled/'
+  valid_path: './experiments/MLP/valid_patients.pkl'
+  T1_path: '/local/home/saitharaju/NIFTI/'
+  DTI_FA_path: '/local/home/saitharaju/NIFTI/DTI_FA_subsampled/'
+  DTI_MO_path: '/local/home/saitharaju/NIFTI/DTI_MO_subsampled/'
+  DTI_MD_path: '/local/home/saitharaju/NIFTI/DTI_MD_subsampled/'
+  logdir: './'
+  class_labels: './experiments/T1_Baseline/patients.pkl'
+  validation_split: 0.15
