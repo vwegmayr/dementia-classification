@@ -16,8 +16,8 @@ class DataInput:
     """
     def __init__(self, params, data, name, mean=0, var=0):
         self.data = params['cnn']
-        self.stable = data[0]
-        self.progressive = data[1]
+        self.s_files = data[0]
+        self.p_files = data[1]
         self.s_batch_index = 0
         self.p_batch_index = 0
         self.name = name
@@ -48,22 +48,22 @@ class DataInput:
         batch_labels = np.zeros((self.data['batch_size'], 2))
 
         iterate = 0
-        start = self.pos_batch_index
+        start = self.s_batch_index
         end = start + int(self.data['batch_size']/2)
-        self.pos_batch_index += int(self.data['batch_size']/2)
+        self.s_batch_index += int(self.data['batch_size']/2)
 
-        if end > len(self.pos):
+        if end > len(self.s_files):
             # Reached end of epoch
-            shuffle_indices = list(range(len(self.pos)))
+            shuffle_indices = list(range(len(self.s_files)))
             random.shuffle(shuffle_indices)
-            self.pos = [self.pos[i] for i in shuffle_indices]
+            self.s_files = [self.s_files[i] for i in shuffle_indices]
             start = 0
             end = int(self.data['batch_size']/2)
-            self.pos_batch_index = int(self.data['batch_size']/2)
+            self.s_batch_index = int(self.data['batch_size']/2)
         print("Batch patients:")
         for i in range(start, end):
-            mri_image = nb.load(self.pos[i])
-            print(self.name+" "+self.pos[i]+" 0", flush=True)
+            mri_image = nb.load(self.s_files[i])
+            print(self.name+" "+self.s_files[i]+" 0", flush=True)
             mri_image = mri_image.get_data()
             mri_image = self.normalize(mri_image)
 
@@ -74,22 +74,22 @@ class DataInput:
             batch_labels[iterate][0] = 1 #1 - demented, 0 - stable
             iterate += 1
         
-        start = self.neg_batch_index
+        start = self.p_batch_index
         end = start + int(self.data['batch_size']/2)
-        self.neg_batch_index += int(self.data['batch_size']/2)
+        self.p_batch_index += int(self.data['batch_size']/2)
 
-        if end > len(self.neg):
+        if end > len(self.p_files):
             # Reached end of epoch
-            shuffle_indices = list(range(len(self.neg)))
+            shuffle_indices = list(range(len(self.p_files)))
             random.shuffle(shuffle_indices)
-            self.neg = [self.neg[i] for i in shuffle_indices]
+            self.p_files = [self.p_files[i] for i in shuffle_indices]
             start = 0
             end = int(self.data['batch_size']/2)
-            self.neg_batch_index = int(self.data['batch_size']/2)
+            self.p_batch_index = int(self.data['batch_size']/2)
         #print("Batch patients:")
         for i in range(start, end):
-            mri_image = nb.load(self.neg[i])
-            print(self.name+" "+self.neg[i]+" 1",flush=True)
+            mri_image = nb.load(self.p_files[i])
+            print(self.name+" "+self.p_files[i]+" 1",flush=True)
             mri_image = mri_image.get_data()
             mri_image = self.normalize(mri_image)
 
