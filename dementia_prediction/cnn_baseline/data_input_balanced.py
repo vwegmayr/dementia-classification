@@ -14,14 +14,29 @@ class DataInput:
     Initialize this class with the required parameter file and the dataset
     as a tuple of filenames.
     """
-    def __init__(self, params, data, name):
+    def __init__(self, params, data, name, mean=0, var=0):
         self.data = params['cnn']
-        self.pos = data[0]
-        self.neg = data[1]
-        self.pos_batch_index = 0
-        self.neg_batch_index = 0
-        self.name=name
+        self.stable = data[0]
+        self.progressive = data[1]
+        self.s_batch_index = 0
+        self.p_batch_index = 0
+        self.name = name
+        self.mean = mean
+        self.var = var
 
+    def normalize(self, mri_image):
+        if self.mean == 0:
+            mean = mri_image.mean()
+            stddev = mri_image.std()
+            #adjusted_stddev = max(stddev, 1.0 / math.sqrt(mri_image.size))
+            norm_image = (mri_image - mean) / stddev
+        else:
+            norm_image = [(x-y)/z for x,y,z in zip(mri_image, self.mean,
+                                                self.var)]
+
+        return  np.reshape(norm_image, [1, self.data['depth'],
+                                           self.data['height'],
+                                           self.data['width'], 1])
     def next_batch(self):
         """
         This functions retrieves the next batch of the data.
@@ -50,16 +65,7 @@ class DataInput:
             mri_image = nb.load(self.pos[i])
             print(self.name+" "+self.pos[i]+" 0", flush=True)
             mri_image = mri_image.get_data()
-            mean = mri_image.mean()
-            stddev = mri_image.std()
-            #adjusted_stddev = max(stddev, 1.0 / math.sqrt(mri_image.size))
-            mri_image = (mri_image - mean) / stddev
-            mri_image = np.reshape(mri_image, [1, self.data['depth'],
-                                               self.data['height'],
-                                               self.data['width'], 1])
-
-            # print("Shape of mri: " + str(mri_image.shape) + " type: "
-            # "" + str(mri_image.dtype) + " Mean: " + str(mri_image.mean()))
+            mri_image = self.normalize(mri_image)
 
             if len(batch_images) == 0:
                 batch_images = mri_image
@@ -85,16 +91,7 @@ class DataInput:
             mri_image = nb.load(self.neg[i])
             print(self.name+" "+self.neg[i]+" 1",flush=True)
             mri_image = mri_image.get_data()
-            mean = mri_image.mean()
-            stddev = mri_image.std()
-            #adjusted_stddev = max(stddev, 1.0 / math.sqrt(mri_image.size))
-            mri_image = (mri_image - mean) / stddev
-            mri_image = np.reshape(mri_image, [1, self.data['depth'],
-                                               self.data['height'],
-                                               self.data['width'], 1])
-
-            # print("Shape of mri: " + str(mri_image.shape) + " type: "
-            # "" + str(mri_image.dtype) + " Mean: " + str(mri_image.mean()))
+            mri_image = self.normalize(mri_image)
 
             if len(batch_images) == 0:
                 batch_images = mri_image

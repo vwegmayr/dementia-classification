@@ -13,7 +13,8 @@ config = Config()
 param_file = sys.argv[1]
 config.parse(path.abspath(param_file))
 
-
+# Add the training data to the CBF data directory which might be removed
+# during multimodal setup
 paths = config.config.get('data_paths')
 #regex = r"-T1_brain_sub_rotation5\.nii\.gz$"
 filep = open(paths['class_labels'], 'rb')
