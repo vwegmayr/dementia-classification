@@ -54,8 +54,7 @@ def main():
     mode_param = paths['mode']
     for mode in [mode_param]:
         print("Mode: ", mode)
-        fisher_scores_all = paths[
-                                'fisher_all']+mode+'_fisher_score_robust_parallel_all_newbins.pkl'
+        fisher_scores_all = paths['fisher_all']+mode+'_fisher_score_robust_parallel_all_newbins.pkl'
         print("Input fisher scores: ", fisher_scores_all)
         for percent in [0.3]:
 

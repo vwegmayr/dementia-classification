@@ -23,7 +23,7 @@ data_path = '/local/home/saitharaju/NIFTI/'+mode+'_subsampled/'
 NUM_BINS = 3 
 IMG_SIZE = 897600
 
-filep = open(path.abspath('./patients.pkl'), 'rb')
+filep = open(path.abspath('../patients.pkl'), 'rb')
 patients_dict = pickle.load(filep)
 
 

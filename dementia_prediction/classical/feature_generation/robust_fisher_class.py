@@ -34,7 +34,7 @@ class RobustFisher:
         self.image_size = 897600
         self.varA = 0
         self.bins_patient = []
-        self.patients_dict = pickle.load(open(path.abspath('./patients.pkl'),
+        self.patients_dict = pickle.load(open(path.abspath('../patients.pkl'),
                                           'rb'))
         print("Hello")
         for i in range(0, self.image_size):

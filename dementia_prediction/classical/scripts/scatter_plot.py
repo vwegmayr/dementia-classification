@@ -2,7 +2,7 @@ import pickle
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 import numpy as np
-
+import nibabel as nb
 
 font = {'family' : 'normal',
         'weight' : 'bold',
@@ -11,8 +11,8 @@ font = {'family' : 'normal',
 plt.rc('font', **font)
 
 
-modeB = 'CBF'
-modeA = 'CBF'
+modeB = 'T1_brain'
+modeA = 'T1_brain'
 print(modeA, "10%")
 scoresA = pickle.load(open('./fisher_10/'+modeA+'_fisher_score_all.pkl', 'rb'))
 scoresB = pickle.load(open(
@@ -35,13 +35,14 @@ featB = pickle.load(open(
     +'_features_30.0_robust_mask.pkl',
     'rb'))
 print(len(featA), len(featB))
-'''
-common_feat = list(set(featA) & set(featB))
+
+#common_feat = list(set(featA) & set(featB))
 color_plot_X = []
 color_plot_Y = []
-print("Common feat cnt: ", len(common_feat))
+#print("Common feat cnt: ", len(common_feat))
+
 for i in range(0, 897600):
-    if i in common_feat:
+    if i in featA and i in featB:
         if np.isinf(scoresA[i]):
             color_plot_X.append(maxA)
         else:
@@ -54,8 +55,17 @@ for i in range(0, 897600):
 
 fig, ax = plt.subplots()
 
-ax.scatter(scoresA, scoresB)
-ax.scatter(color_plot_X, color_plot_Y, c='r')
+brain_mask_path= '/home/rams/4_Sem/Thesis/Data/T1_brain_subsampled/CON018/CON018-T1_brain_mask_subsampled.nii.gz'
+mri_image_mask = nb.load(brain_mask_path)
+mri_image_mask = mri_image_mask.get_data()
+mri_image_mask = mri_image_mask.flatten()
+non_zero_indices = np.nonzero(mri_image_mask)[0]
+
+non_zero_scoresA = np.take(scoresA, non_zero_indices)
+non_zero_scoresB = np.take(scoresB, non_zero_indices)
+
+ax.scatter(non_zero_scoresA, non_zero_scoresB, s=5)
+ax.scatter(color_plot_X, color_plot_Y, c='r', s=5)
 
 # Set the ranges of X and Y axes
 ax.set_xlim([minA, maxA])
@@ -67,7 +77,6 @@ lims = [
 ]
 print("Limits: ", lims)
 
-
 # now plot both limits against eachother
 #ax.plot(lims, lims, 'k-', alpha=0.75, zorder=0)
 plt.xticks(np.arange(minA, maxA, 0.01))
@@ -78,6 +87,4 @@ plt.title('T1 Fisher Scores Robust vs Naive')
 ax.legend(loc='upper right')
 #plt.grid(True)
 plt.show()
-fig.savefig(modeA+"_Robust_Naive_30.png")
-
-'''
+fig.savefig(modeA+"Rob_Naive.png")
