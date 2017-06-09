@@ -8,6 +8,7 @@ import nibabel as nb
 import subprocess
 import math
 
+from pathos.multiprocessing import ProcessPool
 from dementia_prediction.config_wrapper import Config
 from dementia_prediction.cnn_baseline.data_input_balanced import DataInput
 from dementia_prediction.cnn_baseline.t1_baseline import CNN
@@ -17,50 +18,106 @@ config = Config()
 param_file = sys.argv[1]
 config.parse(path.abspath(param_file))
 
-filep = open('../validation_patients.pkl', 'rb')
-valid_patients = pickle.load(filep)
 
 paths = config.config.get('data_paths')
 filep = open(paths['class_labels'], 'rb')
 patients_dict = pickle.load(filep)
-
+filep = open(paths['valid_data'], 'rb')
+valid_patients = pickle.load(filep)
+print(len(valid_patients))
+global_mean = [0 for i in range(0, IMG_SIZE)]
+global_variance = [0 for i in range(0, IMG_SIZE)]
+mean_path = paths['norm_mean_var']+'./t1_train_mean_path.pkl'
+var_path = paths['norm_mean_var']+'./t1_train_var_path.pkl'
+def mean_fun(filenames):
+    mean = [0 for x in range(0, IMG_SIZE)]
+    for file in filenames:
+        image = nb.load(file).get_data().flatten()
+        for i in range(0, IMG_SIZE):
+            mean[i] += image[i]
+    return mean
+def var_fun(filenames):
+    variance = [0 for i in range(0, IMG_SIZE)]
+    with open(mean_path, 'rb') as filep:
+        global_mean = pickle.load(filep)
+    for file in filenames:
+        image = nb.load(file).get_data().flatten()
+        for i in range(0, IMG_SIZE):
+            variance[i] += math.pow((image[i] - global_mean[i]), 2)#TODO check globalmean
+    return variance
 def normalize(train):
     train_data = train[0] + train[1]
-    mean_image = './train_mean_image.nii.gz'
-    var_image = './train_var_image.pkl'
-    mean = []
-    var = []
-
-    if not os.path.exists(mean_image):
+    mean = [0 for i in range(0, IMG_SIZE)]
+    var = [0 for i in range(0, IMG_SIZE)]
+    num_parallel = 15
+    split = int(len(train_data) / num_parallel)
+    pool = ProcessPool(num_parallel)
+    train_splits = []
+    for par in range(0, num_parallel - 1):
+        train_splits.append(train_data[par * split:(par + 1) * split])
+    train_splits.append(train_data[(num_parallel - 1) * split:])
+    '''
+    # If argument list too long, skip this
+    if not os.path.exists(mean_path):
         command = 'fslmaths'
         command += ' -add '.join(train_data)
         command += ' -div ' + str(len(train_data)) + \
-                   ' ' + mean_image
+                   ' ' + mean_path
         print("Number of training images: " + str(len(train_data)))
         subprocess.call(command, shell=True)
-
-    if not os.path.exists(var_image):
-        variance = [0 for x in range(IMG_SIZE)]
-        mean_values = nb.load(mean_image).get_data()
+    mean = nb.load(mean_path).get_data()
+    if not os.path.exists(mean_path):
+        mean = [0 for x in range(IMG_SIZE)]
         for file in train_data:
-            image = nb.load(file).get_data()
-            for i in range(0, 897600):
+            print("mean", file)
+            mr_image = nb.load(file).get_data().flatten()
+            for i in range(0, IMG_SIZE):
+                mean[i] += mr_image[i]
+        mean = [i/len(train_data) for i in mean]
+        with open(mean_path, 'wb') as filep:
+            pickle.dump(mean, filep)
+    if not os.path.exists(var_path):
+        variance = [0 for x in range(IMG_SIZE)]
+        #mean_values = nb.load(mean_path).get_data().flatten()
+        with open(mean_path, 'rb') as filep:
+            mean_values = pickle.load(filep)
+        for file in train_data:
+            print("var", file)
+            image = nb.load(file).get_data().flatten()
+            for i in range(0, IMG_SIZE):
                 variance[i] += math.pow((image[i] - mean_values[i]), 2)
-        variance = [x/len(train_data) for x in variance]
-        with open(var_image, 'wb') as filep:
+        variance = [math.sqrt(x/(len(train_data)-1)) for x in variance]
+        with open(var_path, 'wb') as filep:
             pickle.dump(variance, filep)
+    '''
+    if not os.path.exists(mean_path):
+        mean_arrays = pool.map(mean_fun, train_splits)
+        for i in range(0, IMG_SIZE):
+            for j in range(0, len(mean_arrays)):
+                mean[i] += mean_arrays[j][i]
+        global_mean = [i/len(train_data) for i in mean]
+        with open(mean_path, 'wb') as filep:
+            pickle.dump(global_mean, filep)
+    with open(mean_path, 'rb') as filep:
+        global_mean = pickle.load(filep)
+    if not os.path.exists(var_path):
+        var_arrays = pool.map(var_fun, train_splits)
+        for i in range(0, IMG_SIZE):
+            for j in range(0, len(var_arrays)):
+                var[i] += var_arrays[j][i]
+        global_variance = [math.sqrt(x/(len(train_data)-1)) for x in var]
+        with open(var_path, 'wb') as filep:
+            pickle.dump(global_variance, filep)
+    with open(var_path, 'rb') as filep:
+        global_variance = pickle.load(filep)
 
-    mean = nb.load(mean_image).get_data()
-    with open(var_image, 'rb') as filep:
-        var = pickle.load(filep)
-
-    return mean, var
+    return global_mean, global_variance
 
 s_train_filenames = []
 p_train_filenames = []
 s_valid_filenames = []
 p_valid_filenames = []
-
+"""
 # Add Data Augmented with rotations and translations
 for directory in os.walk(paths['datadir']):
     # Walk inside the directory
@@ -90,7 +147,9 @@ for directory in os.walk(paths['datadir']):
                         s_train_filenames.append(input_file)
                     if patients_dict[patient_code] == 1:
                         p_train_filenames.append(input_file)
-
+print(len(s_train_filenames), len(p_train_filenames))
+# 166*6 stable and 180*6 progressive patients
+"""
 for directory in os.walk(paths['datadir']):
     # Walk inside the directory
     for file in directory[2]:
@@ -109,6 +168,7 @@ for directory in os.walk(paths['datadir']):
             if patient_code in patients_dict and patient_code in valid_patients:
                 if patients_dict[patient_code] == 0:
                     s_valid_filenames.append(input_file)
+                    print(input_file)
                 if patients_dict[patient_code] == 1:
                     p_valid_filenames.append(input_file)
 

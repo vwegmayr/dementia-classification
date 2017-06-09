@@ -25,15 +25,19 @@ class DataInput:
         self.var = var
 
     def normalize(self, mri_image):
+        norm_image = []
         if self.mean == 0:
             mean = mri_image.mean()
             stddev = mri_image.std()
             #adjusted_stddev = max(stddev, 1.0 / math.sqrt(mri_image.size))
             norm_image = (mri_image - mean) / stddev
         else:
-            norm_image = [(x-y)/z for x,y,z in zip(mri_image, self.mean,
-                                                self.var)]
-
+            for x,y,z in zip(mri_image, self.mean, self.var):
+                if z == 0:
+                    norm_image.append(0)
+                else:
+                    norm_image.append((x-y)/z)
+            #print(norm_image)
         return  np.reshape(norm_image, [1, self.data['depth'],
                                            self.data['height'],
                                            self.data['width'], 1])
@@ -60,11 +64,11 @@ class DataInput:
             start = 0
             end = int(self.data['batch_size']/2)
             self.s_batch_index = int(self.data['batch_size']/2)
-        print("Batch patients:")
+        #print("Batch patients:")
         for i in range(start, end):
             mri_image = nb.load(self.s_files[i])
-            print(self.name+" "+self.s_files[i]+" 0", flush=True)
-            mri_image = mri_image.get_data()
+            #print(self.name+" "+self.s_files[i]+" 0", flush=True)
+            mri_image = mri_image.get_data().flatten()
             mri_image = self.normalize(mri_image)
 
             if len(batch_images) == 0:
@@ -89,8 +93,8 @@ class DataInput:
         #print("Batch patients:")
         for i in range(start, end):
             mri_image = nb.load(self.p_files[i])
-            print(self.name+" "+self.p_files[i]+" 1",flush=True)
-            mri_image = mri_image.get_data()
+            #print(self.name+" "+self.p_files[i]+" 1",flush=True)
+            mri_image = mri_image.get_data().flatten()
             mri_image = self.normalize(mri_image)
 
             if len(batch_images) == 0:
