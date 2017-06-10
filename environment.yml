@@ -11,3 +11,8 @@ dependencies:
   - scipy=0.18.1
   - pip:
     - pyyaml==3.12
+    - tensorflow-gpu==1.0.1
+    - nibabel==2.1.0
+    - git+https://github.com/vwegmayr/sumatra
+    - configparser
+    - gitpython

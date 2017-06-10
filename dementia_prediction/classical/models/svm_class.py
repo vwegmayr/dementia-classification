@@ -51,7 +51,7 @@ class SVM:
         train_Y = []
         valid_X = []
         valid_Y = []
-
+        valid_pat_code = []
         # Add training data to train_X and validation to valid_X
         for directory in os.walk(self.data_path):
             # Walk inside the directory
@@ -73,7 +73,8 @@ class SVM:
                             mri_image = pre.scale(mri_image, copy=False)
 
                         feature_selected_image = np.take(mri_image, features)
-                        print("Feature selected: ", len(feature_selected_image))
+                        #print("Feature selected: ",
+                        # len(feature_selected_image))
                         if len(feature_selected_image) == 0:
                             raise ValueError('Zero selected features')
 
@@ -81,6 +82,7 @@ class SVM:
                         train_X.append(feature_selected_image)
                         train_Y.append(self.patients_dict[patient_code])
                     elif patient_code in self.valid_patients:
+                        valid_pat_code.append(patient_code)
                         valid_X.append(feature_selected_image)
                         valid_Y.append(self.patients_dict[patient_code])
 
@@ -123,3 +125,4 @@ class SVM:
                 correct += 1
 
         print("Accuracy: ",(correct/len(pred)))
+        return valid_pat_code, pred
