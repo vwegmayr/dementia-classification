@@ -1,0 +1,24 @@
+
+parameters:
+  cnn:
+    depth: 88 
+    height: 102
+    width: 100
+    batch_size: 10
+    num_epochs: 30
+    learning_rate: 0.000005
+    decay_factor: 0.9
+    decay_const: 0.005
+    checkpoint_path: './output/'
+    summary_path: './output/'
+    keep_prob: 0.3
+data_paths:
+  T1_brain_path: '/local/home/saitharaju/NIFTI/T1_brain_subsampled/'
+  CBF_path: '/local/home/saitharaju/NIFTI/CBF_subsampled/'
+  DTI_FA_path: '/local/home/saitharaju/NIFTI/DTI_FA_subsampled/'
+  multimodal_norm_out: '/local/home/saitharaju/NIFTI/norm_multimodal/'
+  logdir: '/local/home/saitharaju/Data/'
+  norm_mean_var: './Dictionaries/'
+  class_labels: './experiments/T1_Baseline/patients.pkl'
+  valid_data: './experiments/validation_patients.pkl'
+  validation_split: 0.15
