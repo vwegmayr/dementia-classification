@@ -6,8 +6,8 @@ import argparse
 import sys
 
 from dementia_prediction.config_wrapper import Config
-from dementia_prediction.cnn_baseline.multimodal_input import DataInput
-from dementia_prediction.cnn_baseline.multimodal_baseline import CNN
+from dementia_prediction.cnn_baseline.multichannel_input import DataInput
+from dementia_prediction.cnn_baseline.multichannel import CNN
 
 config = Config()
 param_file = sys.argv[1]
