@@ -11,7 +11,7 @@ import math
 from pathos.multiprocessing import ProcessPool
 from dementia_prediction.config_wrapper import Config
 from dementia_prediction.cnn_baseline.data_input_balanced import DataInput
-from dementia_prediction.cnn_baseline.t1_baseline import CNN
+from dementia_prediction.cnn_baseline.baseline_balanced import CNN
 
 IMG_SIZE = 897600
 config = Config()
@@ -155,9 +155,10 @@ for directory in os.walk(paths['datadir']):
     for file in directory[2]:
         # Match all files ending with 'regex'
         input_file = os.path.join(directory[0], file)
-        regex = r"-"+mode+"_subsampled\.nii\.gz$"
+        #TODO: normalization refactoring
+        regex = r"-"+mode+"_norm_subsampled\.nii\.gz$"
         if re.search(regex, input_file):
-            pat_code = input_file.rsplit('-'+mode+'_subsampled.nii.gz')
+            pat_code = input_file.rsplit('-'+mode+'_norm_subsampled.nii.gz')
             patient_code = pat_code[0].rsplit('/', 1)[1]
             if patient_code in patients_dict and patient_code not in \
                     valid_patients:
@@ -177,12 +178,20 @@ print("Validation Data: S: ", len(s_valid_filenames), "P: ", len(p_valid_filenam
 
 train = (s_train_filenames, p_train_filenames)
 validation = (s_valid_filenames, p_valid_filenames)
+'''
+#TODO: normalization refactoring
 mean_norm, var_norm = normalize(train)
 train_data = DataInput(params=config.config.get('parameters'), data=train,
                        name='train', mean=mean_norm, var=var_norm)
 validation_data = DataInput(params=config.config.get('parameters'),
                             data=validation, name='valid', mean=mean_norm,
                             var=var_norm)
+'''
+train_data = DataInput(params=config.config.get('parameters'), data=train,
+                       name='train', mean=0, var=0)
+validation_data = DataInput(params=config.config.get('parameters'),
+                            data=validation, name='valid', mean=0,
+                            var=0)
 cnn_model = CNN(params=config.config.get('parameters'))
 cnn_model.train(train_data, validation_data, True)
 

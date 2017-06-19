@@ -10,8 +10,8 @@ import math
 
 from pathos.multiprocessing import ProcessPool
 from dementia_prediction.config_wrapper import Config
-from dementia_prediction.cnn_baseline.data_input_balanced import DataInput
-from dementia_prediction.cnn_baseline.baseline_balanced import CNN
+from dementia_prediction.multimodal.fusion_input import FusionDataInput
+from dementia_prediction.multimodal.fusion import MultimodalCNN
 
 IMG_SIZE = 897600
 config = Config()
@@ -27,8 +27,8 @@ valid_patients = pickle.load(filep)
 print(len(valid_patients))
 global_mean = [0 for i in range(0, IMG_SIZE)]
 global_variance = [0 for i in range(0, IMG_SIZE)]
-#mean_path = paths['norm_mean_var']+'./t1_train_mean_path.pkl'
-#var_path = paths['norm_mean_var']+'./t1_train_var_path.pkl'
+mean_path = paths['norm_mean_var']+'./t1_train_mean_path.pkl'
+var_path = paths['norm_mean_var']+'./t1_train_var_path.pkl'
 def mean_fun(filenames):
     mean = [0 for x in range(0, IMG_SIZE)]
     for file in filenames:
@@ -155,11 +155,10 @@ for directory in os.walk(paths['datadir']):
     for file in directory[2]:
         # Match all files ending with 'regex'
         input_file = os.path.join(directory[0], file)
-        #TODO: Add code for norm
-        #regex = r"-T1_brain_subsampled\.nii\.gz$"
-        regex = r"-T1_brain_norm_subsampled\.nii\.gz$"
+        #TODO: normlazation refactoring
+        regex = r"-CBF_norm_subsampled\.nii\.gz$"
         if re.search(regex, input_file):
-            pat_code = input_file.rsplit('-T1_brain_norm_subsampled.nii.gz')
+            pat_code = input_file.rsplit('-CBF_norm_subsampled.nii.gz')
             patient_code = pat_code[0].rsplit('/', 1)[1]
             if patient_code in patients_dict and patient_code not in \
                     valid_patients:
@@ -179,8 +178,8 @@ print("Validation Data: S: ", len(s_valid_filenames), "P: ", len(p_valid_filenam
 
 train = (s_train_filenames, p_train_filenames)
 validation = (s_valid_filenames, p_valid_filenames)
+#TODO: Dont uncomment unless the output paths are set 
 '''
-# Generate the normalized data on-fly
 mean_norm, var_norm = normalize(train)
 train_data = DataInput(params=config.config.get('parameters'), data=train,
                        name='train', mean=mean_norm, var=var_norm)
@@ -188,13 +187,12 @@ validation_data = DataInput(params=config.config.get('parameters'),
                             data=validation, name='valid', mean=mean_norm,
                             var=var_norm)
 '''
-train_data = DataInput(params=config.config.get('parameters'), data=train,
-                       name='train', mean=0, var=0)
-validation_data = DataInput(params=config.config.get('parameters'),
-                            data=validation, name='valid', mean=0,
-                            var=0)
+train_data = FusionDataInput(params=config.config.get('parameters'), data=train,
+                       name='train')
+validation_data = FusionDataInput(params=config.config.get('parameters'),
+                            data=validation, name='valid') 
 # T1 baseline CNN model
-cnn_model = CNN(params=config.config.get('parameters'))
+cnn_model = MultimodalCNN(params=config.config.get('parameters'))
 cnn_model.train(train_data, validation_data, True)
 
 

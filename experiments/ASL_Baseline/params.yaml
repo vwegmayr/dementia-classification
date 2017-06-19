@@ -4,16 +4,16 @@ parameters:
     depth: 88 
     height: 102
     width: 100
-    batch_size: 10
-    num_epochs: 30
+    batch_size: 10 
+    num_epochs: 20 
     learning_rate: 0.000005
     decay_factor: 0.9
     decay_const: 0.005
-    checkpoint_path: './output/'
+    checkpoint_path: './output/CBF/'
     summary_path: './output/'
     keep_prob: 0.3
 data_paths:
-  datadir: '/local/home/saitharaju/NIFTI/CBF_subsampled/'
+  datadir: '/local/home/saitharaju/NIFTI/norm_multimodal/CBF/'
   logdir: '/local/home/saitharaju/Data/'
   norm_mean_var: './Dictionaries/'
   class_labels: './experiments/T1_Baseline/patients.pkl'

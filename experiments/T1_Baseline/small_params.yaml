@@ -4,18 +4,18 @@ parameters:
     depth: 88 
     height: 102
     width: 100
-    batch_size: 10
-    num_epochs: 28 
+    batch_size: 2 
+    num_epochs: 3 
     learning_rate: 0.000005
     decay_factor: 0.9
     decay_const: 0.005
-    checkpoint_path: './output/T1_brain/'
-    summary_path: './output/'
+    checkpoint_path: './output/smalldata/'
+    summary_path: './output/smalldata/'
     keep_prob: 0.3
 data_paths:
-  datadir: '/local/home/saitharaju/NIFTI/norm_multimodal/T1_brain/'
+  datadir: '/local/home/saitharaju/NIFTI/small_dataset/T1_brain_subsampled/'
   logdir: '/local/home/saitharaju/Data/'
-  #norm_mean_var: './Dictionaries/cv/'
+  norm_mean_var: './Dictionaries/'
   class_labels: './experiments/T1_Baseline/patients.pkl'
   valid_data: './experiments/validation_patients.pkl'
   validation_split: 0.15

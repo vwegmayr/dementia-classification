@@ -68,8 +68,12 @@ class DataInput:
         for i in range(start, end):
             mri_image = nb.load(self.s_files[i])
             #print(self.name+" "+self.s_files[i]+" 0", flush=True)
-            mri_image = mri_image.get_data().flatten()
-            mri_image = self.normalize(mri_image)
+            #mri_image = mri_image.get_data().flatten()
+            #mri_image = self.normalize(mri_image)
+            mri_image = mri_image.get_data()
+            mri_image = np.reshape(mri_image, [1, self.data['depth'],
+                                               self.data['height'],
+                                               self.data['width'], 1])
 
             if len(batch_images) == 0:
                 batch_images = mri_image
@@ -94,9 +98,13 @@ class DataInput:
         for i in range(start, end):
             mri_image = nb.load(self.p_files[i])
             #print(self.name+" "+self.p_files[i]+" 1",flush=True)
-            mri_image = mri_image.get_data().flatten()
-            mri_image = self.normalize(mri_image)
-
+            #mri_image = mri_image.get_data().flatten()
+            #mri_image = self.normalize(mri_image)
+            #TODO: refactor code for normalization
+            mri_image = mri_image.get_data()
+            mri_image = np.reshape(mri_image, [1, self.data['depth'],
+                                               self.data['height'],
+                                               self.data['width'], 1])
             if len(batch_images) == 0:
                 batch_images = mri_image
             else:

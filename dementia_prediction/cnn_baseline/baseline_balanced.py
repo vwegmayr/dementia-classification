@@ -342,7 +342,7 @@ class CNN:
         """
         correct_predictions = 0
         total_seen = 0
-        dataset_size = len(dataset.pos) + len(dataset.neg)
+        dataset_size = len(dataset.s_files) + len(dataset.p_files)
         for step in range(int(dataset_size / self.param['batch_size'])):
             image_data, label_data = dataset.next_batch()
             predictions, correct_, loss_ = sess.run([eval_op, corr, loss],
@@ -379,18 +379,18 @@ class CNN:
                                            self.param['depth'],
                                            self.param['height'],
                                            self.param['width'],
-                                           1])
+                                           1], name='images')
             labels = tf.placeholder(dtype=tf.int8,
-                                    shape=[None, 2])
-            keep_prob = tf.placeholder(tf.float32)
-            var_lr = tf.placeholder(tf.float32)
+                                    shape=[None, 2], name='labels')
+            keep_prob = tf.placeholder(tf.float32, name='keep_prob')
+            var_lr = tf.placeholder(tf.float32, name='var_lr')
             is_training = tf.placeholder(tf.bool, name='phase')
             global_step = tf.get_variable(name='global_step',
                                           shape=[],
                                           initializer=tf.constant_initializer(
                                               0),
                                           trainable=False)
-            train_size = len(train_data.pos) + len(train_data.neg)
+            train_size = len(train_data.s_files) + len(train_data.p_files)
             num_batches_epoch = int(train_size / self.param['batch_size'])
             num_steps = num_batches_epoch * self.param['num_epochs']
 
@@ -401,7 +401,7 @@ class CNN:
             opt = tf.train.AdamOptimizer(
                 learning_rate=self.param['learning_rate'])
 
-            tf.summary.scalar('learning_rate', learn_rate)
+            #tf.summary.scalar('learning_rate', learn_rate)
 
             with tf.variable_scope(tf.get_variable_scope()):
                 with tf.name_scope('Train') as scope:
@@ -413,7 +413,7 @@ class CNN:
 
                     # Sum all the losses
                     total_loss = tf.add_n(losses, name='total_loss')
-                    tf.summary.scalar('total_loss', total_loss)
+                    #tf.summary.scalar('total_loss', total_loss)
                 update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
                 with tf.control_dependencies(update_ops):
                     train_op = opt.minimize(total_loss, global_step=global_step)
@@ -479,13 +479,13 @@ class CNN:
                                       'examples/sec; %.3f sec/batch)')
                         print(format_str % (datetime.now(), step, loss_value,
                                             examples_per_sec, sec_per_batch))
-                    summary_writer.add_summary(summary_values, step)
+                    #summary_writer.add_summary(summary_values, step)
 
                     # Saving Model Checkpoints for evaluation
                     if step % num_batches_epoch == 0 or (step + 1) == num_steps:
                         if (step+1) == num_steps:
                             checkpoint_path = self.param['checkpoint_path'] + \
-                                              'crossvalidationmodel.ckpt'
+                                              'model.ckpt'
                             saver.save(sess, checkpoint_path, global_step=step)
 
                         # Evaluate against the training data.
@@ -511,8 +511,8 @@ class CNN:
                                                      is_training=is_training,
                                                      corr=correct_prediction,
                                                      loss=total_loss)))
-                    
                     sys.stdout.flush()
+                '''
                 if test == True:
                     ckpt = tf.train.get_checkpoint_state(self.param['checkpoint_path']) 
                     if ckpt and ckpt.model_checkpoint_path:
@@ -529,4 +529,5 @@ class CNN:
                                                  loss=total_loss))
                     else:
                         print("No checkpoint found.")
+                '''
 

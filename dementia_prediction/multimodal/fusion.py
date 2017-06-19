@@ -352,7 +352,8 @@ class MultimodalCNN:
         with tf.Graph().as_default() as model_graph:
             sess = tf.Session(graph=model_graph)
             meta_path = '/model.ckpt-895.meta'
-            if mode == 'CBF':
+            #print("Mode:", mode, flush=True)
+            if self.modalities[mode] == 'CBF':
                 meta_path = '/model.ckpt-639.meta'
             saver = tf.train.import_meta_graph(self.param['checkpoint_path']+self.modalities[mode]+meta_path)
             ckpath = self.param['checkpoint_path'] + self.modalities[mode] + '/'
