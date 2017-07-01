@@ -11,7 +11,8 @@ import math
 from pathos.multiprocessing import ProcessPool
 from dementia_prediction.config_wrapper import Config
 from dementia_prediction.multimodal.fusion_input import FusionDataInput
-from dementia_prediction.multimodal.fusion import MultimodalCNN
+from dementia_prediction.multimodal.fusion_finetuning import MultimodalCNN
+#from dementia_prediction.multimodal.fusion import MultimodalCNN
 
 IMG_SIZE = 897600
 config = Config()

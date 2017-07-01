@@ -1,0 +1,8 @@
+
+data_paths:
+  smooth_path: '/local/adni_mni_smoothed/' 
+  adni_per_image_out: '/local/adni_normalized/per_image/'
+  adni_valid_path: '/local/ADNI_valid.pkl'
+  adni_train_path: '/local/ADNI_train.pkl'
+  adni_norm_out: '/local/adni_normalized/train/'
+  norm_mean_var: '/local/home/saitharaju/source_code/mri-fusion/experiments/Normalization/Dictionaries/'

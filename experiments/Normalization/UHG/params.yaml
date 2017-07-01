@@ -1,0 +1,10 @@
+
+data_paths:
+  smooth_path: '/local/home/saitharaju/T1_UHG/smoothed/'
+  per_image_out: '/local/home/saitharaju/T1_UHG/per_image/'
+  logdir: '/local/home/saitharaju/Data/'
+  norm_mean_var: '/local/home/saitharaju/source_code/mri-fusion/Dictionaries/UHG/'
+  class_labels: './experiments/T1_Baseline/patients.pkl'
+  uhg_valid_path: './experiments/validation_patients.pkl'
+  uhg_train_path: '/local/home/saitharaju/source_code/mri-fusion/Dictionaries/UHG/train_patients.pkl'
+  norm_out: '/local/home/saitharaju/T1_UHG/normalized/'
