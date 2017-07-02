@@ -1,0 +1,22 @@
+
+parameters:
+  cnn:
+    depth: 91 
+    height: 109
+    width: 91
+    batch_size: 15 
+    num_epochs: 80 
+    learning_rate: 0.001
+    decay_factor: 0.9
+    decay_const: 0.005
+    transfer_checkpoint_path: './output/T1_brain/ADNI/data1/'
+    checkpoint_path: './output/T1_brain/transfer/'
+    summary_path: './output/T1_brain/transfer/'
+    keep_prob: 0.3
+data_paths:
+  datadir: '/local/home/saitharaju/T1_UHG/normalized/'
+  logdir: '/local/home/saitharaju/Data/'
+  #norm_mean_var: './Dictionaries/cv/'
+  class_labels: './experiments/T1_Baseline/patients.pkl'
+  valid_data: './experiments/validation_patients.pkl'
+  train_data: './Dictionaries/UHG/train_patients.pkl'

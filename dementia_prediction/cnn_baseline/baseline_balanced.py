@@ -224,7 +224,6 @@ class CNN:
             pre_activation2 = tf.matmul(vector_per_batch, weights) + biases
             fullcn = tf.nn.relu(pre_activation2, name=scope.name)
             fullcn_drop = tf.nn.dropout(fullcn, keep_prob)
-
         with tf.variable_scope('logits') as scope:
             weights = self.weight_decay_variable(name="weights",
                                                  shape=[512, 2],
@@ -235,6 +234,7 @@ class CNN:
                                               0.1))
             logits = tf.add(tf.matmul(fullcn_drop, weights), biases,
                             name=scope.name)
+            print('logits:', logits.get_shape())
 
         return logits
 
@@ -308,6 +308,7 @@ class CNN:
             validation_data: validation dataset object of class DataInput
             test: Data object of DataInput class to test the model accuracy
         """
+        mode = 'CBF'
         with tf.Graph().as_default():
 
             images = tf.placeholder(dtype=tf.float32,
@@ -315,12 +316,13 @@ class CNN:
                                            self.param['depth'],
                                            self.param['height'],
                                            self.param['width'],
-                                           1], name='images')
+                                           1], name=mode+'images')
             labels = tf.placeholder(dtype=tf.int8,
-                                    shape=[None, 2], name='labels')
-            keep_prob = tf.placeholder(tf.float32, name='keep_prob')
-            var_lr = tf.placeholder(tf.float32, name='var_lr')
-            global_step = tf.get_variable(name='global_step',
+                                    shape=[None, 2], name=mode+'labels')
+            keep_prob = tf.placeholder(tf.float32, name=mode+'keep_prob')
+            var_lr = tf.placeholder(tf.float32, name=mode+'var_lr')
+            is_training = tf.placeholder(tf.bool, name=mode+'phase')
+            global_step = tf.get_variable(name=mode+'global_step',
                                           shape=[],
                                           initializer=tf.constant_initializer(
                                               0),
@@ -328,7 +330,6 @@ class CNN:
             train_size = len(train_data.s_files) + len(train_data.p_files)
             num_batches_epoch = int(train_size / self.param['batch_size'])
             num_steps = num_batches_epoch * self.param['num_epochs']
-
             learn_rate = tf.train.exponential_decay(
                 self.param['learning_rate'], global_step,
                 decay_steps=num_steps, decay_rate=self.param['decay_factor'],
@@ -339,7 +340,7 @@ class CNN:
             #tf.summary.scalar('learning_rate', learn_rate)
 
             with tf.variable_scope(tf.get_variable_scope()):
-                with tf.name_scope('Train') as scope:
+                with tf.name_scope('Train'+mode) as scope:
                     logits = self.inference(images, keep_prob)
 
                     _ = self.inference_loss(logits, labels)

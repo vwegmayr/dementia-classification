@@ -1,0 +1,18 @@
+
+parameters:
+  cnn:
+    depth: 91 
+    height: 109
+    width: 91
+    batch_size: 12 
+    num_epochs: 28 
+    learning_rate: 0.00005
+    decay_factor: 0.9
+    decay_const: 0.005
+    checkpoint_path: './output/T1_brain/ADNI/data1/newlabels/rerun/'
+    summary_path: './output/T1_brain/ADNI/data1/newlabels/rerun/'
+    keep_prob: 0.3
+data_paths:
+  datadir: '/local/adni_normalized/train/'
+  valid_data: '/local/ADNI_valid.pkl'
+  train_data: '/local/ADNI_train.pkl'
