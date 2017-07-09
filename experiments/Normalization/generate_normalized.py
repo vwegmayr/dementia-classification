@@ -33,9 +33,9 @@ class Normalize():
     def __init__(self, mode):
         self.mode = mode
         self.mean_path = paths['norm_mean_var'] + \
-                         'multimodal/'+self.mode+'_train_mean_path.pkl'
+                         'multimodal/'+self.mode+'_all_data_mean_path.pkl'
         self.var_path = paths['norm_mean_var'] + \
-                        'multimodal/'+self.mode+'_train_var_path.pkl'
+                        'multimodal/'+self.mode+'_all_data_var_path.pkl'
 
     def mean_fun(self, filenames):
         mean = [0 for x in range(0, IMG_SIZE)]
@@ -106,8 +106,9 @@ for directory in os.walk(paths['CBF_path']):
                     train_patients.append(patient_code)
 
 print("Train: ", len(train_patients))
-for mode in ['CBF', 'T1_brain', 'DTI_FA']:
+for mode in ['T1_brain', 'DTI_FA']:
     train = []
+    valid = []
     norm_object = Normalize(mode)
 
     print("Mode:", mode)
@@ -122,12 +123,18 @@ for mode in ['CBF', 'T1_brain', 'DTI_FA']:
                     rsplit('-'+mode+'_subsampled.nii.gz')
                 patient_code = pat_code[0].rsplit('/', 1)[1]
                 if patient_code in patients_dict:
+                    # CBF train images as reference
                     if patient_code in train_patients:
                         train.append(input_file)
-    print("Train: ", len(train))
-    mean_norm, var_norm = norm_object.normalize(train)
+                    elif patient_code in valid_patients:
+                        valid.append(input_file)
+    print("Train: ", len(train), "Valid:", len(valid))
+    #TODO: Add code for train and valid
+    total = train+valid
+    print("Total:", len(total))
+    mean_norm, var_norm = norm_object.normalize(total)
     print("Normalized")
-    for filename in train:
+    for filename in total:
         mri_image = nb.load(filename)
         affine = mri_image.get_affine()
         mri_image = mri_image.get_data().flatten()
@@ -141,7 +148,7 @@ for mode in ['CBF', 'T1_brain', 'DTI_FA']:
         im = nb.Nifti1Image(reshaped_image, affine=affine)
         pat_code = filename.rsplit('-' + mode + '_subsampled.nii.gz')
         patient_code = pat_code[0].rsplit('/', 1)[1]
-        output = paths['multimodal_norm_out']+mode+'/'+patient_code+'-'+mode\
+        output = paths['multimodal_norm_out']+'all/'+mode+'/'+patient_code+'-'+mode\
                  +'_norm_subsampled.nii.gz'
         print("Saving to output: ", output)
         nb.save(im, output) 
