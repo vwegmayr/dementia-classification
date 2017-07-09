@@ -9,6 +9,4 @@ parameters:
     searchcost: 'normcorr'
     gauss_smooth_sigma: 1
 paths:
-  data: './Data/'
-  ref: './Data/CON018/CON018-T1_brain.nii.gz'
-
+  data: '/home/rams/4_Sem/Thesis/Data/NIFTI/'
