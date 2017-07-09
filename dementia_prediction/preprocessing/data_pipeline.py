@@ -44,8 +44,7 @@ class DataPipeline:
             params: Parameters for the Data preprocessing pipeline
 
         """
-        self.bet = params['bet']
-        self.registration = params['registration']
+        self.params = params
         self.input_folder = in_folder
 
     def eddy_correction(self):
@@ -110,11 +109,11 @@ class DataPipeline:
 
                             cmd = 'bet {0} {1} -B -f {2} -m -v'.format(
                                             input_file, output_file,
-                                            self.bet["frac_intens_thres"])
+                                            self.params['bet']["frac_intens_thres"])
                             if bias is False:
                                 cmd = 'bet {0} {1} -f {2} -m -v'.format(
                                     input_file, output_file,
-                                    self.bet["frac_intens_thres"])
+                                    self.params['bet']["frac_intens_thres"])
                             subprocess.call(cmd, shell=True)
                             print('Generated extracted brain: ' + output_file)
                             ctr += 1
@@ -239,8 +238,8 @@ class DataPipeline:
                                         .format(input_file,
                                                 ref_path,
                                                 output_file,
-                                                self.registration['cost'],
-                                                self.registration[
+                                                self.params['registration']['cost'],
+                                                self.params['registration'][
                                                     'searchcost']),
                                         shell=True)
                         print('Generated aligned file: ' +
@@ -330,8 +329,8 @@ class DataPipeline:
                                                 ref_path,
                                                 output_file,
                                                 output_matrix,
-                                                self.registration['cost'],
-                                                self.registration[
+                                                self.params['registration']['cost'],
+                                                self.params['registration'][
                                                     'searchcost']),
                                         shell=True)
                         print('Generated aligned file: ' +
@@ -409,7 +408,7 @@ class DataPipeline:
                         print("Smoothing image: " + input_file)
                         subprocess.call('fslmaths {0} -s {1} {2}'
                                         .format(input_file,
-                                                self.registration[
+                                                self.params['registration'][
                                                     'gauss_smooth_sigma'],
                                                 output_file),
                                         shell=True)
@@ -475,12 +474,14 @@ class DataPipeline:
                         angle_rot = 3 if random.uniform(0, 1) > 0.5 \
                             else -3
                         print("Rotating image: " + input_file)
-                        subprocess.call('makerot -c {0} -a {1},{2},'
-                                        '{3} -t {4} -o {5}'
-                                        .format(input_file,
-                                                x_axis, y_axis, z_axis,
-                                                angle_rot, rot_matrix),
-                                        shell=True)
+                        subprocess.call('makerot -c {0},{1},{2} -a {3},{4},'
+                                            '{5} -t {6} -o {7}'
+                                            .format(self.params['dim']['x']/2,
+                                                    self.params['dim']['y']/2,
+                                                    self.params['dim']['z']/2,
+                                                    x_axis, y_axis, z_axis,
+                                                    angle_rot, rot_matrix),
+                                            shell=True)
                         subprocess.call('flirt -in {0} -ref {1} -out '
                                         '{2} -applyxfm -init {3}'
                                         .format(input_file, input_file,
@@ -541,53 +542,98 @@ class DataPipeline:
                         print('File No.: ' + str(counter) +
                               ' Generated output: ' + output_file)
 
-    def rotate(self, regex, split_on, in_folder, out_folder):
-        """
-        Given input images, this function augments the dataset
-        by adding varying rotations to the MR Images.
-        """
-
+    def translate(self, regex, split_on, in_folder, out_folder, pixels,
+                  patient_list=[]):
         counter = 0
-
+        # patient_flag: True - Only patients from patient_list should be
+        # rotated. False - Every patient
+        patient_flag = True
+        if len(patient_list) == 0:
+            patient_flag = False
         for directory in os.walk(in_folder):
             # Walk inside the directory
             for file in directory[2]:
                 # Match all files ending with 'regex'
                 input_file = os.path.join(directory[0], file)
                 if re.search(regex, input_file):
-                    for direction in ['x', 'y', 'z']:
-                        x_axis = y_axis = z_axis = 0
-                        if direction == 'x':
-                            x_axis = 1
-                        if direction == 'y':
-                            y_axis = 1
-                        if direction == 'z':
-                            z_axis = 1
+                    patient_code = input_file.rsplit('/', 1)[1]
+                    patient_code = patient_code.split(split_on)[0]
+                    if patient_flag == False or patient_code in patient_list:
+                        output = out_folder + patient_code + \
+                                 '_trans_mni_aligned.nii.gz'
+                        if not os.path.exists(output):
+                            mri_image = nb.load(input_file)
+                            aff = mri_image.get_affine()
+                            mri_image = mri_image.get_data()
+                            direction = random.randint(1, 3)
+                            shift_axis = [pixels, 0, 0]
+                            if direction == 1:
+                                shift_axis = [pixels, 0, 0]
+                            elif direction == 2:
+                                shift_axis = [pixels, 4, 0]
+                            else:
+                                shift_axis = [0, 0, pixels]
+                            translated_image = shift(mri_image, shift_axis,
+                                                     mode='nearest')
+                            im = nb.Nifti1Image(translated_image, affine=aff)
+                            nb.save(im, output)
+                            print("Saving to " + output)
+                        else:
+                            print("Exists" + output)
 
+    def rotate(self, regex, split_on, in_folder, out_folder, angle,
+               patient_list=[]):
+        """
+        Given input images, this function augments the dataset
+        by adding rotations to the MR Images.
+        """
 
-                        output_file = out_folder + str(
-                            input_file.rsplit('/', 1)[1])
-                        output_path = output_file.split(split_on)[0]
-                        output_file = output_path + \
-                                      '_sub_rot5_{0}.nii.gz'.format(direction)
-                        rot_matrix = 'rot5_{0}.mat'.format(direction)
-                        angle_rot = 5 if random.uniform(0, 1) > 0.5 \
-                            else -5
-                        print("Rotating image: " + input_file)
-                        subprocess.call('makerot -c {0} -a {1},{2},'
-                                        '{3} -t {4} -o {5}'
-                                        .format(input_file,
-                                                x_axis, y_axis, z_axis,
-                                                angle_rot, rot_matrix),
-                                        shell=True)
-                        subprocess.call('flirt -in {0} -ref {1} -out '
-                                        '{2} -applyxfm -init {3}'
-                                        .format(input_file, input_file,
-                                                output_file,
-                                                rot_matrix),
-                                        shell=True)
-                        counter += 1
-                        print('File No.: ' + str(counter) +
-                              ' Generated output: ' + output_file)
+        counter = 0
+        # patient_flag: True - Only patients from patient_list should be
+        # rotated. False - Every patient
+        patient_flag = True
+        if len(patient_list) == 0:
+            patient_flag = False
+        for directory in os.walk(in_folder):
+            # Walk inside the directory
+            for file in directory[2]:
+                # Match all files ending with 'regex'
+                input_file = os.path.join(directory[0], file)
+                if re.search(regex, input_file):
+                    patient_code = input_file.rsplit('/', 1)[1]
+                    patient_code = patient_code.split(split_on)[0]
+                    if patient_flag == False or patient_code in patient_list:
+                        for direction in ['x', 'y', 'z']:
+                            x_axis = y_axis = z_axis = 0
+                            if direction == 'x':
+                                x_axis = 1
+                            if direction == 'y':
+                                y_axis = 1
+                            if direction == 'z':
+                                z_axis = 1
+
+                            output_file = out_folder + patient_code + \
+                                          '_rot_{0}.nii.gz'.format(direction)
+                            rot_matrix = 'rot_{0}.mat'.format(direction)
+                            angle_rot = random.uniform(-angle, angle)
+                            print("Rotating image: " + input_file)
+                            subprocess.call('makerot -c {0},{1},{2} -a {3},'
+                                            '{4},'
+                                            '{5} -t {6} -o {7}'
+                                            .format(self.params['dim']['x']/2,
+                                                    self.params['dim']['y']/2,
+                                                    self.params['dim']['z']/2,
+                                                    x_axis, y_axis, z_axis,
+                                                    angle_rot, rot_matrix),
+                                            shell=True)
+                            subprocess.call('flirt -in {0} -ref {1} -out '
+                                            '{2} -applyxfm -init {3}'
+                                            .format(input_file, input_file,
+                                                    output_file,
+                                                    rot_matrix),
+                                            shell=True)
+                            counter += 1
+                            print('File No.: ' + str(counter) +
+                                  ' Generated output: ' + output_file)
 
         return True

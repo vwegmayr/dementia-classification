@@ -57,7 +57,8 @@ pipeline.subsample(regex=r"-T1_brain_smoothed\.nii\.gz$",
 pipeline.rotate(regex=r"-T1_brain_subsampled\.nii\.gz$",
                 split_on="_subsampled.nii.gz",
                 in_folder='/home/rams/4_Sem/Thesis/Data/T1_brain_subsampled/',
-                out_folder='/home/rams/4_Sem/Thesis/Data/T1_brain_subsampled/'
+                out_folder='/home/rams/4_Sem/Thesis/Data/T1_brain_subsampled/',
+                angle=5
                 )
 pipeline.rot_trans(regex=r"-T1_brain_subsampled\.nii\.gz$",
                 split_on="_subsampled.nii.gz",

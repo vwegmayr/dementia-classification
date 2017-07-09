@@ -136,7 +136,8 @@ if pipeline.rotate(regex=r"-"+DTI+"_subsampled\.nii\.gz$",
                    in_folder='/home/rams/4_Sem/Thesis/Data/'+DTI\
                                               +'_subsampled/',
                    out_folder='/home/rams/4_Sem/Thesis/Data/'+DTI\
-                                              +'_rot/'):
+                                              +'_rot/',
+                   angle=5):
     print("Successful")
 
 if pipeline.rot_trans(regex=r"-"+DTI+"_subsampled\.nii\.gz$",
