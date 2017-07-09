@@ -4,13 +4,14 @@ parameters:
     depth: 88 
     height: 102
     width: 100
+    mode: 'T1'
     batch_size: 2 
     num_epochs: 3 
     learning_rate: 0.000005
     decay_factor: 0.9
     decay_const: 0.005
-    checkpoint_path: './output/smalldata/'
-    summary_path: './output/smalldata/'
+    checkpoint_path: './output/smalldata/T1_brain/'
+    summary_path: './output/smalldata/T1_brain/'
     keep_prob: 0.3
 data_paths:
   datadir: '/local/home/saitharaju/NIFTI/small_dataset/T1_brain_subsampled/'

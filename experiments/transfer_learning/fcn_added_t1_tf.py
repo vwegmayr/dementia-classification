@@ -11,9 +11,7 @@ import math
 from pathos.multiprocessing import ProcessPool
 from dementia_prediction.config_wrapper import Config
 from dementia_prediction.transfer_learning.data_input_new import DataInput
-#TODO: Uncomment this
-#from dementia_prediction.cnn_baseline.adni_data_input import DataInput
-from dementia_prediction.cnn_baseline.adni_baseline import CNN
+from dementia_prediction.transfer_learning.adni_t1_add_fcn import CNN
 
 IMG_SIZE = 902629 
 config = Config()
@@ -22,17 +20,20 @@ config.parse(path.abspath(param_file))
 
 
 paths = config.config.get('data_paths')
-filep = open(paths['train_data'], 'rb')
-train_patients = pickle.load(filep)
+filep = open(paths['class_labels'], 'rb')
+patients_dict = pickle.load(filep)
 filep = open(paths['valid_data'], 'rb')
 valid_patients = pickle.load(filep)
-print(len(valid_patients), len(train_patients))
-
+print(len(valid_patients))
+filep = open(paths['train_data'], 'rb')
+train_patients = pickle.load(filep)
+print(len(train_patients))
+total_dict = train_patients+valid_patients
+print("Total:", len(set(total_dict)))
 global_mean = [0 for i in range(0, IMG_SIZE)]
 global_variance = [0 for i in range(0, IMG_SIZE)]
 #mean_path = paths['norm_mean_var']+'./t1_train_mean_path.pkl'
 #var_path = paths['norm_mean_var']+'./t1_train_var_path.pkl'
-
 def mean_fun(filenames):
     mean = [0 for x in range(0, IMG_SIZE)]
     for file in filenames:
@@ -117,12 +118,10 @@ def normalize(train):
 
     return global_mean, global_variance
 
-nc_train_filenames = []
-mci_train_filenames = []
-ad_train_filenames = []
-nc_valid_filenames = []
-mci_valid_filenames = []
-ad_valid_filenames = []
+s_train_filenames = []
+p_train_filenames = []
+s_valid_filenames = []
+p_valid_filenames = []
 """
 # Add Data Augmented with rotations and translations
 for directory in os.walk(paths['datadir']):
@@ -147,56 +146,86 @@ for directory in os.walk(paths['datadir']):
             if split_on != '':
                 pat_code = input_file.rsplit(split_on)
                 patient_code = pat_code[0].rsplit('/', 1)[1]
-                if patient_code in train_patients and patient_code not in \
+                if patient_code in patients_dict and patient_code not in \
                         valid_patients:
-                    if train_patients[patient_code] == 0:
+                    if patients_dict[patient_code] == 0:
                         s_train_filenames.append(input_file)
-                    if train_patients[patient_code] == 1:
+                    if patients_dict[patient_code] == 1:
                         p_train_filenames.append(input_file)
 print(len(s_train_filenames), len(p_train_filenames))
 # 166*6 stable and 180*6 progressive patients
 """
-print(valid_patients)
 for directory in os.walk(paths['datadir']):
     # Walk inside the directory
     for file in directory[2]:
         # Match all files ending with 'regex'
         input_file = os.path.join(directory[0], file)
+        #TODO: Add code for norm
+        #regex = r"-T1_brain_subsampled\.nii\.gz$"
         regex = r"_normalized\.nii\.gz$"
         if re.search(regex, input_file):
             pat_code = input_file.rsplit('_normalized.nii.gz')
             patient_code = pat_code[0].rsplit('/', 1)[1]
-            #print(patient_code)
             if patient_code in train_patients:
-                if train_patients[patient_code] == 0:
-                    nc_train_filenames.append(input_file)
-                if train_patients[patient_code] == 1:
-                    mci_train_filenames.append(input_file)
-                if train_patients[patient_code] == 2:
-                    ad_train_filenames.append(input_file)
+                if patients_dict[patient_code] == 0:
+                    s_train_filenames.append(input_file)
+                if patients_dict[patient_code] == 1:
+                    p_train_filenames.append(input_file)
             if patient_code in valid_patients:
-                if valid_patients[patient_code] == 0:
-                    nc_valid_filenames.append(input_file)
-                if valid_patients[patient_code] == 1 or\
-                   valid_patients[patient_code] == 4:
-                    mci_valid_filenames.append(input_file)
-                if valid_patients[patient_code] == 2 or\
-                   valid_patients[patient_code] == 5:
-                    ad_valid_filenames.append(input_file)
+                if patients_dict[patient_code] == 0:
+                    s_valid_filenames.append(input_file)
+                if patients_dict[patient_code] == 1:
+                    p_valid_filenames.append(input_file)
 
-print("Train Data: NC: ", len(nc_train_filenames), "MCI: ", len(mci_train_filenames), "AD:", len(ad_train_filenames))
-print("Validation Data: NC: ", len(nc_valid_filenames), "MCI: ", len(mci_valid_filenames), "AD:", len(ad_valid_filenames), 
-        "Total:", len(nc_valid_filenames)+len(mci_valid_filenames)+len(ad_valid_filenames))
+print("Train Data: S: ", len(s_train_filenames), "P: ", len(p_train_filenames))
+print("Validation Data: S: ", len(s_valid_filenames), "P: ", len(p_valid_filenames))
 
-train = (nc_train_filenames, mci_train_filenames, ad_train_filenames)
-validation = (nc_valid_filenames, mci_valid_filenames, ad_valid_filenames)
+train = (s_train_filenames, p_train_filenames)
+validation = (s_valid_filenames, p_valid_filenames)
+'''
+# Generate the normalized data on-fly
+mean_norm, var_norm = normalize(train)
+train_data = DataInput(params=config.config.get('parameters'), data=train,
+                       name='train', mean=mean_norm, var=var_norm)
+validation_data = DataInput(params=config.config.get('parameters'),
+                            data=validation, name='valid', mean=mean_norm,
+                            var=var_norm)
+'''
 train_data = DataInput(params=config.config.get('parameters'), data=train,
                        name='train', mean=0, var=0)
 validation_data = DataInput(params=config.config.get('parameters'),
                             data=validation, name='valid', mean=0,
                             var=0)
-# ADNI baseline CNN model
+params = config.config.get('parameters')['cnn']
+"""
+correct_predictions = 0
+total_seen = 0
+dataset_size = len(validation_data.files[0]) + len(validation_data.files[1])
+pred_out = {}
+num_steps = int(dataset_size/params['batch_size'])
+if dataset_size%params['batch_size'] != 0:
+    num_steps += 1
+dataset = validation_data
+print("Num steps:", num_steps, "Data size:", dataset_size)
+for step in range(num_steps):
+    patients, image_data, label_data = dataset.next_batch()
+    #feature_images = self.get_features(image_data)
+    '''
+    predictions, correct_, loss_ = sess.run([eval_op, corr, loss],
+                                            feed_dict={
+                                                transfer_input: feature_images,
+                                                labels: label_data,
+                                                keep_prob: 1.0,
+                                                is_training: 1
+                                            })
+    print("Prediction:", correct_)
+    '''
+    pred_out.update(dict(zip(patients, label_data)))
+for key, value in pred_out.items():
+    print( key, value)
+print(len(pred_out))
+sys.stdout.flush()
+"""
+# T1 baseline CNN model
 cnn_model = CNN(params=config.config.get('parameters'))
 cnn_model.train(train_data, validation_data, True)
-
-

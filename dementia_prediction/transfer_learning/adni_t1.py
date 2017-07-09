@@ -138,7 +138,7 @@ class CNN:
         # Change 7,7,7 to 5,5,5
         with tf.variable_scope('conv1_a') as scope:
             conv1_a = self.conv_relu(input_=images,
-                                     kernel_shape=[5, 5, 5, 3, 10],
+                                     kernel_shape=[5, 5, 5, 1, 10],
                                      biases_shape=[10],
                                      decay_constant=self.param['decay_const'],
                                      scope=scope, padding='SAME',
@@ -147,7 +147,7 @@ class CNN:
         print("Conv1_a", conv1_a.get_shape())
         with tf.variable_scope('conv1_b') as scope:
             conv1_b = self.conv_relu(input_=images,
-                                     kernel_shape=[6, 6, 6, 3, 10],
+                                     kernel_shape=[6, 6, 6, 1, 10],
                                      biases_shape=[10],
                                      decay_constant=self.param['decay_const'],
                                      scope=scope, padding='SAME',
@@ -156,7 +156,7 @@ class CNN:
         print("Conv1_b", conv1_b.get_shape())
         with tf.variable_scope('conv1_c') as scope:
             conv1_c = self.conv_relu(input_=images,
-                                     kernel_shape=[7, 7, 7, 3, 10],
+                                     kernel_shape=[7, 7, 7, 1, 10],
                                      biases_shape=[10],
                                      decay_constant=self.param['decay_const'],
                                      scope=scope, padding='SAME',
@@ -340,8 +340,9 @@ class CNN:
     def get_features(self, image_data):
         with tf.Graph().as_default() as model_graph:
             sess = tf.Session(graph=model_graph)
-            meta_path = 'model.ckpt-17499.meta'
+            meta_path = 'model.ckpt-57455.meta'
             #meta_path = 'model.ckpt-32563.meta'
+            #meta_path = 'model.ckpt-17499.meta'
             #meta_path = 'model.ckpt-1.meta'
             saver = tf.train.import_meta_graph(self.param['transfer_checkpoint_path']+meta_path)
             ckpath = self.param['transfer_checkpoint_path']
@@ -391,58 +392,44 @@ class CNN:
         """
         correct_predictions = 0
         total_seen = 0
-        dataset_size = len(dataset.files[0]) + len(dataset.files[1])
         pred_out = {}
-        num_steps = int(dataset_size/self.param['batch_size'])
-        if dataset_size%self.param['batch_size'] != 0:
+        class_max_size = 0
+        data_size = 0
+        for i in range(0, len(dataset.files)):
+            data_size += len(dataset.files[i])
+            if len(dataset.files[i]) > class_max_size:
+                class_max_size = len(dataset.files[i])
+        num_steps = int(class_max_size / (self.param['batch_size']/len(dataset.files)))
+        if class_max_size%(self.param['batch_size']/len(dataset.files)) != 0:
             num_steps += 1
-        print("Num steps:", num_steps, "Data size:", dataset_size)
+        print("Num steps:", num_steps, "Data size:", data_size)
         for step in range(num_steps):
             patients, image_data, label_data = dataset.next_batch()
             feature_images = self.get_features(image_data)
             predictions, correct_, loss_ = sess.run([eval_op, corr, loss],
-                                                    feed_dict={
-                                                        transfer_input: feature_images,
-                                                        labels: label_data,
-                                                        keep_prob: 1.0,
-                                                        is_training: 1
-                                                    })
+                feed_dict={
+                    transfer_input: feature_images,
+                    labels: label_data,
+                    keep_prob: 1.0,
+                    is_training: 1
+                })
             print("Prediction:", correct_)
-            #dict_new = dict(zip(patients, correct_))
-            '''
-            for key, value in dict_new.items():
-                if key not in pred_out:
-                    pred_out[key] = value
-                    print("Added", key)
-                else:
-                    print("Not added", key)
-            '''
-            pred_out.update(dict(zip(patients, correct_)))
             correct_predictions += predictions
-
+            pred_out.update(dict(zip(patients, correct_)))
             total_seen += self.param['batch_size']
-            print("Accuracy until " + str(total_seen) + " data points is: " +
-                  str(correct_predictions / total_seen))
+            print("Accuracy until "+str(total_seen)+" data points is: " +
+                      str(correct_predictions/total_seen))
             print("loss", loss_)
-            #for key, value in pred_out.items():
-            #    print(key, value)
-            #print("So far ", len(pred_out), "in dict")
-            sys.stdout.flush()
-        #accuracy = correct_predictions / total_seen
-        #return accuracy
+            #print("logits:", logits_)
         accuracy_ = 0
-        '''
-        for key, value in pred_out.items():
-            print(key, value)
-        '''
         for key, value in pred_out.items():
             if value == True:
                 accuracy_ += 1
         accuracy_ /= len(pred_out)
         print("Accuracy of ", len(pred_out)," images is ", accuracy_)
+        # TODO: Add accuracy [2]
         sys.stdout.flush()
         return accuracy_
-
 
     def train(self, train_data, validation_data, test):
         """
@@ -476,14 +463,18 @@ class CNN:
                                           initializer=tf.constant_initializer(
                                               0),
                                           trainable=False)
-            train_size = len(train_data.files[0]) + len(train_data.files[1])
-            num_batches_epoch = int(train_size / self.param['batch_size'])
-            if train_size%self.param['batch_size'] != 0:
-                num_batches_epoch += 1
-            print("Number of batches per epoch:", num_batches_epoch)
-            print("Dataset size:", train_size)
-            num_steps = num_batches_epoch * self.param['num_epochs']
+            class_max_size = 0
+            train_size = 0
+            for i in range(0, len(train_data.files)):
+                train_size += len(train_data.files[i])
+                if len(train_data.files[i]) > class_max_size:
+                    class_max_size = len(train_data.files[i])
 
+            num_batches_epoch = int(class_max_size / (self.param['batch_size']/len(train_data.files)))
+            if class_max_size%(self.param['batch_size']/len(train_data.files)) != 0:
+                num_batches_epoch += 1
+            num_steps = num_batches_epoch * self.param['num_epochs']
+            print("Numsteps: ", num_steps, "Num batches/epoch:", num_batches_epoch, "Trainsize", train_size)
             learn_rate = tf.train.exponential_decay(
                 self.param['learning_rate'], global_step,
                 decay_steps=num_steps, decay_rate=self.param['decay_factor'],
@@ -582,6 +573,9 @@ class CNN:
                             checkpoint_path = self.param['checkpoint_path'] + \
                                               'transfer_model.ckpt'
                             saver.save(sess, checkpoint_path, global_step=step)
+                        for i in range(0, len(validation_data.files)):
+                            validation_data.batch_index[i] = 0
+                            train_data.batch_index[i] = 0
 
                         # Evaluate against the training data.
                         print("Step: %d Training accuracy: %g " %
@@ -595,7 +589,6 @@ class CNN:
                                                      is_training=is_training,
                                                      corr=correct_prediction,
                                                      loss=total_loss)))
-
                         # Evaluate against the validation data
                         print("Step: %d Validation accuracy: %g" %
                               (step, self.evaluation(sess=sess,
@@ -608,7 +601,6 @@ class CNN:
                                                      is_training=is_training,
                                                      corr=correct_prediction,
                                                      loss=total_loss)))
-
                         for i in range(0, len(validation_data.files)):
                             validation_data.batch_index[i] = 0
                             train_data.batch_index[i] = 0

@@ -504,6 +504,13 @@ class CNN:
                             checkpoint_path = self.param['checkpoint_path'] + \
                                               'model.ckpt'
                             saver.save(sess, checkpoint_path, global_step=step)
+                            print("Saving checkpoint model...")
+                            sys.stdout.flush()
+                        for i in range(0, len(validation_data.files)):
+                            validation_data.batch_index[i] = 0
+                            validation_data.shuffle()
+                            train_data.batch_index[i] = 0
+                            train_data.shuffle()
 
                         # Evaluate against the training data.
                         print("Step: %d Training accuracy: %g " %
@@ -555,4 +562,3 @@ class CNN:
                     else:
                         print("No checkpoint found.")
                 """
-

@@ -4,13 +4,14 @@ parameters:
     depth: 88 
     height: 102
     width: 100
-    batch_size: 10 
+    mode: 'CBF'
+    batch_size: 2 
     num_epochs: 3 
     learning_rate: 0.000005
     decay_factor: 0.9
     decay_const: 0.005
-    checkpoint_path: './output/smalldata/'
-    summary_path: './output/smalldata/'
+    checkpoint_path: './output/smalldata/CBF/'
+    summary_path: './output/smalldata/CBF/'
     keep_prob: 0.3
 data_paths:
   datadir: '/local/home/saitharaju/NIFTI/small_dataset/CBF_subsampled/'

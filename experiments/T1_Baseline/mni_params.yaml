@@ -1,22 +1,21 @@
 
 parameters:
   cnn:
-    depth: 88 
-    height: 102
-    width: 100
-    mode: 'DTI'
-    batch_size: 2 
-    num_epochs: 3
+    depth: 91
+    height: 109
+    width: 91
+    batch_size: 10
+    num_epochs: 28 
     learning_rate: 0.000005
     decay_factor: 0.9
     decay_const: 0.005
-    checkpoint_path: './output/smalldata/DTI/'
-    summary_path: './output/smalldata/DTI/'
+    checkpoint_path: './output/T1_brain/MNI/'
+    summary_path: './output/T1_brain/MNI/'
     keep_prob: 0.3
 data_paths:
-  datadir: '/local/home/saitharaju/NIFTI/small_dataset/DTI_FA_subsampled/'
+  datadir: '/local/home/saitharaju/T1_UHG/normalized/'
   logdir: '/local/home/saitharaju/Data/'
-  norm_mean_var: './Dictionaries/'
+  #norm_mean_var: './Dictionaries/cv/'
   class_labels: './experiments/T1_Baseline/patients.pkl'
   valid_data: './experiments/validation_patients.pkl'
   validation_split: 0.15

@@ -6,7 +6,7 @@ parameters:
     width: 91
     batch_size: 12 
     num_epochs: 80 
-    learning_rate: 0.0000001
+    learning_rate: 0.0005
     decay_factor: 0.9
     decay_const: 0.005
     transfer_checkpoint_path: './output/T1_brain/ADNI/data1/newlabels/'
@@ -14,9 +14,9 @@ parameters:
     summary_path: './output/T1_brain/transfer/newlabels/'
     keep_prob: 0.3
 data_paths:
-  datadir: '/local/home/saitharaju/T1_UHG/normalized/'
+  datadir: '/local/home/saitharaju/T1_UHG/per_image/'
   logdir: '/local/home/saitharaju/Data/'
   #norm_mean_var: './Dictionaries/cv/'
   class_labels: './experiments/T1_Baseline/patients.pkl'
-  valid_data: './experiments/validation_patients.pkl'
-  train_data: './Dictionaries/UHG/train_patients.pkl'
+  valid_data: '/local/home/saitharaju/source_code/mri-fusion/experiments/Normalization/Dictionaries/cv/cv_valid_codes_5.pkl'
+  train_data: '/local/home/saitharaju/source_code/mri-fusion/experiments/Normalization/Dictionaries/cv/cv_train_codes_5.pkl'

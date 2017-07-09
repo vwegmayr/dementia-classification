@@ -4,12 +4,12 @@ parameters:
     depth: 91 
     height: 109
     width: 91
-    batch_size: 12 
+    batch_size: 15 
     num_epochs: 80 
-    learning_rate: 0.0000001
+    learning_rate: 0.0005
     decay_factor: 0.9
     decay_const: 0.005
-    transfer_checkpoint_path: './output/T1_brain/ADNI/data1/newlabels/'
+    transfer_checkpoint_path: './output/T1_brain/ADNI/data1/'
     checkpoint_path: './output/T1_brain/transfer/newlabels/'
     summary_path: './output/T1_brain/transfer/newlabels/'
     keep_prob: 0.3

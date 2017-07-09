@@ -124,7 +124,7 @@ class MultimodalCNN:
         act_relu = tf.nn.relu(features=pre_activation, name=scope.name)
         # drop = tf.nn.dropout(act_relu, keep_prob)
         return act_relu
-
+    '''
     def inference(self, images, keep_prob, is_training):
         """
         This function builds the 3D Convolutional Neural Network architecture
@@ -275,32 +275,42 @@ class MultimodalCNN:
                                  padding="SAME")
         """
         return conv7
+    '''
     def get_features(self, sess, model_graph, mode):
-        with tf.variable_scope('fusion'):
+        with tf.name_scope('fusion'+self.modalities[mode]):
             #meta_path = '/model.ckpt-895.meta'
             meta_path = '/model.ckpt-2.meta'
             #print("Mode:", mode, flush=True)
-            layer_path = 'TrainT1/conv7/conv7:0'
+            layer_path = 'TrainT1/T1conv7/T1conv7:0'
             im_path = 'T1'
             if self.modalities[mode] == 'DTI_FA':
-                layer_path = 'TrainDTI/conv7/conv7:0'
+                layer_path = 'TrainDTI/DTIconv7/DTIconv7:0'
                 im_path = 'DTI'
             if self.modalities[mode] == 'CBF':
                 #meta_path = '/model.ckpt-639.meta'
-                layer_path = 'TrainCBF/conv7/conv7:0'
+                layer_path = 'TrainCBF/CBFconv7/CBFconv7:0'
                 im_path = 'CBF'
-            #saver = tf.train.import_meta_graph(self.param['checkpoint_path']+
-            #                                   self.modalities[mode]+'/'+meta_path)
             # Either run baslnies with add_to_coolection
-            saver = tf.train.Saver([v for v in tf.all_variables() if 'TrainT1' in v.name])
+            if mode == 1 or mode == 2:
+                #saver = tf.train.Saver([self.modalities[mode]+v.name.lstrip("T1")[:-2] for v in tf.global_variables() if 'T1' in v.name])
+                trainable = {self.modalities[mode]+v.name.lstrip('T1')[:-2]: v for v in tf.trainable_variables() if 'T1' in v.name}
+                print("Trainable:", trainable)
+                #saver = tf.train.Saver(trainable)
+                saver = tf.train.import_meta_graph(self.param['checkpoint_path']+
+                                               self.modalities[mode]+'/'+meta_path)
+
+            if mode == 0:
+                saver = tf.train.import_meta_graph(self.param['checkpoint_path']+
+                                               self.modalities[mode]+'/'+meta_path)
             ckpath = self.param['checkpoint_path'] + self.modalities[mode] + '/'
             ckpt = tf.train.get_checkpoint_state(ckpath)
             print(ckpath, ckpt)
             #print(model_graph.get_operations())
             if ckpt and ckpt.model_checkpoint_path:
                 #sess.run(tf.initialize_all_variables())
-                saver.restore(sess, ckpt.model_checkpoint_path)
                 print([tensor.name for tensor in model_graph.as_graph_def().node])
+                saver.restore(sess, ckpt.model_checkpoint_path)
+                #print("Trainable:",tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='TrainT1'))
                 layer = model_graph.get_tensor_by_name(layer_path)
                 images = model_graph.get_tensor_by_name(im_path+'images:0')
                 print(layer)
@@ -311,10 +321,13 @@ class MultimodalCNN:
 
     def fcn_nw(self, sess, model_graph, keep_prob):
         images1, feature1 = self.get_features(sess, model_graph, 0)
+        #tf.reset_default_graph()
         images2, feature2 = self.get_features(sess, model_graph, 1)
+        #tf.reset_default_graph()
         images3, feature3 = self.get_features(sess, model_graph, 2)
 
-        fusion_input = tf.concat([feature1, feature3], axis=0)
+        fusion_input = tf.concat([feature1, feature2, feature3], axis=0)
+        print("Shape:", fusion_input.shape)
         with tf.variable_scope('fullcn2') as scope:
             vector_per_batch = tf.reshape(fusion_input, [self.param['batch_size'],
                                                   -1])

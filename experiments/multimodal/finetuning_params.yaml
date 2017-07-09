@@ -9,7 +9,7 @@ parameters:
     learning_rate: 0.00005
     decay_factor: 0.9
     decay_const: 0.001
-    restore_chekpoint_path: '/local/home/saitharaju/source_code/mri-fusion/output/'
+    restore_checkpoint_path: '/local/home/saitharaju/source_code/mri-fusion/output/'
     checkpoint_path: './output/smalldata/'
     summary_path: './output/smalldata/'
     keep_prob: 0.3
