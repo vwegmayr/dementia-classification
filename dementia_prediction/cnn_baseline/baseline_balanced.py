@@ -25,7 +25,7 @@ class CNN:
     @classmethod
     def variable_on_cpu(cls, name, shape, initializer):
         """
-        This helper functions creates all the weights on the CPU
+        This helper functions creates all the trainable weights on the CPU
         Args:
             name: name of the weights
             shape: the shape for these weights
@@ -51,7 +51,7 @@ class CNN:
                             data, keep this value at minimum. For deeper
                             networks, keep a little higher value.
                             L1 regularization term is > L2 , so keep L1 wd < L2
-            stddev: this is the standard deviation for intialising the weights.
+            Comment on stddev:
                     If we initialize the weights to a unit standard
                     deviation, the variance of the outputs of neuron increases
                     linearly with inputs. Hence, at present, the weights
@@ -62,7 +62,7 @@ class CNN:
         Returns: the initialized weights with weight decay
 
         """
-        
+
         """
         """
         temp_shape = shape[:-1]
@@ -82,7 +82,7 @@ class CNN:
         return weights
 
     def conv_relu(self, input_, kernel_shape, biases_shape, decay_constant,
-                  scope, padding, stride, is_training, keep_prob):
+                  scope, padding, stride):
         """
         This function builds a convolution layer of the 3D CNN
         Args:
@@ -90,11 +90,14 @@ class CNN:
                     feature representation
             kernel_shape: the shape of the kernel filters
             biases_shape: bias shape is equal to the shape of output channels
-            wd: Weight decay adds weight to the L2 regularization loss value.
-                For more training data, keep this value at minimum
-                For deeper networks, keep a little higher value
-                L1 regularization term is > L2 , so keep L1 wd < L2
+            decay_constant: 
+                Weight decay adds weight to the L2 regularization loss value.
+                For more training data, keep this value at minimum.
+                For deeper networks, keep a little higher value. L1
+                regularization term is > L2 , so keep L1 wd < L2
             scope: scope of the weights and biases in this convolution layer
+            padding: 'SAME' or 'VALID' padding
+            stride: integer, convolution stride
 
         Returns:
             Feature maps of the convolution layer
@@ -115,14 +118,10 @@ class CNN:
                             strides=[1, stride, stride, stride, 1],
                             padding=padding)
         pre_activation = tf.nn.bias_add(conv, biases)
-        #bn = tf.contrib.layers.batch_norm(pre_activation,
-        #                                  center=True, scale=True,
-        #                                  is_training=is_training)
         act_relu = tf.nn.relu(features=pre_activation, name=scope.name)
-        #drop = tf.nn.dropout(act_relu, keep_prob)
         return act_relu 
 
-    def inference(self, images, keep_prob, is_training):
+    def inference(self, images, keep_prob):
         """
         This function builds the 3D Convolutional Neural Network architecture
         Args:
@@ -139,7 +138,7 @@ class CNN:
                                    biases_shape=[10],
                                    decay_constant=self.param['decay_const'],
                                    scope=scope,padding='SAME',
-                                   stride=2, is_training=is_training, keep_prob=keep_prob)
+                                   stride=2)
         print("Conv1_a", conv1_a.get_shape())
         with tf.variable_scope(self.param['mode']+'conv1_b') as scope:
             conv1_b = self.conv_relu(input_=images,
@@ -147,7 +146,7 @@ class CNN:
                                    biases_shape=[10],
                                    decay_constant=self.param['decay_const'],
                                    scope=scope,padding='SAME',
-                                   stride=2, is_training=is_training, keep_prob=keep_prob)
+                                   stride=2)
         print("Conv1_b", conv1_b.get_shape())
         with tf.variable_scope(self.param['mode']+'conv1_c') as scope:
             conv1_c = self.conv_relu(input_=images,
@@ -155,14 +154,8 @@ class CNN:
                                    biases_shape=[10],
                                    decay_constant=self.param['decay_const'],
                                    scope=scope,padding='SAME',
-                                   stride=2, is_training=is_training, keep_prob=keep_prob)
+                                   stride=2)
         print("Conv1_c", conv1_c.get_shape())
-        """
-        pool1 = tf.nn.max_pool3d(conv1,
-                                 ksize=[1, 2, 2, 2, 1],
-                                 strides=[1, 2, 2, 2, 1],
-                                 padding="SAME")
-        """
         conv1 = tf.concat([conv1_a, conv1_b, conv1_c], 4)
         with tf.variable_scope(self.param['mode']+'conv2') as scope:
             conv2 = self.conv_relu(input_=conv1,
@@ -170,98 +163,49 @@ class CNN:
                                    biases_shape=[32],
                                    decay_constant=self.param['decay_const'],
                                    scope=scope,padding='SAME',
-                                   stride=2, is_training=is_training, keep_prob=keep_prob)
+                                   stride=2)
         print("Conv2", conv2.get_shape())
-        """
-        pool2 = tf.nn.max_pool3d(conv2,
-                                 ksize=[1, 2, 2, 2, 1],
-                                 strides=[1, 2, 2, 2, 1],
-                                 padding="SAME")
-        """
         with tf.variable_scope(self.param['mode']+'conv3') as scope:
             conv3 = self.conv_relu(input_=conv2,
                                    kernel_shape=[5, 5, 5, 32, 64],
                                    biases_shape=[64],
                                    decay_constant=self.param['decay_const'],
                                    scope=scope,padding='SAME',
-                                   stride=2, is_training=is_training, keep_prob=keep_prob)
+                                   stride=2)
         print("Conv3", conv3.get_shape())
-        """
-        pool3 = tf.nn.max_pool3d(conv3,
-                                 ksize=[1, 2, 2, 2, 1],
-                                 strides=[1, 2, 2, 2, 1],
-                                 padding="SAME")
-        
-        """
         with tf.variable_scope(self.param['mode']+'conv4') as scope:
             conv4 = self.conv_relu(input_=conv3,
                                    kernel_shape=[3, 3, 3, 64, 64],
                                    biases_shape=[64],
                                    decay_constant=self.param['decay_const'],
                                    scope=scope,padding='SAME',
-                                   stride=2, is_training=is_training, keep_prob=keep_prob)
+                                   stride=2)
         print("Conv4", conv4.get_shape())
 
-        """
-        pool4 = tf.nn.max_pool3d(conv4,
-                                 ksize=[1, 2, 2, 2, 1],
-                                 strides=[1, 2, 2, 2, 1],
-                                 padding="SAME")
-        """
         with tf.variable_scope(self.param['mode']+'conv5') as scope:
             conv5 = self.conv_relu(input_=conv4,
                                    kernel_shape=[3, 3, 3, 64, 128],
                                    biases_shape=[128],
                                    decay_constant=self.param['decay_const'],
                                    scope=scope,padding='SAME',
-                                   stride=2, is_training=is_training, keep_prob=keep_prob)
+                                   stride=2)
         print("Conv5", conv5.get_shape())
-        """
-        pool5 = tf.nn.max_pool3d(conv5,
-                                 ksize=[1, 2, 2, 2, 1],
-                                 strides=[1, 2, 2, 2, 1],
-                                 padding="SAME")
-        """
         with tf.variable_scope(self.param['mode']+'conv6') as scope:
             conv6 = self.conv_relu(input_=conv5,
                                    kernel_shape=[3, 3, 3, 128, 256],
                                    biases_shape=[256],
                                    decay_constant=self.param['decay_const'],
                                    scope=scope,padding='SAME',
-                                   stride=2, is_training=is_training, keep_prob=keep_prob)
+                                   stride=2)
         print("Conv6", conv6.get_shape())
-        """
-        pool6 = tf.nn.max_pool3d(conv6,
-                                 ksize=[1, 2, 2, 2, 1],
-                                 strides=[1, 2, 2, 2, 1],
-                                 padding="SAME")
-        """
         with tf.variable_scope(self.param['mode']+'conv7') as scope:
             conv7 = self.conv_relu(input_=conv6,
                                    kernel_shape=[3, 3, 3, 256, 512],
                                    biases_shape=[512],
                                    decay_constant=self.param['decay_const'],
                                    scope=scope,padding='SAME',
-                                   stride=2, is_training=is_training, keep_prob=keep_prob)
+                                   stride=2)
         print("Conv7", conv7.get_shape())
-        """
-        pool7 = tf.nn.max_pool3d(conv7,
-                                 ksize=[1, 2, 2, 2, 1],
-                                 strides=[1, 2, 2, 2, 1],
-                                 padding="SAME")
-        with tf.variable_scope('conv8') as scope:
-            conv8 = self.conv_relu(input_=conv7,
-                                   kernel_shape=[3, 3, 3, 512, 512],
-                                   biases_shape=[512],
-                                   decay_constant=self.param['decay_const'],
-                                   scope=scope,padding='SAME',
-                                   stride=1, is_training=is_training, keep_prob=keep_prob)
-        print("Conv8", conv8.get_shape())
-        pool8 = tf.nn.max_pool3d(conv8,
-                                 ksize=[1, 2, 2, 2, 1],
-                                 strides=[1, 2, 2, 2, 1],
-                                 padding="SAME")
-        """
         
         with tf.variable_scope(self.param['mode']+'fullcn2') as scope:
             vector_per_batch = tf.reshape(conv7, [self.param['batch_size'],
@@ -312,8 +256,8 @@ class CNN:
         This function calculates the cross entropy loss from the output of the
         3D CNN model
         Args:
-            logits: the output of 3D CNN [batch_size, 2]
-            labels: the actual class labels of the batch [batch_size, 2]
+            logits: the output of 3D CNN Ex: [batch_size, 2]
+            labels: the actual class labels of the batch Ex: [batch_size, 2]
 
         Returns: cross entropy loss
 
@@ -328,16 +272,19 @@ class CNN:
         return tf.add_n(tf.get_collection('losses'), name='total_loss')
     
     def evaluation(self, sess, eval_op, dataset, images, labels, keep_prob,
-                    is_training, loss, corr):
+                    loss, corr):
         """
         This function evaluates the accuracy of the model
         Args:
             sess: tensorflow session
             eval_op: evaluation operation which calculates number of correct
                     predictions
-            dataset: input dataset either train or validation
+            dataset: input dataset
             images: the images placeholder
             labels: the labels placeholder
+            keep_prob: dropout keep probability placeholder
+            loss: cross entropy loss tensor
+            corr: correct predictions tensor
 
         Returns: the accuracy of the 3D CNN model
 
@@ -351,8 +298,7 @@ class CNN:
                 feed_dict={
                     images: image_data,
                     labels: label_data,
-                    keep_prob: 1.0,
-                    is_training: 1
+                    keep_prob: 1.0
                 })
             print("Prediction:", correct_)
             correct_predictions += predictions
@@ -366,13 +312,13 @@ class CNN:
 
     def train(self, train_data, validation_data, test):
         """
-        This function creates the training operations and starts building and
+        This function starts building and
         training the 3D CNN model.
 
         Args:
-            train_data: the training data required for 3D CNN
-            validation_data: validation data to test the accuracy of the model.
-
+            train_data: the training dataset object of class DataInput
+            validation_data: validation dataset object of class DataInput
+            test: Data object of DataInput class to test the model accuracy
         """
         mode = self.param['mode'] 
         with tf.Graph().as_default():
@@ -407,7 +353,7 @@ class CNN:
 
             with tf.variable_scope(tf.get_variable_scope()):
                 with tf.name_scope('Train'+mode) as scope:
-                    logits = self.inference(images, keep_prob, is_training)
+                    logits = self.inference(images, keep_prob)
 
                     _ = self.inference_loss(logits, labels)
 
@@ -442,7 +388,11 @@ class CNN:
                     self.param['summary_path'], sess.graph)
                 summary_op = tf.summary.merge_all()
                 tf.get_default_graph().finalize()
+
+                # For var_lr - decreasing the learning rate after specific
+                # number of epochs
                 init_lr = self.param['learning_rate']
+
                 for step in range(1, num_steps):
                     start_time = time.time()
                     if step%(5*num_batches_epoch) == 0:
@@ -455,16 +405,14 @@ class CNN:
                         feed_dict={
                             images: image_data,
                             labels: label_data,
-                            keep_prob: self.param['keep_prob'],
-                            is_training: 1
+                            keep_prob: self.param['keep_prob']
                         }
                     )
                     accuracy_ = sess.run(accuracy,
                                          feed_dict={
                                                  images: image_data,
                                                  labels: label_data,
-                                                 keep_prob: 1.0,
-                                                 is_training: 1
+                                                 keep_prob: 1.0
                                                  })
                     print("Train Batch Accuracy. %g step %d" % (accuracy_,
                                                                     step))
@@ -499,7 +447,6 @@ class CNN:
                                                      images=images,
                                                      labels=labels,
                                                      keep_prob=keep_prob,
-                                                     is_training=is_training,
                                                      corr=correct_prediction,
                                                      loss=total_loss)))
 
@@ -511,7 +458,6 @@ class CNN:
                                                      images=images,
                                                      labels=labels,
                                                      keep_prob=keep_prob,
-                                                     is_training=is_training,
                                                      corr=correct_prediction,
                                                      loss=total_loss)))
                     sys.stdout.flush()
@@ -527,7 +473,6 @@ class CNN:
                                                  images=images,
                                                  labels=labels,
                                                  keep_prob=keep_prob,
-                                                 is_training=is_training,
                                                  corr=correct_prediction,
                                                  loss=total_loss))
                     else:
