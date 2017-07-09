@@ -67,7 +67,7 @@ for patient, label in all_pat.items():
             ad_train.append(patient)
 print(len(nc_train), len(mci_train), len(ad_train))
 print("NC:", len(nc_for_aug), "AD:", len(ad_for_aug))
-
+'''
 with open('./adni_ad_aug_data2.pkl', 'wb') as filep:
     pickle.dump(ad_for_aug, filep)
 with open('./adni_nc_aug_data2.pkl', 'wb') as filep:
@@ -77,3 +77,4 @@ with open('./adni_train_data2_aug.pkl', 'wb') as filep:
     pickle.dump(train_dict, filep)
 with open('./adni_valid_data2_aug.pkl', 'wb') as filep:
     pickle.dump(valid_dict, filep)
+'''

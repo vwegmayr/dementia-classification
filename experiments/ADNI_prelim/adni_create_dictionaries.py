@@ -124,9 +124,10 @@ for key, value in all_data.items():
 print("Unique train patients:", len(patient_ctr))
 print("Valid Dict:", len(valid_dict_new))
 print("Train Dict:", len(train_dict_new))
-
+'''
 with open('adni_valid_dict_data1.pkl', 'wb') as filep:
     pickle.dump(valid_dict_new, filep)
 
 with open('adni_train_dict_data1.pkl', 'wb') as filep:
     pickle.dump(train_dict_new, filep)
+'''

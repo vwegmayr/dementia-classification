@@ -6,9 +6,16 @@ Output: adni_train.pkl adni_valid.pkl
 import csv
 from collections import defaultdict
 import pickle
+import argparse
+import sys
 
-filep = open('/home/rams/PolyBox/Thesis/ADNI/labels.csv')
-csvreader = csv.reader(filep)
+parser = argparse.ArgumentParser(description="Get labels for the images.")
+parser.add_argument("t2alldict", type=str, help='Path to T2 All data dict')
+parser.add_argument("t2searchfile", type=str, help='Path to T2 Advanced '
+                                                   'Search (Beta) file')
+
+args = parser.parse_args()
+
 
 # Counting scanner types and class types for patient ids
 patient_dict = [[] for i in range(0, 3)]
@@ -17,6 +24,7 @@ for i in range(0, 3):
          patient_dict[i].append([])
          patient_dict[i][j].append([]) # For subjects
          patient_dict[i][j].append([])  # For image ids
+
 # Mapping imageId to patient ID
 image_patient = defaultdict(int)
 
@@ -25,24 +33,27 @@ scanner_type = {'Field Strength=1.5':0,
                 'Field Strength=2.9':2
                 }
 
-with open('ADNI_new_dict.pkl', 'rb') as filep:
+with open(args.t2alldict, 'rb') as filep:
     all_data = pickle.load(filep)
 print("All:", len(all_data))
+
+csvreader = csv.reader(open(args.t2searchfile, 'r'))
 
 train_subjects = []
 all_subjects = []
 valid_subjects = []
 
 for row in csvreader:
-    if row[0][0] != 'i' and row[0] in all_data: #Header
-        image_code = row[0]
-        label = all_data[image_code]
-        scanner = scanner_type[row[18]]
-        patient_id = row[24]
-        patient_dict[label][scanner][0].append(patient_id)
-        patient_dict[label][scanner][1].append(image_code)
-        image_patient[image_code] = patient_id
-        all_subjects.append(patient_id)
+    if row[0][0] != 'S': #Header
+        image_code = 'I'+row[7]
+        if image_code in all_data:
+            label = all_data[image_code]
+            scanner = scanner_type[row[6]]
+            patient_id = row[0]
+            patient_dict[label][scanner][0].append(patient_id)
+            patient_dict[label][scanner][1].append(image_code)
+            image_patient[image_code] = patient_id
+            all_subjects.append(patient_id)
 unique_patients = list(set(all_subjects))
 print(len(unique_patients))
 for i in range(0, 3):
@@ -70,8 +81,7 @@ print("MCI<->AD:", len(class_1)+len(class_2) - len(set(class_1 + class_2)))
 # NC , AD conversions/reversions
 print("NC<->AD:", len(class_0)+len(class_2) - len(set(class_0 + class_2)))
 
-valid_subjects = list(set(class_0[:50] + class_1[:40] + class_2[:60])) # Out
-#  of 150, 133 are unique
+valid_subjects = list(set(class_0[:15] + class_1[:15] + class_2[:10]))
 unique_patients = list(set(all_subjects))
 for subject in unique_patients:
     if subject not in valid_subjects:
@@ -79,7 +89,6 @@ for subject in unique_patients:
 print(len(train_subjects)+len(valid_subjects), len(train_subjects), len(valid_subjects))
 
 
-'''
 valid_dict = {}
 train_dict = {}
 for img_code, label in all_data.items():
@@ -88,14 +97,13 @@ for img_code, label in all_data.items():
     elif image_patient[img_code] in valid_subjects:
         valid_dict[img_code] = label
 
-
-with open('ADNI_train.pkl', 'wb') as filep:
+'''
+with open('ADNI_train_t2.pkl', 'wb') as filep:
     pickle.dump(train_dict, filep)
 
-with open('ADNI_valid.pkl', 'wb') as filep:
+with open('ADNI_valid_t2.pkl', 'wb') as filep:
     pickle.dump(valid_dict, filep)
 '''
-
 '''
 # NC validation data patient_dict[0/1][0]
 nc_valid = patient_dict[0][0][:20] + patient_dict[1][0][:20]
