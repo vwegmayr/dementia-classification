@@ -560,7 +560,7 @@ class DataPipeline:
                     patient_code = patient_code.split(split_on)[0]
                     if patient_flag == False or patient_code in patient_list:
                         output = out_folder + patient_code + \
-                                 '_trans_mni_aligned.nii.gz'
+                                 '_trans'+split_on
                         if not os.path.exists(output):
                             mri_image = nb.load(input_file)
                             aff = mri_image.get_affine()
@@ -613,7 +613,8 @@ class DataPipeline:
                                 z_axis = 1
 
                             output_file = out_folder + patient_code + \
-                                          '_rot_{0}.nii.gz'.format(direction)
+                                          '_rot_{0}_{1}'.format(direction,
+                                                                split_on)
                             rot_matrix = 'rot_{0}.mat'.format(direction)
                             angle_rot = random.uniform(-angle, angle)
                             print("Rotating image: " + input_file)

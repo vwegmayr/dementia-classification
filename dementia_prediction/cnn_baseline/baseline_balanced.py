@@ -293,7 +293,7 @@ class CNN:
         total_seen = 0
         dataset_size = len(dataset.s_files) + len(dataset.p_files)
         for step in range(int(dataset_size / self.param['batch_size'])):
-            image_data, label_data = dataset.next_batch()
+            _, image_data, label_data = dataset.next_batch()
             predictions, correct_, loss_ = sess.run([eval_op, corr, loss],
                 feed_dict={
                     images: image_data,
@@ -397,7 +397,7 @@ class CNN:
                     start_time = time.time()
                     if step%(5*num_batches_epoch) == 0:
                         init_lr /= 2
-                    image_data, label_data = train_data.next_batch()
+                    _, image_data, label_data = train_data.next_batch()
                     summary_values, _, loss_value = sess.run(
                         [summary_op,
                          train_op,

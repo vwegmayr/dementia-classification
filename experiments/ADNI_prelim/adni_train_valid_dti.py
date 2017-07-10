@@ -2,6 +2,7 @@
 This script would create the training and validation data dictionaries.
 Input: adni_all_data.pkl - Dictionary of all images and its labels
 Output: adni_train.pkl adni_valid.pkl
+ python adni_train_valid_dti.py ADNI_DTI_all_dict.pkl 
 """
 import csv
 from collections import defaultdict

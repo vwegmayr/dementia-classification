@@ -1,0 +1,15 @@
+parameters:
+  img_size: 902629
+  heigth: 91
+  width: 109
+  depth: 91
+  mode: 'adni'
+  epsilon: 0.00001
+  regex: r"_mni_aligned\.nii\.gz$"
+  split_on: '_mni_aligned.nii.gz'
+  smooth_path: '/local/adni_mni_smoothed/' 
+  per_image_out: '/local/adni_normalized/per_image/'
+  valid_path: '/local/ADNI_valid.pkl'
+  train_path: '/local/ADNI_train.pkl'
+  norm_out: '/local/adni_normalized/train/'
+  norm_mean_var: '/local/home/saitharaju/source_code/mri-fusion/experiments/Normalization/Dictionaries/adni/'
