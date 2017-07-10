@@ -1,6 +1,7 @@
 from os import path
 import pickle
 import argparse
+import re
 
 from pathos.multiprocessing import ProcessPool
 from dementia_prediction.config_wrapper import Config
@@ -21,8 +22,9 @@ train_dict = pickle.load(open(params['train_path'], 'rb'))
 print("Train", len(train_dict), "Patients")
 
 norm_object = Normalize(params, train_dict, valid_dict)
+print(params['regex'])
 train_patients, valid_patients = norm_object.get_files(params['smooth_path'],
-                                                       regex=params['regex'],
+                                                       regex=r""+params['regex']+"$",
                                                        split_on=params[
                                                            'split_on']
                                                        )
@@ -41,7 +43,11 @@ print("Finding per-image normalization..")
 pool.map(norm_object.per_image, splits)
 
 print("Retrieving files from ", params['per_image_out'])
-train_patients, valid_patients = norm_object.get_files(params['per_image_out'])
+train_patients, valid_patients = norm_object.get_files(params['per_image_out'],
+                                                       regex=r""+params['regex']+"$",
+                                                       split_on=params[
+                                                           'split_on']
+                                                       )
 all_patients = train_patients + valid_patients
 
 print("Finding mean, var normalization of ", len(train_patients), "images")

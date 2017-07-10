@@ -5,7 +5,7 @@ parameters:
   depth: 91
   mode: 'adni_t2'
   epsilon: 0.00001
-  regex: r"_mni_aligned\.nii\.gz$"
+  regex: '_mni_aligned\.nii\.gz'
   split_on: '_mni_aligned.nii.gz'
   smooth_path: '/local/adni_t2_smoothed/'
   adni_per_image_out: '/local/adni_t2_normalized/per_image/'
