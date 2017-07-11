@@ -12,6 +12,7 @@ parameters:
     checkpoint_path: './output/T1_brain/ADNI/data1/newlabels/'
     summary_path: './output/T1_brain/ADNI/data1/newlabels/'
     keep_prob: 0.3
+    classes: 3
 data_paths:
   datadir: '/local/home/saitharaju/cad_normalized/'
   class_labels: '/local/adni_normalized/adni_all_data.pkl'

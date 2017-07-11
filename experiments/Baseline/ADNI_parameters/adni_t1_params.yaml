@@ -12,6 +12,7 @@ parameters:
     checkpoint_path: './output/T1_brain/ADNI/data1/newlabels/rerun/'
     summary_path: './output/T1_brain/ADNI/data1/newlabels/rerun/'
     keep_prob: 0.3
+    classes: 3
 data_paths:
   datadir: '/local/adni_normalized/train/'
   valid_data: '/local/ADNI_valid.pkl'

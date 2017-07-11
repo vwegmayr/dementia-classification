@@ -12,6 +12,9 @@ parameters:
     checkpoint_path: './output/T1_brain/MNI/'
     summary_path: './output/T1_brain/MNI/'
     keep_prob: 0.3
+    classes: 2
+  regex: r"-T1_brain_subsampled\.nii\.gz$"
+  split_on: '-T1_brain_subsampled.nii.gz'
 data_paths:
   datadir: '/local/home/saitharaju/T1_UHG/normalized/'
   logdir: '/local/home/saitharaju/Data/'

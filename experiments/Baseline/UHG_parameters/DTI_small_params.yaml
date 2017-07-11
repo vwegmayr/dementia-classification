@@ -13,6 +13,9 @@ parameters:
     checkpoint_path: './output/smalldata/DTI/'
     summary_path: './output/smalldata/DTI/'
     keep_prob: 0.3
+    classes: 2
+  regex: r"-DTI_FA_norm_subsampled\.nii\.gz$"
+  split_on: '-DTI_FA_norm_subsampled.nii.gz'
 data_paths:
   datadir: '/local/home/saitharaju/NIFTI/small_dataset/DTI_FA_subsampled/'
   logdir: '/local/home/saitharaju/Data/'

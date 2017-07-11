@@ -13,6 +13,9 @@ parameters:
     checkpoint_path: './output/smalldata/CBF/'
     summary_path: './output/smalldata/CBF/'
     keep_prob: 0.3
+    classes: 2
+  regex: r"-CBF_norm_subsampled\.nii\.gz$"
+  split_on: '-CBF_norm_subsampled.nii.gz'
 data_paths:
   datadir: '/local/home/saitharaju/NIFTI/small_dataset/CBF_subsampled/'
   logdir: '/local/home/saitharaju/Data/'

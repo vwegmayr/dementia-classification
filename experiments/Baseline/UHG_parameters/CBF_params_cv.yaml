@@ -12,6 +12,9 @@ parameters:
     checkpoint_path: './output/cv9/CBF/'
     summary_path: './output/cv9/'
     keep_prob: 0.3
+    classes: 2
+  regex: r"-CBF_norm_subsampled\.nii\.gz$"
+  split_on: '-CBF_norm_subsampled.nii.gz'
 data_paths:
   datadir: '/local/home/saitharaju/NIFTI/norm_multimodal/cv/CBF/fold_9/'
   logdir: '/local/home/saitharaju/Data/'
