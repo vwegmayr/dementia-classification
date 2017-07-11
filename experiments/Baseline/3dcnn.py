@@ -32,7 +32,7 @@ train_patients = pickle.load(open(paths['train_data'], 'rb'))
 print("Total number of patients:",  len(patients_dict),
       "Validation patients count: ", len(valid_patients),
       "Train patients count:", len(train_patients))
-
+print(len(train_patients), len(valid_patients), len(set(train_patients+valid_patients)))
 # If data is not normalized, we can normalize it on-the-fly
 # Mean and Variance of the training data
 global_mean = [0 for i in range(0, IMG_SIZE)]
@@ -184,5 +184,4 @@ validation_data = DataInput(params=config.config.get('parameters'),
 # T1 baseline CNN model
 cnn_model = CNN(params=config.config.get('parameters'))
 cnn_model.train(train_data, validation_data, True)
-
 

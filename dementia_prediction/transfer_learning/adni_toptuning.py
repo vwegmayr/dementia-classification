@@ -340,7 +340,8 @@ class CNN:
     def get_features(self, image_data):
         with tf.Graph().as_default() as model_graph:
             sess = tf.Session(graph=model_graph)
-            meta_path = 'model.ckpt-57455.meta'
+            meta_path = self.param['meta_path']
+            #'model.ckpt-57455.meta'
             #meta_path = 'model.ckpt-32563.meta'
             #meta_path = 'model.ckpt-17499.meta'
             #meta_path = 'model.ckpt-1.meta'

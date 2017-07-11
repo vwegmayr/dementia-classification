@@ -6,12 +6,12 @@ parameters:
     width: 91
     mode: 'UHG_DTI_FA'
     batch_size: 12
-    num_epochs: 28 
+    num_epochs: 50 
     learning_rate: 0.000005
     decay_factor: 0.9
     decay_const: 0.005
-    checkpoint_path: './output/DTI_FA/UHG_MNI/'
-    summary_path: './output/DTI_FA/UHG_MNI/'
+    checkpoint_path: './output/DTI_FA/UHG_MNI/50epochs/'
+    summary_path: './output/DTI_FA/UHG_MNI/50epochs/'
     keep_prob: 0.3
     classes: 2
   regex: '_normalized\.nii\.gz'

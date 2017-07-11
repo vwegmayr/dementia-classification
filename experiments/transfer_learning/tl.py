@@ -6,7 +6,7 @@ import argparse
 
 from dementia_prediction.config_wrapper import Config
 from dementia_prediction.data_input_new import DataInput
-from dementia_prediction.transfer_learning.adni_t1 import CNN
+from dementia_prediction.transfer_learning.adni_toptuning import CNN
 from dementia_prediction.transfer_learning.adni_finetuning import FinetuneCNN
 
 # Parse the parameter file
@@ -36,7 +36,7 @@ for directory in os.walk(paths['datadir']):
     for file in directory[2]:
         # Match all files ending with 'regex'
         input_file = os.path.join(directory[0], file)
-        regex = paths['regex']
+        regex = r""+paths['regex']+"$"
         if re.search(regex, input_file):
             pat_code = input_file.rsplit(paths['split_on'])
             patient_code = pat_code[0].rsplit('/', 1)[1]
