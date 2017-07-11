@@ -12,7 +12,7 @@ import numpy as np
 import sys
 
 
-class MultimodalCNN:
+class FusionFinetuneCNN:
     """
     This class provides functions to train a 3D Convolutional Neural Network
     model. To train the network and evaluate it, initialize the class with the

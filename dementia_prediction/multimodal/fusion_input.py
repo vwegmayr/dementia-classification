@@ -22,9 +22,11 @@ class FusionDataInput:
         self.pos_batch_index = 0
         self.neg_batch_index = 0
         self.name = name
-        self.T1_folder = params['T1_folder']
-        self.DTI_folder = params['DTI_folder']
-        self.modalities = {0: 'T1_brain', 1: 'CBF', 2: 'DTI_FA'}
+        self.mode_folders = [params['mode_folder'+str(i)] for i in range(1, 4)]
+        self.modalities = {0: params['cnn']['mode1'],
+                           1: params['cnn']['mode2'],
+                           2: params['cnn']['mode3']
+                           }
 
     def next_batch(self):
         """

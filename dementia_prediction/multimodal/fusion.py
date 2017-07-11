@@ -22,7 +22,18 @@ class MultimodalCNN:
 
     def __init__(self, params):
         self.param = params['cnn']
-        self.modalities = {0 : 'T1_brain', 1 : 'CBF', 2 : 'DTI_FA'}
+        self.modalities = {0 : params['cnn']['mode1'],
+                           1 : params['cnn']['mode2'],
+                           2 : params['cnn']['mode3']
+                           }
+        self.meta_paths = {0 : params['cnn']['meta_mode1'],
+                           1: params['cnn']['meta_mode2'],
+                           2: params['cnn']['meta_mode3']
+                           }
+        self.checkpoints = {0 : params['cnn']['ckpt_mode1'],
+                           1: params['cnn']['ckpt_mode2'],
+                           2: params['cnn']['ckpt_mode3']
+                           }
 
     @classmethod
     def variable_on_cpu(cls, name, shape, initializer):
@@ -351,13 +362,8 @@ class MultimodalCNN:
                      mode, image_data, label_data):
         with tf.Graph().as_default() as model_graph:
             sess = tf.Session(graph=model_graph)
-            meta_path = '/model.ckpt-895.meta'
-            #print("Mode:", mode, flush=True)
-            if self.modalities[mode] == 'CBF':
-                meta_path = '/model.ckpt-639.meta'
-            saver = tf.train.import_meta_graph(self.param['checkpoint_path']+self.modalities[mode]+meta_path)
-            ckpath = self.param['checkpoint_path'] + self.modalities[mode] + '/'
-            ckpt = tf.train.get_checkpoint_state(ckpath)
+            saver = tf.train.import_meta_graph(self.meta_paths[mode])
+            ckpt = tf.train.get_checkpoint_state(self.checkpoints[mode])
             #print(ckpath, ckpt)
             #print(model_graph.get_operations())
             if ckpt and ckpt.model_checkpoint_path:
@@ -579,7 +585,7 @@ class MultimodalCNN:
                     if step % num_batches_epoch == 0 or (step + 1) == num_steps:
                         if (step + 1) == num_steps:
                             checkpoint_path = self.param['checkpoint_path'] + \
-                                              'multimodal/fusion_model.ckpt'
+                                              'fusion_model.ckpt'
                             saver.save(sess, checkpoint_path, global_step=step)
 
                         # Evaluate against the training data.

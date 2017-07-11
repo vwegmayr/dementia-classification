@@ -10,22 +10,30 @@ import math
 
 from pathos.multiprocessing import ProcessPool
 from dementia_prediction.config_wrapper import Config
-from dementia_prediction.multimodal.fusion_input import FusionDataInput
-from dementia_prediction.multimodal.fusion_finetuning import MultimodalCNN
-#from dementia_prediction.multimodal.fusion import MultimodalCNN
+from dementia_prediction.fusion_input_new import FusionDataInput
+from dementia_prediction.multimodal.fusion_finetuning import FusionFinetuneCNN
+from dementia_prediction.multimodal.fusion import MultimodalCNN
 
-IMG_SIZE = 897600
+# Parse the parameter file
 config = Config()
-param_file = sys.argv[1]
-config.parse(path.abspath(param_file))
-
-
+parser = argparse.ArgumentParser(description="Run the Baseline model")
+parser.add_argument("paramfile", type=str, help='Path to the parameter file')
+args = parser.parse_args()
+config.parse(path.abspath(args.paramfile))
+params = config.config.get('parameters')
 paths = config.config.get('data_paths')
-filep = open(paths['class_labels'], 'rb')
-patients_dict = pickle.load(filep)
-filep = open(paths['valid_data'], 'rb')
-valid_patients = pickle.load(filep)
-print(len(valid_patients))
+
+IMG_SIZE = params['cnn']['depth']*params['cnn']['height']*params['cnn'][
+            'width']
+
+# All patients class labels dictionary and list of validation patient codes
+patients_dict = pickle.load(open(paths['class_labels'], 'rb'))
+valid_patients = pickle.load(open(paths['valid_data'], 'rb'))
+train_patients = pickle.load(open(paths['train_data'], 'rb'))
+print("Total number of patients:",  len(patients_dict),
+      "Validation patients count: ", len(valid_patients),
+      "Train patients count:", len(train_patients))
+
 global_mean = [0 for i in range(0, IMG_SIZE)]
 global_variance = [0 for i in range(0, IMG_SIZE)]
 mean_path = paths['norm_mean_var']+'./t1_train_mean_path.pkl'
@@ -57,40 +65,6 @@ def normalize(train):
     for par in range(0, num_parallel - 1):
         train_splits.append(train_data[par * split:(par + 1) * split])
     train_splits.append(train_data[(num_parallel - 1) * split:])
-    '''
-    # If argument list too long, skip this
-    if not os.path.exists(mean_path):
-        command = 'fslmaths'
-        command += ' -add '.join(train_data)
-        command += ' -div ' + str(len(train_data)) + \
-                   ' ' + mean_path
-        print("Number of training images: " + str(len(train_data)))
-        subprocess.call(command, shell=True)
-    mean = nb.load(mean_path).get_data()
-    if not os.path.exists(mean_path):
-        mean = [0 for x in range(IMG_SIZE)]
-        for file in train_data:
-            print("mean", file)
-            mr_image = nb.load(file).get_data().flatten()
-            for i in range(0, IMG_SIZE):
-                mean[i] += mr_image[i]
-        mean = [i/len(train_data) for i in mean]
-        with open(mean_path, 'wb') as filep:
-            pickle.dump(mean, filep)
-    if not os.path.exists(var_path):
-        variance = [0 for x in range(IMG_SIZE)]
-        #mean_values = nb.load(mean_path).get_data().flatten()
-        with open(mean_path, 'rb') as filep:
-            mean_values = pickle.load(filep)
-        for file in train_data:
-            print("var", file)
-            image = nb.load(file).get_data().flatten()
-            for i in range(0, IMG_SIZE):
-                variance[i] += math.pow((image[i] - mean_values[i]), 2)
-        variance = [math.sqrt(x/(len(train_data)-1)) for x in variance]
-        with open(var_path, 'wb') as filep:
-            pickle.dump(variance, filep)
-    '''
     if not os.path.exists(mean_path):
         mean_arrays = pool.map(mean_fun, train_splits)
         for i in range(0, IMG_SIZE):
@@ -156,13 +130,12 @@ for directory in os.walk(paths['datadir']):
     for file in directory[2]:
         # Match all files ending with 'regex'
         input_file = os.path.join(directory[0], file)
-        #TODO: normlazation refactoring
-        regex = r"-CBF_norm_subsampled\.nii\.gz$"
+        regex = r""+params['regex']+"$"
         if re.search(regex, input_file):
-            pat_code = input_file.rsplit('-CBF_norm_subsampled.nii.gz')
+            pat_code = input_file.rsplit(params['split_on'])
             patient_code = pat_code[0].rsplit('/', 1)[1]
-            if patient_code in patients_dict and patient_code not in \
-                    valid_patients:
+            if patient_code in patients_dict and patient_code in \
+                    train_patients:
                 if patients_dict[patient_code] == 0:
                     s_train_filenames.append(input_file)
                 if patients_dict[patient_code] == 1:
@@ -179,7 +152,6 @@ print("Validation Data: S: ", len(s_valid_filenames), "P: ", len(p_valid_filenam
 
 train = (s_train_filenames, p_train_filenames)
 validation = (s_valid_filenames, p_valid_filenames)
-#TODO: Dont uncomment unless the output paths are set 
 '''
 mean_norm, var_norm = normalize(train)
 train_data = DataInput(params=config.config.get('parameters'), data=train,
@@ -189,9 +161,9 @@ validation_data = DataInput(params=config.config.get('parameters'),
                             var=var_norm)
 '''
 train_data = FusionDataInput(params=config.config.get('parameters'), data=train,
-                       name='train')
+                       name='train', mean=0, var=0)
 validation_data = FusionDataInput(params=config.config.get('parameters'),
-                            data=validation, name='valid') 
+                            data=validation, name='valid', mean=0, var=0)
 # T1 baseline CNN model
 cnn_model = MultimodalCNN(params=config.config.get('parameters'))
 cnn_model.train(train_data, validation_data, True)
