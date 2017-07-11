@@ -1,0 +1,25 @@
+
+parameters:
+  cnn:
+    depth: 91 
+    height: 109
+    width: 91
+    batch_size: 12 
+    num_epochs: 40 
+    learning_rate: 0.000005
+    decay_factor: 0.9
+    decay_const: 0.005
+    transfer_checkpoint_path: './output/T2/ADNI/5e6/'
+    checkpoint_path: './output/T2/transfer/finetuning/5e6/'
+    summary_path: './output/T2/transfer/finetuning/5e6/'
+    keep_prob: 0.3
+    meta_path: 'model.ckpt-9883.meta'
+  tl: 'finetune'
+data_paths:
+  datadir: '/local/UHG_T2_normalized/train/'
+  logdir: '/local/home/saitharaju/Data/'
+  regex: '_normalized\.nii\.gz'
+  split_on: '_normalized.nii.gz'
+  class_labels: './experiments/patients.pkl'
+  valid_data: './experiments/validation_patients.pkl'
+  train_data: './Dictionaries/UHG_T1/train_patients.pkl'

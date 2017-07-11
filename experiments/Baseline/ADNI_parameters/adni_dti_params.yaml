@@ -1,0 +1,19 @@
+
+parameters:
+  cnn:
+    depth: 91 
+    height: 109
+    width: 91
+    batch_size: 12 
+    num_epochs: 28 
+    learning_rate: 0.001
+    decay_factor: 0.9
+    decay_const: 0.005
+    checkpoint_path: './output/DTI_FA/ADNI/1e3/'
+    summary_path: './output/DTI_FA/ADNI/1e3/'
+    keep_prob: 0.3
+    classes: 3
+data_paths:
+  datadir: '/local/adni_fa_normalized/train/'
+  valid_data: '/local/adni_fa_normalized/ADNI_valid_dti.pkl'
+  train_data: '/local/adni_fa_normalized/ADNI_train_dti.pkl'

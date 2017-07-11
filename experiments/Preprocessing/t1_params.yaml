@@ -8,6 +8,11 @@ parameters:
     cost: 'normcorr'
     searchcost: 'normcorr'
     gauss_smooth_sigma: 1
+  dim:
+    depth: 88
+    height: 102
+    width: 100
 paths:
   data: './Data/'
   ref: './Data/CON018/CON018-T1_brain.nii.gz'
+

@@ -9,6 +9,7 @@ dependencies:
   - pip=9.0.1
   - scikit-learn=0.18.1
   - scipy=0.18.1
+  - matplotlib
   - pip:
     - pyyaml==3.12
     - tensorflow-gpu==1.0.1
@@ -16,3 +17,4 @@ dependencies:
     - git+https://github.com/vwegmayr/sumatra
     - configparser
     - gitpython
+    - matplotlib
