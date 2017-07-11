@@ -1,0 +1,24 @@
+
+parameters:
+  bet:
+    frac_intens_thres: 0.35
+  registration:
+    reference_image: 18
+    resample_size: 128
+    cost: 'normcorr'
+    searchcost: 'normcorr'
+    gauss_smooth_sigma: 1
+  dim:
+    depth: 91
+    height: 109
+    width: 91
+
+paths:
+  data: '/local/adni_mni_smoothed/'
+  ref: './Data/CON018/CON018-T1_brain.nii.gz'
+  in_folder: '/local/adni_mni_smoothed/'
+  out_folder_ad: '/local/adni_augmented/ad/'
+  out_folder_nc: '/local/adni_augmented/nc/'
+  ad_list: '/local/adni_normalized/adni_ad_aug_data2.pkl'
+  nc_list: '/local/adni_normalized/adni_nc_aug_data2.pkl'
+

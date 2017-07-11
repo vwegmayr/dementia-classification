@@ -1,0 +1,19 @@
+
+parameters:
+  cnn:
+    depth: 91 
+    height: 109
+    width: 91
+    batch_size: 12 
+    num_epochs: 28 
+    learning_rate: 0.000005
+    decay_factor: 0.9
+    decay_const: 0.005
+    checkpoint_path: '/local/home/saitharaju/source_code/mri-fusion/output/T1_brain/ADNI_aug/data2/'
+    summary_path: './output/T1_brain/ADNI_aug/data2/'
+    keep_prob: 0.3
+    classes: 3
+data_paths:
+  datadir: '/local/adniAugNormalized/train/'
+  valid_data: '/local/adniAugmented/adni_valid_data2_aug.pkl'
+  train_data: '/local/adniAugmented/adni_train_data2_aug.pkl'

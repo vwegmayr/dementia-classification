@@ -12,7 +12,23 @@ test:
 	nosetests -v --with-doctest --doctest-tests \
 		--with-coverage --cover-package=$(PROJECT)
 	rm .coverage
-
+smt:
+	@read -r -p "Enter sumatra project: " PROJ; \
+	read -r -p "Enter sumatra username: " USER; \
+	read -r -p "Enter sumatra password: " PASS; \
+	read -r -p "Enter archive path: " ARCH; \
+	echo "\nAdditionally, using the following sumatra settings:"; \
+	echo "--executable python"; \
+	echo "--datapath ./output/"; \
+	echo "--on-changed diff"; \
+	echo "--store http://$$USER:***@192.33.91.83:8080/records"; \
+	smt init \
+	--datapath './output/' \
+	--archive $$ARCH \
+	--executable python \
+	--on-changed store-diff \
+	--store http://$$USER:$$PASS@192.33.91.83:8080/records \
+	$$PROJ
 quality:
 	flake8 $(PROJECT)
 	pylint $(PROJECT)
@@ -43,3 +59,8 @@ test_server:
 quality_server:
 	docker run --rm $(PROJECT) flake8 $(PROJECT)
 	docker run --rm $(PROJECT) pylint $(PROJECT)
+data:
+	wget -O Data.tar.gz "https://www.dropbox.com/s/juacxvix0rdqo09/Data.tar.gz?dl=0" 
+	tar -xzvf Data.tar.gz -C ./
+	rm Data.tar.gz
+	echo "MRI Data downloaded successfully to 'Data' folder"

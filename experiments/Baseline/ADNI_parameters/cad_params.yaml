@@ -1,0 +1,20 @@
+
+parameters:
+  cnn:
+    depth: 91 
+    height: 109
+    width: 91
+    batch_size: 3 
+    num_epochs: 28
+    learning_rate: 0.000005
+    decay_factor: 0.9
+    decay_const: 0.005
+    checkpoint_path: './output/T1_brain/ADNI/data1/newlabels/'
+    summary_path: './output/T1_brain/ADNI/data1/newlabels/'
+    keep_prob: 0.3
+    classes: 3
+data_paths:
+  datadir: '/local/home/saitharaju/cad_normalized/'
+  class_labels: '/local/adni_normalized/adni_all_data.pkl'
+  valid_data: '/local/home/saitharaju/cad_normalized/cad_valid_dict.pkl'
+  train_data: '/local/adni_normalized/ADNI_train.pkl'

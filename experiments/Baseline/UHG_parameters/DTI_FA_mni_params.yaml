@@ -1,0 +1,26 @@
+
+parameters:
+  cnn:
+    depth: 91 
+    height: 109
+    width: 91
+    mode: 'UHG_DTI_FA'
+    batch_size: 12
+    num_epochs: 50 
+    learning_rate: 0.000005
+    decay_factor: 0.9
+    decay_const: 0.005
+    checkpoint_path: './output/DTI_FA/UHG_MNI/50epochs/'
+    summary_path: './output/DTI_FA/UHG_MNI/50epochs/'
+    keep_prob: 0.3
+    classes: 2
+  regex: '_normalized\.nii\.gz'
+  split_on: '_normalized.nii.gz'
+data_paths:
+  datadir: '/local/UHG_DTI_FA_normalized/train/'
+  logdir: '/local/home/saitharaju/Data/'
+  norm_mean_var: './Dictionaries/cv/'
+  class_labels: './experiments/patients.pkl'
+  valid_data: './experiments/validation_patients.pkl'
+  train_data: '/local/home/saitharaju/source_code/mri-fusion/Dictionaries/UHG_T1/train_patients.pkl'
+  validation_split: 0.15

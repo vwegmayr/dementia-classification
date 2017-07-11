@@ -1,0 +1,24 @@
+
+parameters:
+  cnn:
+    depth: 88 
+    height: 102
+    width: 100
+    batch_size: 10 
+    num_epochs: 30 
+    learning_rate: 0.00005
+    decay_factor: 0.9
+    decay_const: 0.001
+    restore_checkpoint_path: '/local/home/saitharaju/source_code/mri-fusion/output/'
+    checkpoint_path: './output/smalldata/'
+    summary_path: './output/smalldata/'
+    keep_prob: 0.3
+  T1_folder: '/local/home/saitharaju/NIFTI/norm_multimodal/T1_brain/'
+  DTI_folder: '/local/home/saitharaju/NIFTI/norm_multimodal/DTI_FA/'
+data_paths:
+  datadir: '/local/home/saitharaju/NIFTI/norm_multimodal/CBF/'
+  logdir: '/local/home/saitharaju/Data/'
+  norm_mean_var: './Dictionaries/'
+  class_labels: './experiments/T1_Baseline/patients.pkl'
+  valid_data: './experiments/validation_patients.pkl'
+  validation_split: 0.15
