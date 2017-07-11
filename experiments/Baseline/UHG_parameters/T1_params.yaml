@@ -13,7 +13,8 @@ parameters:
     checkpoint_path: './output/T1_brain/'
     summary_path: './output/T1_brain/'
     keep_prob: 0.3
-  regex: r"-T1_brain_norm_subsampled\.nii\.gz$"
+    classes: 2
+  regex: '-T1_brain_norm_subsampled\.nii\.gz'
   split_on: '-T1_brain_norm_subsampled.nii.gz'
 data_paths:
   datadir: '/local/home/saitharaju/NIFTI/norm_multimodal/T1_brain/'

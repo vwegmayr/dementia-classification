@@ -51,7 +51,7 @@ class CNN:
                             data, keep this value at minimum. For deeper
                             networks, keep a little higher value.
                             L1 regularization term is > L2 , so keep L1 wd < L2
-            Comment on stddev:
+            stddev: this is the standard deviation for intialising the weights.
                     If we initialize the weights to a unit standard
                     deviation, the variance of the outputs of neuron increases
                     linearly with inputs. Hence, at present, the weights
@@ -238,10 +238,11 @@ class CNN:
             """
         with tf.variable_scope(self.param['mode']+'logits') as scope:
             weights = self.weight_decay_variable(name="weights",
-                                                 shape=[512, 2],
+                                                 shape=[512, self.param[
+                                                     'classes']],
                                    decay_constant=self.param['decay_const'])
             biases = self.variable_on_cpu(name='biases',
-                                          shape=[2],
+                                          shape=[self.param['classes']],
                                           initializer=tf.constant_initializer(
                                               0.1))
             logits = tf.add(tf.matmul(fullcn_drop, weights), biases,
@@ -256,8 +257,8 @@ class CNN:
         This function calculates the cross entropy loss from the output of the
         3D CNN model
         Args:
-            logits: the output of 3D CNN Ex: [batch_size, 2]
-            labels: the actual class labels of the batch Ex: [batch_size, 2]
+            logits: the output of 3D CNN
+            labels: the actual class labels of the batch
 
         Returns: cross entropy loss
 
@@ -291,9 +292,19 @@ class CNN:
         """
         correct_predictions = 0
         total_seen = 0
-        dataset_size = len(dataset.s_files) + len(dataset.p_files)
-        for step in range(int(dataset_size / self.param['batch_size'])):
-            _, image_data, label_data = dataset.next_batch()
+        pred_out = {}
+        class_max_size = 0
+        data_size = 0
+        for i in range(0, len(dataset.files)):
+            data_size += len(dataset.files[i])
+            if len(dataset.files[i]) > class_max_size:
+                class_max_size = len(dataset.files[i])
+        num_steps = int(class_max_size / (self.param['batch_size']/len(dataset.files)))
+        if class_max_size%(self.param['batch_size']/len(dataset.files)) != 0:
+            num_steps += 1
+        print("Num steps:", num_steps, "Data size:", data_size)
+        for step in range(num_steps):
+            patients, image_data, label_data = dataset.next_batch()
             predictions, correct_, loss_ = sess.run([eval_op, corr, loss],
                 feed_dict={
                     images: image_data,
@@ -302,13 +313,21 @@ class CNN:
                 })
             print("Prediction:", correct_)
             correct_predictions += predictions
-
+            pred_out.update(dict(zip(patients, correct_)))
             total_seen += self.param['batch_size']
             print("Accuracy until "+str(total_seen)+" data points is: " +
                       str(correct_predictions/total_seen))
             print("loss", loss_)
-        accuracy = correct_predictions / total_seen
-        return accuracy
+            #print("logits:", logits_)
+        accuracy_ = 0
+        for key, value in pred_out.items():
+            if value == True:
+                accuracy_ += 1
+        accuracy_ /= len(pred_out)
+        print("Accuracy of ", len(pred_out)," images is ", accuracy_)
+        # TODO: Add accuracy [2]
+        sys.stdout.flush()
+        return accuracy_
 
     def train(self, train_data, validation_data, test):
         """
@@ -330,7 +349,8 @@ class CNN:
                                            self.param['width'],
                                            1], name=mode+'images')
             labels = tf.placeholder(dtype=tf.int8,
-                                    shape=[None, 2], name=mode+'labels')
+                                    shape=[None, self.param['classes']],
+                                    name=mode+'labels')
             keep_prob = tf.placeholder(tf.float32, name=mode+'keep_prob')
             var_lr = tf.placeholder(tf.float32, name=mode+'var_lr')
             is_training = tf.placeholder(tf.bool, name=mode+'phase')
@@ -339,18 +359,29 @@ class CNN:
                                           initializer=tf.constant_initializer(
                                               0),
                                           trainable=False)
-            train_size = len(train_data.s_files) + len(train_data.p_files)
-            num_batches_epoch = int(train_size / self.param['batch_size'])
+            class_max_size = 0
+            train_size = 0
+            for i in range(0, len(train_data.files)):
+                train_size += len(train_data.files[i])
+                if len(train_data.files[i]) > class_max_size:
+                    class_max_size = len(train_data.files[i])
+
+            num_batches_epoch = int(class_max_size / (self.param['batch_size']/len(train_data.files)))
+            if class_max_size%(self.param['batch_size']/len(train_data.files)) != 0:
+                num_batches_epoch += 1
             num_steps = num_batches_epoch * self.param['num_epochs']
+            print("Numsteps: ", num_steps, "Num batches/epoch:", num_batches_epoch, "Trainsize", train_size)
+            sys.stdout.flush()
+            '''
             learn_rate = tf.train.exponential_decay(
                 self.param['learning_rate'], global_step,
                 decay_steps=num_steps, decay_rate=self.param['decay_factor'],
                 staircase=True)
+            '''
             opt = tf.train.AdamOptimizer(
                 learning_rate=self.param['learning_rate'])
 
             #tf.summary.scalar('learning_rate', learn_rate)
-
             with tf.variable_scope(tf.get_variable_scope()):
                 with tf.name_scope('Train'+mode) as scope:
                     logits = self.inference(images, keep_prob)
@@ -408,20 +439,20 @@ class CNN:
                             keep_prob: self.param['keep_prob']
                         }
                     )
-                    accuracy_ = sess.run(accuracy,
-                                         feed_dict={
-                                                 images: image_data,
-                                                 labels: label_data,
-                                                 keep_prob: 1.0
-                                                 })
-                    print("Train Batch Accuracy. %g step %d" % (accuracy_,
-                                                                    step))
-                    duration = time.time() - start_time
+                    if step % 50 == 0:
+                        accuracy_ = sess.run(accuracy,
+                                             feed_dict={
+                                                     images: image_data,
+                                                     labels: label_data,
+                                                     keep_prob: 1.0
+                                                     })
+                        print("Train Batch Accuracy. %g step %d" % (accuracy_,
+                                                                        step))
+                        duration = time.time() - start_time
 
-                    assert not np.isnan(
-                        loss_value), 'Model diverged with loss = NaN'
+                        assert not np.isnan(
+                            loss_value), 'Model diverged with loss = NaN'
 
-                    if step % 5 == 0:
                         num_examples_per_step = self.param['batch_size']
                         examples_per_sec = num_examples_per_step / duration
                         sec_per_batch = duration
@@ -430,14 +461,22 @@ class CNN:
                                       'examples/sec; %.3f sec/batch)')
                         print(format_str % (datetime.now(), step, loss_value,
                                             examples_per_sec, sec_per_batch))
+                        sys.stdout.flush()
                     #summary_writer.add_summary(summary_values, step)
 
                     # Saving Model Checkpoints for evaluation
                     if step % num_batches_epoch == 0 or (step + 1) == num_steps:
-                        if (step+1) == num_steps:
+                        if (step+1) == num_steps or (step+1) == num_steps/2:
                             checkpoint_path = self.param['checkpoint_path'] + \
                                               'model.ckpt'
                             saver.save(sess, checkpoint_path, global_step=step)
+                            print("Saving checkpoint model...")
+                            sys.stdout.flush()
+                        for i in range(0, len(validation_data.files)):
+                            validation_data.batch_index[i] = 0
+                            validation_data.shuffle()
+                            train_data.batch_index[i] = 0
+                            train_data.shuffle()
 
                         # Evaluate against the training data.
                         print("Step: %d Training accuracy: %g " %
@@ -460,6 +499,11 @@ class CNN:
                                                      keep_prob=keep_prob,
                                                      corr=correct_prediction,
                                                      loss=total_loss)))
+                        for i in range(0, len(validation_data.files)):
+                            validation_data.batch_index[i] = 0
+                            validation_data.shuffle()
+                            train_data.batch_index[i] = 0
+                            train_data.shuffle()
                     sys.stdout.flush()
                 '''
                 if test == True:
