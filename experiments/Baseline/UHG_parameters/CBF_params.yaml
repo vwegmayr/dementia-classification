@@ -13,6 +13,7 @@ parameters:
     checkpoint_path: './output/CBF/'
     summary_path: './output/'
     keep_prob: 0.3
+    classes: 2
   regex: r"-CBF_norm_subsampled\.nii\.gz$"
   split_on: '-CBF_norm_subsampled.nii.gz'
 data_paths:

@@ -13,6 +13,7 @@ parameters:
     checkpoint_path: './output/cv9/T1_brain/'
     summary_path: './output/cv9/'
     keep_prob: 0.3
+    classes: 2
   regex: r"-T1_brain_subsampled\.nii\.gz$"
   split_on: '-T1_brain_subsampled.nii.gz'
 data_paths:
