@@ -96,7 +96,7 @@ class MultimodalCNN:
 
 
     def conv_relu(self, input_, kernel_shape, biases_shape, decay_constant,
-                  scope, padding, stride, is_training, keep_prob):
+                  scope, padding, stride):
         """
         This function builds a convolution layer of the 3D CNN
         Args:
@@ -104,11 +104,14 @@ class MultimodalCNN:
                     feature representation
             kernel_shape: the shape of the kernel filters
             biases_shape: bias shape is equal to the shape of output channels
-            wd: Weight decay adds weight to the L2 regularization loss value.
-                For more training data, keep this value at minimum
-                For deeper networks, keep a little higher value
-                L1 regularization term is > L2 , so keep L1 wd < L2
+            decay_constant: 
+                Weight decay adds weight to the L2 regularization loss value.
+                For more training data, keep this value at minimum.
+                For deeper networks, keep a little higher value. L1
+                regularization term is > L2 , so keep L1 wd < L2
             scope: scope of the weights and biases in this convolution layer
+            padding: 'SAME' or 'VALID' padding
+            stride: integer, convolution stride
 
         Returns:
             Feature maps of the convolution layer
@@ -136,7 +139,7 @@ class MultimodalCNN:
         # drop = tf.nn.dropout(act_relu, keep_prob)
         return act_relu
 
-    def inference(self, images, keep_prob, is_training):
+    def inference(self, images, keep_prob):
         """
         This function builds the 3D Convolutional Neural Network architecture
         Args:
@@ -153,8 +156,7 @@ class MultimodalCNN:
                                      biases_shape=[10],
                                      decay_constant=self.param['decay_const'],
                                      scope=scope, padding='SAME',
-                                     stride=2, is_training=is_training,
-                                     keep_prob=keep_prob)
+                                     stride=2)
         print("Conv1_a", conv1_a.get_shape())
         with tf.variable_scope('conv1_b') as scope:
             conv1_b = self.conv_relu(input_=images,
@@ -162,8 +164,7 @@ class MultimodalCNN:
                                      biases_shape=[10],
                                      decay_constant=self.param['decay_const'],
                                      scope=scope, padding='SAME',
-                                     stride=2, is_training=is_training,
-                                     keep_prob=keep_prob)
+                                     stride=2)
         print("Conv1_b", conv1_b.get_shape())
         with tf.variable_scope('conv1_c') as scope:
             conv1_c = self.conv_relu(input_=images,
@@ -171,15 +172,8 @@ class MultimodalCNN:
                                      biases_shape=[10],
                                      decay_constant=self.param['decay_const'],
                                      scope=scope, padding='SAME',
-                                     stride=2, is_training=is_training,
-                                     keep_prob=keep_prob)
+                                     stride=2)
         print("Conv1_c", conv1_c.get_shape())
-        """
-        pool1 = tf.nn.max_pool3d(conv1,
-                                 ksize=[1, 2, 2, 2, 1],
-                                 strides=[1, 2, 2, 2, 1],
-                                 padding="SAME")
-        """
         conv1 = tf.concat([conv1_a, conv1_b, conv1_c], 4)
         with tf.variable_scope('conv2') as scope:
             conv2 = self.conv_relu(input_=conv1,
@@ -187,107 +181,53 @@ class MultimodalCNN:
                                    biases_shape=[32],
                                    decay_constant=self.param['decay_const'],
                                    scope=scope, padding='SAME',
-                                   stride=2, is_training=is_training,
-                                   keep_prob=keep_prob)
+                                   stride=2)
         print("Conv2", conv2.get_shape())
-        """
-        pool2 = tf.nn.max_pool3d(conv2,
-                                 ksize=[1, 2, 2, 2, 1],
-                                 strides=[1, 2, 2, 2, 1],
-                                 padding="SAME")
-        """
         with tf.variable_scope('conv3') as scope:
             conv3 = self.conv_relu(input_=conv2,
                                    kernel_shape=[5, 5, 5, 32, 64],
                                    biases_shape=[64],
                                    decay_constant=self.param['decay_const'],
                                    scope=scope, padding='SAME',
-                                   stride=2, is_training=is_training,
-                                   keep_prob=keep_prob)
+                                   stride=2)
         print("Conv3", conv3.get_shape())
-        """
-        pool3 = tf.nn.max_pool3d(conv3,
-                                 ksize=[1, 2, 2, 2, 1],
-                                 strides=[1, 2, 2, 2, 1],
-                                 padding="SAME")
-
-        """
         with tf.variable_scope('conv4') as scope:
             conv4 = self.conv_relu(input_=conv3,
                                    kernel_shape=[3, 3, 3, 64, 64],
                                    biases_shape=[64],
                                    decay_constant=self.param['decay_const'],
                                    scope=scope, padding='SAME',
-                                   stride=2, is_training=is_training,
-                                   keep_prob=keep_prob)
+                                   stride=2)
         print("Conv4", conv4.get_shape())
 
-        """
-        pool4 = tf.nn.max_pool3d(conv4,
-                                 ksize=[1, 2, 2, 2, 1],
-                                 strides=[1, 2, 2, 2, 1],
-                                 padding="SAME")
-        """
         with tf.variable_scope('conv5') as scope:
             conv5 = self.conv_relu(input_=conv4,
                                    kernel_shape=[3, 3, 3, 64, 128],
                                    biases_shape=[128],
                                    decay_constant=self.param['decay_const'],
                                    scope=scope, padding='SAME',
-                                   stride=2, is_training=is_training,
-                                   keep_prob=keep_prob)
+                                   stride=2)
         print("Conv5", conv5.get_shape())
-        """
-        pool5 = tf.nn.max_pool3d(conv5,
-                                 ksize=[1, 2, 2, 2, 1],
-                                 strides=[1, 2, 2, 2, 1],
-                                 padding="SAME")
-        """
         with tf.variable_scope('conv6') as scope:
             conv6 = self.conv_relu(input_=conv5,
                                    kernel_shape=[3, 3, 3, 128, 256],
                                    biases_shape=[256],
                                    decay_constant=self.param['decay_const'],
                                    scope=scope, padding='SAME',
-                                   stride=2, is_training=is_training,
-                                   keep_prob=keep_prob)
+                                   stride=2)
         print("Conv6", conv6.get_shape())
-        """
-        pool6 = tf.nn.max_pool3d(conv6,
-                                 ksize=[1, 2, 2, 2, 1],
-                                 strides=[1, 2, 2, 2, 1],
-                                 padding="SAME")
-        """
         with tf.variable_scope('conv7') as scope:
             conv7 = self.conv_relu(input_=conv6,
                                    kernel_shape=[3, 3, 3, 256, 512],
                                    biases_shape=[512],
                                    decay_constant=self.param['decay_const'],
                                    scope=scope, padding='SAME',
-                                   stride=2, is_training=is_training,
-                                   keep_prob=keep_prob)
+                                   stride=2)
         print("Conv7", conv7.get_shape())
-        """
-        pool7 = tf.nn.max_pool3d(conv7,
-                                 ksize=[1, 2, 2, 2, 1],
-                                 strides=[1, 2, 2, 2, 1],
-                                 padding="SAME")
-        with tf.variable_scope('conv8') as scope:
-            conv8 = self.conv_relu(input_=conv7,
-                                   kernel_shape=[3, 3, 3, 512, 512],
-                                   biases_shape=[512],
-                                   decay_constant=self.param['decay_const'],
-                                   scope=scope,padding='SAME',
-                                   stride=1, is_training=is_training, keep_prob=keep_prob)
-        print("Conv8", conv8.get_shape())
-        pool8 = tf.nn.max_pool3d(conv8,
-                                 ksize=[1, 2, 2, 2, 1],
-                                 strides=[1, 2, 2, 2, 1],
-                                 padding="SAME")
-        """
+
         return conv7
 
-    def fcn_nw(self, fusion_input, keep_prob, is_training):
+    def fcn_nw(self, fusion_input, keep_prob):
         with tf.variable_scope('fullcn2') as scope:
             vector_per_batch = tf.reshape(fusion_input, [self.param['batch_size'],
                                                   -1])
@@ -358,7 +298,7 @@ class MultimodalCNN:
 
 
 
-    def get_features(self, images, labels, keep_prob, is_training,
+    def get_features(self, images, labels, keep_prob,
                      mode, image_data, label_data):
         with tf.Graph().as_default() as model_graph:
             sess = tf.Session(graph=model_graph)
@@ -368,20 +308,27 @@ class MultimodalCNN:
             #print(model_graph.get_operations())
             if ckpt and ckpt.model_checkpoint_path:
                 #sess.run(tf.initialize_all_variables())
-                saver.restore(sess, ckpt.model_checkpoint_path)
-                layer = model_graph.get_tensor_by_name('Train/conv7/conv7:0')
-                print(type(layer))
                 #print([tensor.name for tensor in model_graph.as_graph_def().node])
-                images = model_graph.get_tensor_by_name('images:0')
-                labels = model_graph.get_tensor_by_name('labels:0')
-                keep_prob = model_graph.get_tensor_by_name('keep_prob:0')
-                is_training = model_graph.get_tensor_by_name('phase:0')
+                saver.restore(sess, ckpt.model_checkpoint_path)
+                '''
+                graph_path = 'Train'+self.modalities[mode]+'/'+self.modalities[mode]+\
+                                            'conv7/'+self.modalities[mode]+'conv7:0'
+                '''
+                graph_path = 'Train/conv7/conv7:0'
+                layer = model_graph.get_tensor_by_name(graph_path)
+                print(type(layer))
+                #images = model_graph.get_tensor_by_name(self.modalities[mode]+'images:0')
+                images = model_graph.get_tensor_by_name('Placeholder:0')
+                #labels = model_graph.get_tensor_by_name(self.modalities[mode]+'labels:0')
+                labels = model_graph.get_tensor_by_name('Placeholder_1:0')
+                #keep_prob = model_graph.get_tensor_by_name(self.modalities[mode]+'keep_prob:0')
+                keep_prob = model_graph.get_tensor_by_name('Placeholder_3:0')
+                #is_training = model_graph.get_tensor_by_name('phase:0')
                 logits = sess.run(layer,
                                 feed_dict={
                                     images: image_data,
                                     labels: label_data,
-                                    keep_prob: 1.0,
-                                    is_training: 1
+                                    keep_prob: 1.0
                                 })
                 print(logits.shape)
                 return logits
@@ -389,16 +336,14 @@ class MultimodalCNN:
                 print("No checkpoint found")
                 return []
 
-    def fuse_modalities(self, dataset, images, labels, keep_prob,
-                       is_training):
+    def fuse_modalities(self, dataset, images, labels, keep_prob):
         features_images = np.array([], np.float)
-        image_data, label_data = dataset.next_batch()
+        patients, image_data, label_data = dataset.next_batch()
         for i in range(0, len(self.modalities)):
             if len(features_images) == 0:
                 features_images = self.get_features(images,
                                                     labels,
                                                     keep_prob,
-                                                    is_training,
                                                     i,
                                                     image_data[i],
                                                     label_data)
@@ -408,16 +353,15 @@ class MultimodalCNN:
                                                 images,
                                                 labels,
                                                 keep_prob,
-                                                is_training,
                                                 i,
                                                 image_data[i],
                                                 label_data
                                             ),
                                             axis=0)
-        return features_images, label_data
+        return patients, features_images, label_data
 
     def evaluation(self, sess, eval_op, dataset, images, fusion_input, labels,
-                   keep_prob, is_training, loss, corr):
+                   keep_prob, loss, corr):
         """
         This function evaluates the accuracy of the model
         Args:
@@ -433,27 +377,45 @@ class MultimodalCNN:
         """
         correct_predictions = 0
         total_seen = 0
-        dataset_size = len(dataset.pos) + len(dataset.neg)
-        for step in range(int(dataset_size / self.param['batch_size'])):
-            feature_images, label_data = self.fuse_modalities(dataset, images,
-                                                  labels, keep_prob,
-                                                is_training)
+        pred_out = {}
+        class_max_size = 0
+        data_size = 0
+        for i in range(0, len(dataset.files)):
+            data_size += len(dataset.files[i])
+            if len(dataset.files[i]) > class_max_size:
+                class_max_size = len(dataset.files[i])
+        num_steps = int(class_max_size / (self.param['batch_size']/len(dataset.files)))
+        if class_max_size%(self.param['batch_size']/len(dataset.files)) != 0:
+            num_steps += 1
+        print("Num steps:", num_steps, "Data size:", data_size)
+        for step in range(num_steps):
+            patients, feature_images, label_data = self.fuse_modalities(dataset,
+                                                              images,
+                                                              labels,
+                                                              keep_prob)
             predictions, correct_, loss_ = sess.run([eval_op, corr, loss],
                                                     feed_dict={
                                                         fusion_input: feature_images,
                                                         labels: label_data,
-                                                        keep_prob: 1.0,
-                                                        is_training: 1
+                                                        keep_prob: 1.0
                                                     })
             print("Prediction:", correct_)
             correct_predictions += predictions
-
+            pred_out.update(dict(zip(patients, correct_)))
             total_seen += self.param['batch_size']
             print("Accuracy until " + str(total_seen) + " data points is: " +
                   str(correct_predictions / total_seen))
             print("loss", loss_)
-        accuracy = correct_predictions / total_seen
-        return accuracy
+            #print("logits:", logits_)
+        accuracy_ = 0
+        for key, value in pred_out.items():
+            if value == True:
+                accuracy_ += 1
+        accuracy_ /= len(pred_out)
+        print("Accuracy of ", len(pred_out)," images is ", accuracy_)
+        # TODO: Add accuracy [2]
+        sys.stdout.flush()
+        return accuracy_
 
     def train(self, train_data, validation_data, test):
         """
@@ -485,24 +447,34 @@ class MultimodalCNN:
                                           initializer=tf.constant_initializer(
                                               0),
                                           trainable=False)
-            train_size = len(train_data.pos) + len(train_data.neg)
-            num_batches_epoch = int(train_size / self.param['batch_size'])
-            num_steps = num_batches_epoch * self.param['num_epochs']
+            class_max_size = 0
+            train_size = 0
+            for i in range(0, len(train_data.files)):
+                train_size += len(train_data.files[i])
+                if len(train_data.files[i]) > class_max_size:
+                    class_max_size = len(train_data.files[i])
 
+            num_batches_epoch = int(class_max_size / (self.param['batch_size']/len(train_data.files)))
+            if class_max_size%(self.param['batch_size']/len(train_data.files)) != 0:
+                num_batches_epoch += 1
+            num_steps = num_batches_epoch * self.param['num_epochs']
+            print("Numsteps: ", num_steps, "Num batches/epoch:", num_batches_epoch, "Trainsize", train_size)
+            sys.stdout.flush()
+            '''
             learn_rate = tf.train.exponential_decay(
                 self.param['learning_rate'], global_step,
                 decay_steps=num_steps, decay_rate=self.param['decay_factor'],
                 staircase=True)
+            '''
             opt = tf.train.AdamOptimizer(
                 learning_rate=self.param['learning_rate'])
 
-            tf.summary.scalar('learning_rate', learn_rate)
+            #tf.summary.scalar('learning_rate', learn_rate)
 
             with tf.variable_scope(tf.get_variable_scope()):
                 with tf.name_scope('Train') as scope:
                     logits = self.fcn_nw(fusion_input,
-                                            keep_prob,
-                                            is_training)
+                                            keep_prob)
 
                     _ = self.inference_loss(logits, labels)
 
@@ -543,8 +515,8 @@ class MultimodalCNN:
                     if step % (5 * num_batches_epoch) == 0:
                         init_lr /= 2
 
-                    features_images, label_data = self.fuse_modalities(
-                        train_data, images, labels, keep_prob, is_training)
+                    _, features_images, label_data = self.fuse_modalities(
+                        train_data, images, labels, keep_prob)
                     summary_values, _, loss_value = sess.run(
                         [summary_op,
                          train_op,
@@ -552,25 +524,24 @@ class MultimodalCNN:
                         feed_dict={
                             fusion_input: features_images,
                             labels: label_data,
-                            keep_prob: self.param['keep_prob'],
-                            is_training: 1
+                            keep_prob: self.param['keep_prob']
                         }
                     )
-                    accuracy_ = sess.run(accuracy,
+
+                    if step % 10 == 0:
+                        accuracy_ = sess.run(accuracy,
                                          feed_dict={
                                              fusion_input: features_images,
                                              labels: label_data,
-                                             keep_prob: 1.0,
-                                             is_training: 1
+                                             keep_prob: 1.0
                                          })
-                    print("Train Batch Accuracy. %g step %d" % (accuracy_,
-                                                                step))
-                    duration = time.time() - start_time
+                        print("Train Batch Accuracy. %g step %d" % (accuracy_,
+                                                                    step))
+                        duration = time.time() - start_time
 
-                    assert not np.isnan(
-                        loss_value), 'Model diverged with loss = NaN'
+                        assert not np.isnan(
+                            loss_value), 'Model diverged with loss = NaN'
 
-                    if step % 5 == 0:
                         num_examples_per_step = self.param['batch_size']
                         examples_per_sec = num_examples_per_step / duration
                         sec_per_batch = duration
@@ -579,7 +550,8 @@ class MultimodalCNN:
                                       'examples/sec; %.3f sec/batch)')
                         print(format_str % (datetime.now(), step, loss_value,
                                             examples_per_sec, sec_per_batch))
-                    summary_writer.add_summary(summary_values, step)
+                        sys.stdout.flush()
+                    #summary_writer.add_summary(summary_values, step)
 
                     # Saving Model Checkpoints for evaluation
                     if step % num_batches_epoch == 0 or (step + 1) == num_steps:
@@ -587,6 +559,13 @@ class MultimodalCNN:
                             checkpoint_path = self.param['checkpoint_path'] + \
                                               'fusion_model.ckpt'
                             saver.save(sess, checkpoint_path, global_step=step)
+                            print("Saving checkpoint model...")
+                            sys.stdout.flush()
+                        for i in range(0, len(validation_data.files)):
+                            validation_data.batch_index[i] = 0
+                            validation_data.shuffle()
+                            train_data.batch_index[i] = 0
+                            train_data.shuffle()
 
                         # Evaluate against the training data.
                         print("Step: %d Training accuracy: %g " %
@@ -597,7 +576,6 @@ class MultimodalCNN:
                                                      fusion_input=fusion_input,
                                                      labels=labels,
                                                      keep_prob=keep_prob,
-                                                     is_training=is_training,
                                                      corr=correct_prediction,
                                                      loss=total_loss)))
 
@@ -610,10 +588,13 @@ class MultimodalCNN:
                                                      fusion_input=fusion_input,
                                                      labels=labels,
                                                      keep_prob=keep_prob,
-                                                     is_training=is_training,
                                                      corr=correct_prediction,
                                                      loss=total_loss)))
-
+                        for i in range(0, len(validation_data.files)):
+                            validation_data.batch_index[i] = 0
+                            validation_data.shuffle()
+                            train_data.batch_index[i] = 0
+                            train_data.shuffle()
                     sys.stdout.flush()
                 '''
                 if test == True:

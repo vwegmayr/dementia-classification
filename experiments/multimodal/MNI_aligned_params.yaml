@@ -12,7 +12,7 @@ parameters:
     mode1: 'UHG_T1'
     mode2: 'UHG_T2'
     mode3: 'UHG_DTI_FA'
-    meta_mode1: './output/UHG_T1/model.ckpt-895.meta'
+    meta_mode1: './output/UHG_T1/model.ckpt-2.meta'
     meta_mode2: './output/UHG_T2/model.ckpt-811.meta'
     meta_mode3: './output/UHG_DTI_FA/model.ckpt-1449.meta'
     ckpt_mode1: './output/UHG_T1/'

@@ -94,10 +94,9 @@ class FusionDataInput:
             for filename in class_files:
                 for index in range(0, len(self.modalities)):
                     mode_file = self.mode_folders[index]+\
-                                filename.rstrip('/',1)[1]
-                    batch_files.append(mode_file)
+                                filename.rsplit('/',1)[1]
                     mri_image = nb.load(mode_file)
-                    print(self.name+" "+mode_file+" "+str(class_label), flush=True)
+                    #print(self.name+" "+mode_file+" "+str(class_label), flush=True)
                     #mri_image = mri_image.get_data().flatten()
                     #mri_image = self.normalize(mri_image)
                     mri_image = mri_image.get_data()
@@ -111,7 +110,7 @@ class FusionDataInput:
                         batch_images[index] = np.append(batch_images[index],
                                                        mri_image,
                                                   axis=0)
-                    batch_labels[iterate][class_label] = 1 #class_label: 0 - NC, 1 - MCI, 2 - AD
-                    iterate += 1
-        
+                batch_labels[iterate][class_label] = 1 #class_label: 0 - NC, 1 - MCI, 2 - AD
+                iterate += 1
+            batch_files += class_files
         return batch_files, batch_images, batch_labels

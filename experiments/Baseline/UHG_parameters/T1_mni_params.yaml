@@ -4,21 +4,23 @@ parameters:
     depth: 91
     height: 109
     width: 91
-    batch_size: 10
-    num_epochs: 28 
+    mode: 'UHG_T1'
+    batch_size: 12
+    num_epochs: 30 
     learning_rate: 0.000005
     decay_factor: 0.9
     decay_const: 0.005
-    checkpoint_path: './output/T1_brain/MNI/'
-    summary_path: './output/T1_brain/MNI/'
+    checkpoint_path: './output/UHG_T1/'
+    summary_path: './output/UHG_T1/'
     keep_prob: 0.3
     classes: 2
-  regex: r"-T1_brain_subsampled\.nii\.gz$"
-  split_on: '-T1_brain_subsampled.nii.gz'
+  regex: '_normalized\.nii\.gz'
+  split_on: '_normalized.nii.gz'
 data_paths:
   datadir: '/local/home/saitharaju/T1_UHG/normalized/'
   logdir: '/local/home/saitharaju/Data/'
-  #norm_mean_var: './Dictionaries/cv/'
-  class_labels: './experiments/T1_Baseline/patients.pkl'
+  norm_mean_var: './Dictionaries/cv/'
+  class_labels: './experiments/patients.pkl'
   valid_data: './experiments/validation_patients.pkl'
+  train_data: './Dictionaries/UHG_T1/train_patients.pkl'
   validation_split: 0.15

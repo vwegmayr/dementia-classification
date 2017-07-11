@@ -7,11 +7,11 @@ parameters:
     mode: 'UHG_T2'
     batch_size: 12
     num_epochs: 28 
-    learning_rate: 0.0000005
+    learning_rate: 0.000005
     decay_factor: 0.9
     decay_const: 0.005
-    checkpoint_path: './output/T2/'
-    summary_path: './output/T2/'
+    checkpoint_path: './output/T2/5e6/'
+    summary_path: './output/T2/5e6/'
     keep_prob: 0.3
     classes: 2
   regex: '_normalized\.nii\.gz'
