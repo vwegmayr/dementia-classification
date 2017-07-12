@@ -39,8 +39,6 @@ In order to test the setup,
 
     make test && make quality
 
-They should both run OK.
-
 You can also build and view the initial documentation with
 
 .. code-block:: shell

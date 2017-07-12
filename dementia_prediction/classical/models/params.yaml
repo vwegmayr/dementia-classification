@@ -1,9 +1,0 @@
-paths:
-  data: '/home/rams/4_Sem/Thesis/Data/'
-  brain_mask: '/home/rams/4_Sem/Thesis/Data/T1_brain_subsampled/CON018/CON018-T1_brain_mask_subsampled.nii.gz'
-  fisher_all: '/home/rams/4_Sem/Thesis/PyCharmProjects/mri-fusion/classical/fisher_10/'
-  out_features_path: '/home/rams/4_Sem/Thesis/PyCharmProjects/mri-fusion/classical/features/'
-  out_fisher_path: '/home/rams/4_Sem/Thesis/PyCharmProjects/mri-fusion/classical/fisher'
-  patient_path: './patients.pkl'
-  valid_path: './valid_patients_CBF.pkl'
-  mode: 'DTI_FA'
