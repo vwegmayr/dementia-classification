@@ -11,7 +11,7 @@ import math
 from pathos.multiprocessing import ProcessPool
 from dementia_prediction.config_wrapper import Config
 from dementia_prediction.data_input_new import DataInput
-from dementia_prediction.cnn_baseline.adni_baseline import CNN
+from dementia_prediction.cnn_baseline.baseline_balanced import CNN
 
 # Parse the parameter file
 config = Config()
@@ -38,7 +38,6 @@ nc_valid_filenames = []
 mci_valid_filenames = []
 ad_valid_filenames = []
 
-print(valid_patients)
 for directory in os.walk(paths['datadir']):
     # Walk inside the directory
     for file in directory[2]:
@@ -52,18 +51,24 @@ for directory in os.walk(paths['datadir']):
             if patient_code in train_patients:
                 if train_patients[patient_code] == 0:
                     nc_train_filenames.append(input_file)
+                    print("Train: 0 ", input_file)
                 if train_patients[patient_code] == 1:
+                    print("Train: 1 ", input_file)
                     mci_train_filenames.append(input_file)
                 if train_patients[patient_code] == 2:
+                    print("Train: 2 ", input_file)
                     ad_train_filenames.append(input_file)
             if patient_code in valid_patients:
                 if valid_patients[patient_code] == 0:
+                    print("Valid: 0 ", input_file)
                     nc_valid_filenames.append(input_file)
                 if valid_patients[patient_code] == 1 or\
                    valid_patients[patient_code] == 4:
+                    print("Valid: 1 ", input_file)
                     mci_valid_filenames.append(input_file)
                 if valid_patients[patient_code] == 2 or\
                    valid_patients[patient_code] == 5:
+                    print("Valid: 2 ", input_file)
                     ad_valid_filenames.append(input_file)
 
 print("Train Data: NC: ", len(nc_train_filenames), "MCI: ", len(mci_train_filenames), "AD:", len(ad_train_filenames))

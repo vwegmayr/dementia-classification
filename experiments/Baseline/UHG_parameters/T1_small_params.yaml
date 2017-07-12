@@ -14,7 +14,7 @@ parameters:
     summary_path: './output/smalldata/T1_brain/'
     keep_prob: 0.3
     classes: 2
-  regex: r"-T1_brain_norm_subsampled\.nii\.gz$"
+  regex: '-T1_brain_norm_subsampled\.nii\.gz'
   split_on: '-T1_brain_norm_subsampled.nii.gz'
 data_paths:
   datadir: '/local/home/saitharaju/NIFTI/small_dataset/T1_brain_subsampled/'

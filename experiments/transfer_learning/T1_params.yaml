@@ -4,6 +4,7 @@ parameters:
     depth: 91 
     height: 109
     width: 91
+    mode: 'ADNI_T1'
     batch_size: 12 
     num_epochs: 50 
     learning_rate: 0.000005
@@ -13,7 +14,10 @@ parameters:
     checkpoint_path: './output/T1_brain/transfer/newlabels/5e6/'
     summary_path: './output/T1_brain/transfer/newlabels/5e6/'
     keep_prob: 0.3
+    classes: 2
   tl: 'finetune'
+  regex: '_normalized\.nii\.gz'
+  split_on: '_normalized.nii.gz'
 data_paths:
   datadir: '/local/home/saitharaju/T1_UHG/normalized/'
   logdir: '/local/home/saitharaju/Data/'

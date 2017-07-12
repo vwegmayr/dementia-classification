@@ -64,5 +64,6 @@ validation_data = DataInput(params=params,
                             var=0)
 cnn_model = CNN(params=params)
 if params['tl'] == 'finetune':
+    print("Finetuning...")
     cnn_model = FinetuneCNN(params=params)
 cnn_model.train(train_data, validation_data, True)

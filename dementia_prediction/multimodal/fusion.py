@@ -310,28 +310,28 @@ class MultimodalCNN:
                 #sess.run(tf.initialize_all_variables())
                 #print([tensor.name for tensor in model_graph.as_graph_def().node])
                 saver.restore(sess, ckpt.model_checkpoint_path)
-                '''
+                
                 graph_path = 'Train'+self.modalities[mode]+'/'+self.modalities[mode]+\
                                             'conv7/'+self.modalities[mode]+'conv7:0'
                 '''
                 graph_path = 'Train/conv7/conv7:0'
+                ''' 
                 layer = model_graph.get_tensor_by_name(graph_path)
-                print(type(layer))
-                #images = model_graph.get_tensor_by_name(self.modalities[mode]+'images:0')
-                images = model_graph.get_tensor_by_name('Placeholder:0')
-                #labels = model_graph.get_tensor_by_name(self.modalities[mode]+'labels:0')
-                labels = model_graph.get_tensor_by_name('Placeholder_1:0')
-                #keep_prob = model_graph.get_tensor_by_name(self.modalities[mode]+'keep_prob:0')
-                keep_prob = model_graph.get_tensor_by_name('Placeholder_3:0')
+                images = model_graph.get_tensor_by_name(self.modalities[mode]+'images:0')
+                #images = model_graph.get_tensor_by_name('Placeholder:0')
+                labels = model_graph.get_tensor_by_name(self.modalities[mode]+'labels:0')
+                #labels = model_graph.get_tensor_by_name('Placeholder_1:0')
+                keep_prob = model_graph.get_tensor_by_name(self.modalities[mode]+'keep_prob:0')
+                #keep_prob = model_graph.get_tensor_by_name('Placeholder_3:0')
                 #is_training = model_graph.get_tensor_by_name('phase:0')
-                logits = sess.run(layer,
+                layer_ = sess.run(layer,
                                 feed_dict={
                                     images: image_data,
                                     labels: label_data,
                                     keep_prob: 1.0
                                 })
-                print(logits.shape)
-                return logits
+                print("Combining a layer with shape:", layer_.shape)
+                return layer_
             else:
                 print("No checkpoint found")
                 return []

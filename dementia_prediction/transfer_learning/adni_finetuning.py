@@ -136,7 +136,7 @@ class FinetuneCNN:
         """
         print(images.get_shape())
         # Change 7,7,7 to 5,5,5
-        with tf.variable_scope('conv1_a') as scope:
+        with tf.variable_scope(self.param['mode']+'conv1_a') as scope:
             conv1_a = self.conv_relu(input_=images,
                                      kernel_shape=[5, 5, 5, 1, 10],
                                      biases_shape=[10],
@@ -145,7 +145,7 @@ class FinetuneCNN:
                                      stride=2, is_training=is_training,
                                      keep_prob=keep_prob)
         print("Conv1_a", conv1_a.get_shape())
-        with tf.variable_scope('conv1_b') as scope:
+        with tf.variable_scope(self.param['mode']+'conv1_b') as scope:
             conv1_b = self.conv_relu(input_=images,
                                      kernel_shape=[6, 6, 6, 1, 10],
                                      biases_shape=[10],
@@ -154,7 +154,7 @@ class FinetuneCNN:
                                      stride=2, is_training=is_training,
                                      keep_prob=keep_prob)
         print("Conv1_b", conv1_b.get_shape())
-        with tf.variable_scope('conv1_c') as scope:
+        with tf.variable_scope(self.param['mode']+'conv1_c') as scope:
             conv1_c = self.conv_relu(input_=images,
                                      kernel_shape=[7, 7, 7, 1, 10],
                                      biases_shape=[10],
@@ -170,7 +170,7 @@ class FinetuneCNN:
                                  padding="SAME")
         """
         conv1 = tf.concat([conv1_a, conv1_b, conv1_c], 4)
-        with tf.variable_scope('conv2') as scope:
+        with tf.variable_scope(self.param['mode']+'conv2') as scope:
             conv2 = self.conv_relu(input_=conv1,
                                    kernel_shape=[5, 5, 5, 30, 32],
                                    biases_shape=[32],
@@ -185,7 +185,7 @@ class FinetuneCNN:
                                  strides=[1, 2, 2, 2, 1],
                                  padding="SAME")
         """
-        with tf.variable_scope('conv3') as scope:
+        with tf.variable_scope(self.param['mode']+'conv3') as scope:
             conv3 = self.conv_relu(input_=conv2,
                                    kernel_shape=[5, 5, 5, 32, 64],
                                    biases_shape=[64],
@@ -201,7 +201,7 @@ class FinetuneCNN:
                                  padding="SAME")
 
         """
-        with tf.variable_scope('conv4') as scope:
+        with tf.variable_scope(self.param['mode']+'conv4') as scope:
             conv4 = self.conv_relu(input_=conv3,
                                    kernel_shape=[3, 3, 3, 64, 64],
                                    biases_shape=[64],
@@ -217,7 +217,7 @@ class FinetuneCNN:
                                  strides=[1, 2, 2, 2, 1],
                                  padding="SAME")
         """
-        with tf.variable_scope('conv5') as scope:
+        with tf.variable_scope(self.param['mode']+'conv5') as scope:
             conv5 = self.conv_relu(input_=conv4,
                                    kernel_shape=[3, 3, 3, 64, 128],
                                    biases_shape=[128],
@@ -232,7 +232,7 @@ class FinetuneCNN:
                                  strides=[1, 2, 2, 2, 1],
                                  padding="SAME")
         """
-        with tf.variable_scope('conv6') as scope:
+        with tf.variable_scope(self.param['mode']+'conv6') as scope:
             conv6 = self.conv_relu(input_=conv5,
                                    kernel_shape=[3, 3, 3, 128, 256],
                                    biases_shape=[256],
@@ -247,7 +247,7 @@ class FinetuneCNN:
                                  strides=[1, 2, 2, 2, 1],
                                  padding="SAME")
         """
-        with tf.variable_scope('conv7') as scope:
+        with tf.variable_scope(self.param['mode']+'conv7') as scope:
             conv7 = self.conv_relu(input_=conv6,
                                    kernel_shape=[3, 3, 3, 256, 512],
                                    biases_shape=[512],
@@ -274,7 +274,7 @@ class FinetuneCNN:
                                  strides=[1, 2, 2, 2, 1],
                                  padding="SAME")
         """
-        with tf.variable_scope('fullcn2') as scope:
+        with tf.variable_scope(self.param['mode']+'fullcn2') as scope:
             vector_per_batch = tf.reshape(conv7, [self.param['batch_size'],
                                                   -1])
             weights = self.weight_decay_variable(name="weights",
@@ -294,7 +294,7 @@ class FinetuneCNN:
         #fullcn_drop = tf.reshape(fullcn_drop, [-1, 512])
         #fullcn_drop = transfer_input
         '''
-        with tf.variable_scope('logits') as scope:
+        with tf.variable_scope(self.param['mode']+'logits') as scope:
             weights = self.weight_decay_variable(name="weights",
                                                  shape=[512, 2],
                                                  decay_constant=self.param[
@@ -336,11 +336,6 @@ class FinetuneCNN:
 
     def get_features(self, sess, saver):
         with tf.Graph().as_default() as model_graph:
-            meta_path = 'model.ckpt-57455.meta'
-            #meta_path = 'model.ckpt-32563.meta'
-            #meta_path = 'model.ckpt-17499.meta'
-            #meta_path = 'model.ckpt-1.meta'
-            #saver = tf.train.import_meta_graph(self.param['transfer_checkpoint_path']+meta_path)
             ckpath = self.param['transfer_checkpoint_path']
             ckpt = tf.train.get_checkpoint_state(ckpath)
             print(ckpath, ckpt)
@@ -423,6 +418,7 @@ class FinetuneCNN:
             validation_data: validation data to test the accuracy of the model.
 
         """
+        mode = self.param['mode']
         with tf.Graph().as_default():
 
             images = tf.placeholder(dtype=tf.float32,
@@ -430,17 +426,19 @@ class FinetuneCNN:
                                            self.param['depth'],
                                            self.param['height'],
                                            self.param['width'],
-                                           1])
+                                           1], name=mode+'images')
             labels = tf.placeholder(dtype=tf.int8,
-                                    shape=[None, 2])
+                                    shape=[None, self.param['classes']],
+                                    name=mode+'labels')
             #transfer_input = tf.placeholder(dtype=tf.float32,
             #                              shape=[None, 1, 1, 1, 512])
             transfer_input = tf.placeholder(dtype=tf.float32,
-                                          shape=[None, 512])
-            keep_prob = tf.placeholder(tf.float32)
-            var_lr = tf.placeholder(tf.float32)
-            is_training = tf.placeholder(tf.bool, name='phase')
-            global_step = tf.get_variable(name='global_step',
+                                          shape=[None, 512],
+                                          name=mode+'transfer_input')
+            keep_prob = tf.placeholder(tf.float32, name=mode+'keep_prob')
+            var_lr = tf.placeholder(tf.float32, name=mode+'var_lr')
+            is_training = tf.placeholder(tf.bool, name=mode+'phase')
+            global_step = tf.get_variable(name=mode+'global_step',
                                           shape=[],
                                           initializer=tf.constant_initializer(
                                               0),
@@ -467,7 +465,7 @@ class FinetuneCNN:
             tf.summary.scalar('learning_rate', learn_rate)
 
             with tf.variable_scope(tf.get_variable_scope()):
-                with tf.name_scope('Train') as scope:
+                with tf.name_scope('Train'+mode) as scope:
                     logits = self.inference(images, keep_prob,
                                             is_training)
 

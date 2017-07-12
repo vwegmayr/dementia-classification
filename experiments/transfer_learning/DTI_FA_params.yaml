@@ -4,6 +4,7 @@ parameters:
     depth: 91 
     height: 109
     width: 91
+    mode: 'ADNI_DTI_FA'
     batch_size: 12 
     num_epochs: 40 
     learning_rate: 0.000005
@@ -14,6 +15,9 @@ parameters:
     summary_path: './output/DTI_FA/transfer/finetuning/5e6/'
     keep_prob: 0.3
     meta_path: 'model.ckpt-2659.meta'
+    classes: 2
+  regex: '_normalized\.nii\.gz'
+  split_on: '_normalized.nii.gz'
   tl: 'finetune'
 data_paths:
   datadir: '/local/UHG_DTI_FA_normalized/train/'

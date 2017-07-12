@@ -65,39 +65,139 @@ Run
 
 The MR Images are downloaded to the local disk into a new 'Data' folder.
 
-## Preprocessing
-
-Preprocessing script will extract the brain from an MR Image and align all the extracted brains
-to a study specific template. For this purpose, choose any one of the patients code as the reference
-image in `ref_path` of `experiments/T1_preprocessing/params.yaml`. (By default it is CON018)
-
-Preprocessing requires installation of FSL tool. Please follow the setup instructions
-`here <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation/Linux/>`_ to download and install FSL.
-
-Each image takes around 10minutes to complete the whole preprocessing pipeline. You can avoid
-the preprocessing step if your data folder already contains the `-T1_brain_rotation_x/y/z.nii.gz`
-images.
-
-To preprocess the data, run
-
-.. code-block:: shell
-
-        python experiments/T1_preprocessing/t1_preprocess.py experiments/T1_preprocessing/params.yaml
-
-
-## 3D CNN
-
-Sumatra can be used to track the records of the experiments that are run on 3D CNN baseline model.
-Setup sumatra with
 
 .. code-block:: shell
 
        make smt
 
-To try the 3D CNN model, run
+
+The checkpoint and summary files can be viewed `here <http://192.33.91.83:9183/dementia_prediction/>`_
+
+## Preprocessing
+
+Raw images of any modality should be preprocessed first. The following preprocessing steps can be followed:
+1. Using FSL bet with parameter f as 0.35, remove the skull and extract the brain from the raw image.
+2. Align all the brain images to the standard MNI 152 2mm brain template.
+3. Smooth the aligned brain images by applying Gaussian Smoothing with sigma 1mm.
+4. Divide the dataset into training and validation data.
+5. Normalize the dataset using the following three steps:
+   a. Normalize each image individually to mean 0 and variance 1.
+   b. Normalize each pixel across the dataset. For this purpose find the mean and variance of each pixel for
+      the training data only to avoid double dipping.
+   c. Normalize each image individually again to mean 0 and variance 1.
+
+## Model Training Tutorial
+
+For this tutorial, we will use the preprocessed toy data in ./Data/ folder. 
+Data conventions: 
+UHG - University Hospitals Geneva [6 images each in training and validation data balanced across 2 classes]
+ADNI - Alzeimers Disease Neuroimaging Iniative [6 images each in training and validation data balanced across 3 classes]
+There are three modalities of data from each institute - T1, T2 and DTI FA
+Models Conventions:
+Baseline model - 3D CNN model trained on any single modality.
+Fusion model - 3D CNN model trained by fusing baseline models.
+Transfer finetuning model - 3D CNN model trained by transferring weights from another model and finetuned.
+
+UHG T1 Baseline model:
 
 .. code-block:: shell
 
-	smt run -m experiments/T1_Baseline/t1_3dcnn.py experiments/T1_Baseline/params.yaml
+       python experiments/Baseline/3dcnn.py experiments/Baseline/toy_parameters/UHG_T1_params.yaml
 
-The checkpoint and summary files can be viewed `here <http://192.33.91.83:9183/dementia_prediction/>`_ 
+       
+This model uses the UHG T1 data from ./Data/UHG_T1 directory and stores the baseline model in ./output/UHG_T1
+
+UHG DTI FA Baseline model:
+
+.. code-block:: shell
+
+       python experiments/Baseline/3dcnn.py experiments/Baseline/toy_parameters/UHG_DTI_FA_params.yaml
+
+This model uses the UHG DTI FA data from ./Data/UHG_DTI_FA directory and stores the baseline model in ./output/UHG_DTI_FA
+
+UHG T2 Baseline model:
+
+.. code-block:: shell
+
+       python experiments/Baseline/3dcnn.py experiments/Baseline/toy_parameters/UHG_T2_params.yaml
+
+This model uses the UHG T2 data from ./Data/UHG_T2 directory and stores the baseline model in ./output/UHG_T2
+
+Fusion model:
+
+.. code-block:: shell
+
+       python experiments/multimodal/multimodal.py experiments/multimodal/toy_parameters/MNI_aligned_params.yaml
+
+This model uses the models stored in ./output/UH_T2 ./output/UHG_T1 ./output/UHG_DTI_FA as fixed feature extractors
+and then trains a fully connected layer on top of it and stores the model in ./output/UHG_multimodal/
+
+## Transfer Learning
+
+To improve the performance of the baselines and the fusion model, transfer learning is employed by using ADNI dataset.
+For transfer learning, initially all the inidividual modality baselines are run and then the weights are transferred
+to the UHG baselines and the UHG models are further finetuned.
+
+ADNI T1 Baseline model:
+
+.. code-block:: shell
+
+       python experiments/Baseline/adni_3dcnn.py experiments/Baseline/toy_parameters/ADNI_T1_params.yaml
+
+This model uses the ADNI T1 data from ./Data/ADNI_T1 directory and stores the baseline model in ./output/ADNI_T1
+
+UHG T1 Transfer finetuning model:
+
+.. code-block:: shell
+
+       python experiments/transfer_learning/tl.py experiments/transfer_learning/toy_parameters/T1_params.yaml
+
+This model uses the model stored in ./output/ADNI_T1 and finetunes using the data from ./Data/UHG_T1 and stores the
+finetuned model at ./output/UHG_T1/transfer
+
+UHG T2 Baseline model:
+
+.. code-block:: shell
+
+       python experiments/Baseline/adni_3dcnn.py experiments/Baseline/toy_parameters/ADNI_T2_params.yaml
+
+This model uses the ADNI T2 data from ./Data/ADNI_T2 directory and stores the baseline model in ./output/ADNI_T2
+
+UHG T2 Transfer finetuning model:
+
+.. code-block:: shell
+
+       python experiments/transfer_learning/tl.py experiments/transfer_learning/toy_parameters/T2_params.yaml
+
+This model uses the model stored in ./output/ADNI_T2 and finetunes using the data from ./Data/UHG_T2 and stores the
+finetuned model at ./output/UHG_T2/transfer
+
+UHG DTI FA Baseline model:
+
+.. code-block:: shell
+
+       python experiments/Baseline/adni_3dcnn.py experiments/Baseline/toy_parameters/ADNI_DTI_FA_params.yaml
+
+This model uses the ADNI DTI FA data from ./Data/ADNI_DTI_FA directory and stores the baseline model in ./output/ADNI_DTI_FA
+
+UHG DTI FA Transfer finetuning model:
+
+.. code-block:: shell
+
+       python experiments/transfer_learning/tl.py experiments/transfer_learning/toy_parameters/DTI_FA_params.yaml
+
+This model uses the model stored in ./output/ADNI_DTI_FA and finetunes using the data from ./Data/UHG_DTI_FA and stores the
+finetuned model at ./output/UHG_DTI_FA/transfer
+
+Fusing the transferred models:
+
+The transferred and finetuned models can be fused as fixed feature extractors similar to fusing the individual baselines
+
+.. code-block:: shell
+
+       python experiments/multimodal/multimodal_fusion.py experiments/multimodal/toy_parameters/transfer_toptuning.yaml
+
+This model uses the transferred finetuned models stored in ./output/UHG_T1/transfer ./output/UHG_T2/transfer ./output/UHG_DTI_FA/transfer
+and trains a fully connected layer on top of it and stores the model in ./output/UHG_multimodal/transfer_toptuning/
+Better performance is expected to be from finetuning this fusion model rather than toptuning.
+

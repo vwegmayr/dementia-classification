@@ -29,10 +29,12 @@ IMG_SIZE = params['cnn']['depth']*params['cnn']['height']*params['cnn'][
 patients_dict = pickle.load(open(paths['class_labels'], 'rb'))
 valid_patients = pickle.load(open(paths['valid_data'], 'rb'))
 train_patients = pickle.load(open(paths['train_data'], 'rb'))
-print("Total number of patients:",  len(patients_dict),
-      "Validation patients count: ", len(valid_patients),
-      "Train patients count:", len(train_patients))
-print(len(train_patients), len(valid_patients), len(set(train_patients+valid_patients)))
+print("Total number of patients in Dict:",  len(patients_dict),
+      "Validation patients count in Dict: ", len(valid_patients),
+      "Train patients count in Dict:", len(train_patients))
+print("Train patients found:", len(train_patients),
+      "Validation patients found:", len(valid_patients),
+      "Total patients found:", len(set(train_patients+valid_patients)))
 # If data is not normalized, we can normalize it on-the-fly
 # Mean and Variance of the training data
 global_mean = [0 for i in range(0, IMG_SIZE)]
@@ -150,15 +152,14 @@ for directory in os.walk(paths['datadir']):
         if re.search(regex, input_file):
             pat_code = input_file.rsplit(params['split_on'])
             patient_code = pat_code[0].rsplit('/', 1)[1]
-            if patient_code in patients_dict and patient_code in train_patients:
+            if patient_code in train_patients:
                 if patients_dict[patient_code] == 0:
                     s_train_filenames.append(input_file)
                 if patients_dict[patient_code] == 1:
                     p_train_filenames.append(input_file)
-            if patient_code in patients_dict and patient_code in valid_patients:
+            if patient_code in valid_patients:
                 if patients_dict[patient_code] == 0:
                     s_valid_filenames.append(input_file)
-                    print(input_file)
                 if patients_dict[patient_code] == 1:
                     p_valid_filenames.append(input_file)
 

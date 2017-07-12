@@ -1,0 +1,36 @@
+
+parameters:
+  cnn:
+    depth: 91
+    height: 109
+    width: 91
+    batch_size: 6 
+    num_epochs: 10 
+    learning_rate: 0.00005
+    decay_factor: 0.9
+    decay_const: 0.001
+    mode1: 'UHG_T1'
+    mode2: 'UHG_T2'
+    mode3: 'UHG_DTI_FA'
+    meta_mode1: './output/UHG_T1/model.ckpt-9.meta'
+    meta_mode2: './output/UHG_T2/model.ckpt-9.meta'
+    meta_mode3: './output/UHG_DTI_FA/model.ckpt-9.meta'
+    ckpt_mode1: './output/UHG_T1/'
+    ckpt_mode2: './output/UHG_T2/'
+    ckpt_mode3: './output/UHG_DTI_FA/'
+    checkpoint_path: './output/UHG_multimodal/'
+    summary_path: './output/UHG_multimodal/'
+    keep_prob: 0.3
+  regex: '_normalized\.nii\.gz'
+  split_on: '_normalized.nii.gz'
+  mode_folder1: './Data/UHG_T1/'
+  mode_folder2: './Data/UHG_T2/'
+  mode_folder3: './Data/UHG_DTI_FA/'
+data_paths:
+  datadir: './Data/UHG_T1/'
+  logdir: './Data/'
+  norm_mean_var: './Dictionaries/'
+  class_labels: './Dictionaries/patients.pkl'
+  valid_data: './Dictionaries/validation_patients.pkl'
+  train_data: './Dictionaries/train_patients.pkl'
+  validation_split: 0.15

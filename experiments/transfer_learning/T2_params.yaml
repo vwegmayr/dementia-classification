@@ -4,6 +4,7 @@ parameters:
     depth: 91 
     height: 109
     width: 91
+    mode: 'ADNI_T2'
     batch_size: 12 
     num_epochs: 40 
     learning_rate: 0.000005
@@ -14,6 +15,9 @@ parameters:
     summary_path: './output/T2/transfer/finetuning/5e6/'
     keep_prob: 0.3
     meta_path: 'model.ckpt-9883.meta'
+    classes: 2
+  regex: '_normalized\.nii\.gz'
+  split_on: '_normalized.nii.gz'
   tl: 'finetune'
 data_paths:
   datadir: '/local/UHG_T2_normalized/train/'
