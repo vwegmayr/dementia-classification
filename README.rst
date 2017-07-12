@@ -134,7 +134,7 @@ Fusion model:
 
 .. code-block:: shell
 
-       python experiments/multimodal/multimodal.py experiments/multimodal/toy_parameters/MNI_aligned_params.yaml
+       python experiments/multimodal/multimodal_fusion.py experiments/multimodal/toy_parameters/MNI_aligned_params.yaml
 
 This model uses the models stored in ./output/UH_T2 ./output/UHG_T1 ./output/UHG_DTI_FA as fixed feature extractors
 and then trains a fully connected layer on top of it and stores the model in ./output/UHG_multimodal/
@@ -151,7 +151,7 @@ ADNI T1 Baseline model:
 
 .. code-block:: shell
 
-       python experiments/Baseline/adni_3dcnn.py experiments/Baseline/toy_parameters/ADNI_T1_params.yaml
+       python experiments/Baseline/adni_3dcnn.py experiments/Baseline/toy_parameters/adni_t1_params.yaml
 
 This model uses the ADNI T1 data from ./Data/ADNI_T1 directory and stores the baseline model in ./output/ADNI_T1
 
@@ -170,7 +170,7 @@ UHG T2 Baseline model:
 
 .. code-block:: shell
 
-       python experiments/Baseline/adni_3dcnn.py experiments/Baseline/toy_parameters/ADNI_T2_params.yaml
+       python experiments/Baseline/adni_3dcnn.py experiments/Baseline/toy_parameters/adni_t2_params.yaml
 
 This model uses the ADNI T2 data from ./Data/ADNI_T2 directory and stores the baseline model in ./output/ADNI_T2
 
@@ -189,7 +189,7 @@ UHG DTI FA Baseline model:
 
 .. code-block:: shell
 
-       python experiments/Baseline/adni_3dcnn.py experiments/Baseline/toy_parameters/ADNI_DTI_FA_params.yaml
+       python experiments/Baseline/adni_3dcnn.py experiments/Baseline/toy_parameters/adni_dti_fa_params.yaml
 
 This model uses the ADNI DTI FA data from ./Data/ADNI_DTI_FA directory and stores the baseline model in ./output/ADNI_DTI_FA
 
