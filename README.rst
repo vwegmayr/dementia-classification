@@ -80,7 +80,7 @@ e. Normalize the dataset using the following three steps:
    c. Normalize each image individually again to mean 0 and variance 1.
 
 Model Training Tutorial
-----------------------
+======================
 
 For this tutorial, we will use the preprocessed toy data in ./Data/ folder.
 
@@ -102,6 +102,7 @@ Fusion model - 3D CNN model trained by fusing baseline models.
 Transfer finetuning model - 3D CNN model trained by transferring weights from another model and finetuned.
 
 UHG T1 Baseline model:
+---------------------
 
 .. code-block:: shell
 
@@ -111,6 +112,7 @@ UHG T1 Baseline model:
 This model uses the UHG T1 data from ./Data/UHG_T1 directory and stores the baseline model in ./output/UHG_T1
 
 UHG DTI FA Baseline model:
+-------------------------
 
 .. code-block:: shell
 
@@ -119,6 +121,7 @@ UHG DTI FA Baseline model:
 This model uses the UHG DTI FA data from ./Data/UHG_DTI_FA directory and stores the baseline model in ./output/UHG_DTI_FA
 
 UHG T2 Baseline model:
+---------------------
 
 .. code-block:: shell
 
@@ -127,6 +130,7 @@ UHG T2 Baseline model:
 This model uses the UHG T2 data from ./Data/UHG_T2 directory and stores the baseline model in ./output/UHG_T2
 
 Fusion model:
+------------
 
 .. code-block:: shell
 
@@ -135,13 +139,15 @@ Fusion model:
 This model uses the models stored in ./output/UH_T2 ./output/UHG_T1 ./output/UHG_DTI_FA as fixed feature extractors
 and then trains a fully connected layer on top of it and stores the model in ./output/UHG_multimodal/
 
-## Transfer Learning
+Transfer Learning
+=================
 
 To improve the performance of the baselines and the fusion model, transfer learning is employed by using ADNI dataset.
 For transfer learning, initially all the inidividual modality baselines are run and then the weights are transferred
 to the UHG baselines and the UHG models are further finetuned.
 
 ADNI T1 Baseline model:
+----------------------
 
 .. code-block:: shell
 
@@ -150,6 +156,7 @@ ADNI T1 Baseline model:
 This model uses the ADNI T1 data from ./Data/ADNI_T1 directory and stores the baseline model in ./output/ADNI_T1
 
 UHG T1 Transfer finetuning model:
+--------------------------------
 
 .. code-block:: shell
 
@@ -159,6 +166,7 @@ This model uses the model stored in ./output/ADNI_T1 and finetunes using the dat
 finetuned model at ./output/UHG_T1/transfer
 
 UHG T2 Baseline model:
+----------------------
 
 .. code-block:: shell
 
@@ -167,6 +175,7 @@ UHG T2 Baseline model:
 This model uses the ADNI T2 data from ./Data/ADNI_T2 directory and stores the baseline model in ./output/ADNI_T2
 
 UHG T2 Transfer finetuning model:
+--------------------------------
 
 .. code-block:: shell
 
@@ -176,6 +185,7 @@ This model uses the model stored in ./output/ADNI_T2 and finetunes using the dat
 finetuned model at ./output/UHG_T2/transfer
 
 UHG DTI FA Baseline model:
+-------------------------
 
 .. code-block:: shell
 
@@ -184,6 +194,7 @@ UHG DTI FA Baseline model:
 This model uses the ADNI DTI FA data from ./Data/ADNI_DTI_FA directory and stores the baseline model in ./output/ADNI_DTI_FA
 
 UHG DTI FA Transfer finetuning model:
+------------------------------------
 
 .. code-block:: shell
 
@@ -193,6 +204,7 @@ This model uses the model stored in ./output/ADNI_DTI_FA and finetunes using the
 finetuned model at ./output/UHG_DTI_FA/transfer
 
 Fusing the transferred models:
+-----------------------------
 
 The transferred and finetuned models can be fused as fixed feature extractors similar to fusing the individual baselines
 
