@@ -54,15 +54,7 @@ Install the package with
     pip install -e .
 
 
-Before running any experiments, the MR Images dataset need to be downloaded and preprocessed.
-Run
-
-.. code-block:: shell
-
-    make data
-
-The MR Images are downloaded to the local disk into a new 'Data' folder.
-
+To setup sumatra
 
 .. code-block:: shell
 
@@ -71,29 +63,42 @@ The MR Images are downloaded to the local disk into a new 'Data' folder.
 
 The checkpoint and summary files can be viewed `here <http://192.33.91.83:9183/dementia_prediction/>`_
 
-## Preprocessing
+Preprocessing
+------------
 
 Raw images of any modality should be preprocessed first. The following preprocessing steps can be followed:
-1. Using FSL bet with parameter f as 0.35, remove the skull and extract the brain from the raw image.
-2. Align all the brain images to the standard MNI 152 2mm brain template.
-3. Smooth the aligned brain images by applying Gaussian Smoothing with sigma 1mm.
-4. Divide the dataset into training and validation data.
-5. Normalize the dataset using the following three steps:
+
+a. Using FSL bet with parameter f as 0.35, remove the skull and extract the brain from the raw image.
+b. Align all the brain images to the standard MNI 152 2mm brain template.
+c. Smooth the aligned brain images by applying Gaussian Smoothing with sigma 1mm.
+d. Divide the dataset into training and validation data.
+e. Normalize the dataset using the following three steps:
+
    a. Normalize each image individually to mean 0 and variance 1.
    b. Normalize each pixel across the dataset. For this purpose find the mean and variance of each pixel for
       the training data only to avoid double dipping.
    c. Normalize each image individually again to mean 0 and variance 1.
 
-## Model Training Tutorial
+Model Training Tutorial
+----------------------
 
-For this tutorial, we will use the preprocessed toy data in ./Data/ folder. 
+For this tutorial, we will use the preprocessed toy data in ./Data/ folder.
+
 Data conventions: 
+
 UHG - University Hospitals Geneva [6 images each in training and validation data balanced across 2 classes]
+
 ADNI - Alzeimers Disease Neuroimaging Iniative [6 images each in training and validation data balanced across 3 classes]
+
+
 There are three modalities of data from each institute - T1, T2 and DTI FA
+
 Models Conventions:
+
 Baseline model - 3D CNN model trained on any single modality.
+
 Fusion model - 3D CNN model trained by fusing baseline models.
+
 Transfer finetuning model - 3D CNN model trained by transferring weights from another model and finetuned.
 
 UHG T1 Baseline model:
