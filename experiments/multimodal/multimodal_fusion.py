@@ -10,8 +10,8 @@ import math
 
 from pathos.multiprocessing import ProcessPool
 from dementia_prediction.config_wrapper import Config
-from dementia_prediction.fusion_input_new import FusionDataInput
-from dementia_prediction.multimodal.fusion_finetuning import FusionFinetuneCNN
+from dementia_prediction.fusion_input import FusionDataInput
+from dementia_prediction.multimodal.finetuning import FusionFinetuneCNN
 from dementia_prediction.multimodal.fusion import MultimodalCNN
 
 # Parse the parameter file
@@ -164,8 +164,10 @@ train_data = FusionDataInput(params=config.config.get('parameters'), data=train,
                        name='train', mean=0, var=0)
 validation_data = FusionDataInput(params=config.config.get('parameters'),
                             data=validation, name='valid', mean=0, var=0)
-# T1 baseline CNN model
 cnn_model = MultimodalCNN(params=config.config.get('parameters'))
+if params['fusion'] == 'finetune':
+    print("Finetuning...")
+    cnn_model = FusionFinetuneCNN(params=config.config.get('parameters'))
 cnn_model.train(train_data, validation_data, True)
 
 

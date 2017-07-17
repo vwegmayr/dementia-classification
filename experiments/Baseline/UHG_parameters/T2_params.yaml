@@ -10,8 +10,8 @@ parameters:
     learning_rate: 0.000005
     decay_factor: 0.9
     decay_const: 0.005
-    checkpoint_path: './output/T2/5e6/'
-    summary_path: './output/T2/5e6/'
+    checkpoint_path: './output/UHG_T2_random/'
+    summary_path: './output/UHG_T2_random/'
     keep_prob: 0.3
     classes: 2
   regex: '_normalized\.nii\.gz'

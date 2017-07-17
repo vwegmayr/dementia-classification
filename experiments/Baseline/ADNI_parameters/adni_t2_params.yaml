@@ -6,12 +6,12 @@ parameters:
     width: 91
     mode: 'ADNI_T2'
     batch_size: 12 
-    num_epochs: 80 
+    num_epochs: 30 
     learning_rate: 0.000005
     decay_factor: 0.9
     decay_const: 0.005
-    checkpoint_path: './output/T2/ADNI/5e6/80epochs/'
-    summary_path: './output/T2/ADNI/5e6/80epochs/'
+    checkpoint_path: './output/ADNI_T2_random/'
+    summary_path: './output/ADNI_T2_random/'
     keep_prob: 0.3
     classes: 3
   regex: '_normalized\.nii\.gz'

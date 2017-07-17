@@ -4,24 +4,22 @@ parameters:
     depth: 91 
     height: 109
     width: 91
-    mode: 'ADNI_DTI_FA'
+    mode: 'ADNI_T1'
     batch_size: 12 
-    num_epochs: 40 
+    num_epochs: 28 
     learning_rate: 0.000005
     decay_factor: 0.9
     decay_const: 0.005
-    transfer_checkpoint_path: './output/ADNI_DTI_FA_random/'
-    checkpoint_path: './output/UHG_DTI_FA_random/transfer/'
-    summary_path: './output/UHG_DTI_FA/transfer/'
+    transfer_checkpoint_path: './output/ADNI_T1_random/'
+    checkpoint_path: './output/UHG_T1_random/transfer/'
+    summary_path: './output/UHG_T1_random/transfer/'
     keep_prob: 0.3
-    meta_path: 'model.ckpt-2659.meta'
     classes: 2
   regex: '_normalized\.nii\.gz'
   split_on: '_normalized.nii.gz'
   tl: 'finetune'
 data_paths:
-  datadir: '/local/UHG_DTI_FA_normalized/train/'
-  logdir: '/local/home/saitharaju/Data/'
+  datadir: '/local/home/saitharaju/T1_UHG/normalized/'
   regex: '_normalized\.nii\.gz'
   split_on: '_normalized.nii.gz'
   class_labels: './Dictionaries/patients.pkl'

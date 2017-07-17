@@ -10,7 +10,7 @@ import math
 
 from pathos.multiprocessing import ProcessPool
 from dementia_prediction.config_wrapper import Config
-from dementia_prediction.data_input_new import DataInput
+from dementia_prediction.data_input import DataInput
 from dementia_prediction.cnn_baseline.baseline_balanced import CNN
 
 # Parse the parameter file

@@ -10,10 +10,10 @@ parameters:
     fusion_channels: 90 
     fusion_layer: 'conv1'
     batch_size: 12
-    num_epochs: 30 
+    num_epochs: 40 
     learning_rate: 0.00005
     decay_factor: 0.9
-    decay_const: 0.01
+    decay_const: 0.001
     mode1: 'UHG_T1'
     mode2: 'UHG_T2'
     mode3: 'UHG_DTI_FA'
@@ -23,15 +23,15 @@ parameters:
     ckpt_mode1: './output/UHG_T1_random/'
     ckpt_mode2: './output/UHG_T2_random/'
     ckpt_mode3: './output/UHG_DTI_FA_random/'
-    checkpoint_path: './output/UHG_multimodal/rand_5e5_conv1_fusion_decay_const_0.01/'
-    summary_path: './output/UHG_multimodal/rand_5e5_conv1_fusion_decay_const_0.01/'
+    checkpoint_path: './output/UHG_multimodal/finetune/rand_5e5_conv1_rerun/'
+    summary_path: './output/UHG_multimodal/finetune/rand_5e5_conv1_rerun/'
     keep_prob: 0.3
   regex: '_normalized\.nii\.gz'
   split_on: '_normalized.nii.gz'
   mode_folder1: '/local/home/saitharaju/T1_UHG/normalized/'
   mode_folder2: '/local/UHG_T2_normalized/train/'
   mode_folder3: '/local/UHG_DTI_FA_normalized/train/'
-  fusion: 'toptuning'
+  fusion: 'finetune'
 data_paths:
   datadir: '/local/home/saitharaju/T1_UHG/normalized/'
   logdir: '/local/home/saitharaju/Data/'

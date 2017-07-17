@@ -60,10 +60,14 @@ class DataInput:
         batch_files = []
         # Increment batch_size/num_class for each class
         inc = int(self.params['batch_size']/self.num_classes)
+        inc = 1
         # If unbalanced, then increment the images of a specific class, say 0
         unbalanced = self.params['batch_size']%self.num_classes
-
-        for class_label in range(0, self.num_classes):
+        batch_order = []
+        for i in range(0, self.num_classes):
+            batch_order += [i for j in range(0,int(self.params['batch_size']/self.num_classes))]
+        random.shuffle(batch_order)
+        for class_label in batch_order:
             start = self.batch_index[class_label]
             class_files = []
             if unbalanced != 0 and class_label == 0:

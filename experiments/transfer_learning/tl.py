@@ -5,7 +5,7 @@ import re
 import argparse
 
 from dementia_prediction.config_wrapper import Config
-from dementia_prediction.data_input_new import DataInput
+from dementia_prediction.data_input import DataInput
 from dementia_prediction.transfer_learning.adni_toptuning import CNN
 from dementia_prediction.transfer_learning.adni_finetuning import FinetuneCNN
 

@@ -47,7 +47,7 @@ class MultimodalCNN:
         Returns: the initialized weights created with given shape
 
         """
-        with tf.device('/cpu:0'):
+        with tf.device('/gpu:0'):
             var = tf.get_variable(name=name,
                                   shape=shape,
                                   initializer=initializer)
@@ -95,8 +95,9 @@ class MultimodalCNN:
         return weights
 
 
-    def conv_relu(self, input_, kernel_shape, biases_shape, decay_constant,
-                  scope, padding, stride):
+    def conv_relu(self, input_, kernel_shape, biases_shape, scope, 
+                  decay_constant=None,
+                  padding='SAME', stride=2):
         """
         This function builds a convolution layer of the 3D CNN
         Args:
@@ -117,7 +118,8 @@ class MultimodalCNN:
             Feature maps of the convolution layer
 
         """
-
+        if decay_constant == None:
+            decay_constant = self.param['decay_const']
         weights = self.weight_decay_variable("weights", kernel_shape,
                                              decay_constant)
         tf.summary.histogram('weights', weights)
@@ -153,86 +155,69 @@ class MultimodalCNN:
         with tf.variable_scope('conv1_a') as scope:
             conv1_a = self.conv_relu(input_=images,
                                      kernel_shape=[5, 5, 5, 3, 10],
-                                     biases_shape=[10],
-                                     decay_constant=self.param['decay_const'],
-                                     scope=scope, padding='SAME',
-                                     stride=2)
+                                     biases_shape=[10],scope=scope)
         print("Conv1_a", conv1_a.get_shape())
         with tf.variable_scope('conv1_b') as scope:
             conv1_b = self.conv_relu(input_=images,
                                      kernel_shape=[6, 6, 6, 3, 10],
                                      biases_shape=[10],
-                                     decay_constant=self.param['decay_const'],
-                                     scope=scope, padding='SAME',
-                                     stride=2)
+                                     scope=scope)
         print("Conv1_b", conv1_b.get_shape())
         with tf.variable_scope('conv1_c') as scope:
             conv1_c = self.conv_relu(input_=images,
                                      kernel_shape=[7, 7, 7, 3, 10],
                                      biases_shape=[10],
-                                     decay_constant=self.param['decay_const'],
-                                     scope=scope, padding='SAME',
-                                     stride=2)
+                                     scope=scope)
         print("Conv1_c", conv1_c.get_shape())
         conv1 = tf.concat([conv1_a, conv1_b, conv1_c], 4)
+        return conv1
+
+    def fcn_nw(self, fusion_input, keep_prob):
+        print("Fusion input:", fusion_input.shape)
         with tf.variable_scope('conv2') as scope:
-            conv2 = self.conv_relu(input_=conv1,
-                                   kernel_shape=[5, 5, 5, 30, 32],
-                                   biases_shape=[32],
-                                   decay_constant=self.param['decay_const'],
-                                   scope=scope, padding='SAME',
-                                   stride=2)
+            conv2 = self.conv_relu(input_=fusion_input,
+                                   kernel_shape=[5, 5, 5, self.param['fusion_channels'], 90],
+                                   biases_shape=[90],
+                                   scope=scope)
         print("Conv2", conv2.get_shape())
         with tf.variable_scope('conv3') as scope:
             conv3 = self.conv_relu(input_=conv2,
-                                   kernel_shape=[5, 5, 5, 32, 64],
-                                   biases_shape=[64],
-                                   decay_constant=self.param['decay_const'],
-                                   scope=scope, padding='SAME',
-                                   stride=2)
+                                   kernel_shape=[5, 5, 5, 90, 100],
+                                   biases_shape=[100],
+                                   scope=scope)
         print("Conv3", conv3.get_shape())
         with tf.variable_scope('conv4') as scope:
             conv4 = self.conv_relu(input_=conv3,
-                                   kernel_shape=[3, 3, 3, 64, 64],
-                                   biases_shape=[64],
-                                   decay_constant=self.param['decay_const'],
-                                   scope=scope, padding='SAME',
-                                   stride=2)
+                                   kernel_shape=[3, 3, 3, 100, 110],
+                                   biases_shape=[110],
+                                   scope=scope)
         print("Conv4", conv4.get_shape())
 
         with tf.variable_scope('conv5') as scope:
             conv5 = self.conv_relu(input_=conv4,
-                                   kernel_shape=[3, 3, 3, 64, 128],
+                                   kernel_shape=[3, 3, 3, 110, 128],
                                    biases_shape=[128],
-                                   decay_constant=self.param['decay_const'],
-                                   scope=scope, padding='SAME',
-                                   stride=2)
+                                   scope=scope)
         print("Conv5", conv5.get_shape())
         with tf.variable_scope('conv6') as scope:
             conv6 = self.conv_relu(input_=conv5,
                                    kernel_shape=[3, 3, 3, 128, 256],
                                    biases_shape=[256],
-                                   decay_constant=self.param['decay_const'],
-                                   scope=scope, padding='SAME',
-                                   stride=2)
+                                   scope=scope)
         print("Conv6", conv6.get_shape())
         with tf.variable_scope('conv7') as scope:
             conv7 = self.conv_relu(input_=conv6,
                                    kernel_shape=[3, 3, 3, 256, 512],
                                    biases_shape=[512],
-                                   decay_constant=self.param['decay_const'],
-                                   scope=scope, padding='SAME',
-                                   stride=2)
+                                   scope=scope)
         print("Conv7", conv7.get_shape())
 
-        return conv7
 
-    def fcn_nw(self, fusion_input, keep_prob):
         with tf.variable_scope('fullcn2') as scope:
-            vector_per_batch = tf.reshape(fusion_input, [self.param['batch_size'],
+            vector_per_batch = tf.reshape(conv7, [self.param['batch_size'],
                                                   -1])
             weights = self.weight_decay_variable(name="weights",
-                                                 shape=[1536, 512],
+                                                 shape=[512,512],
                                                  decay_constant=self.param[
                                                      'decay_const'])
             biases = self.variable_on_cpu(name="biases",
@@ -306,17 +291,11 @@ class MultimodalCNN:
             ckpt = tf.train.get_checkpoint_state(self.checkpoints[mode])
             #print(ckpath, ckpt)
             #print(model_graph.get_operations())
+            fuse_layer = self.param['fusion_layer']
             if ckpt and ckpt.model_checkpoint_path:
                 #sess.run(tf.initialize_all_variables())
                 #print([tensor.name for tensor in model_graph.as_graph_def().node])
                 saver.restore(sess, ckpt.model_checkpoint_path)
-                
-                graph_path = 'Train'+self.modalities[mode]+'/'+self.modalities[mode]+\
-                                            'conv7/'+self.modalities[mode]+'conv7:0'
-                '''
-                graph_path = 'Train/conv7/conv7:0'
-                ''' 
-                layer = model_graph.get_tensor_by_name(graph_path)
                 images = model_graph.get_tensor_by_name(self.modalities[mode]+'images:0')
                 #images = model_graph.get_tensor_by_name('Placeholder:0')
                 labels = model_graph.get_tensor_by_name(self.modalities[mode]+'labels:0')
@@ -324,12 +303,39 @@ class MultimodalCNN:
                 keep_prob = model_graph.get_tensor_by_name(self.modalities[mode]+'keep_prob:0')
                 #keep_prob = model_graph.get_tensor_by_name('Placeholder_3:0')
                 #is_training = model_graph.get_tensor_by_name('phase:0')
-                layer_ = sess.run(layer,
-                                feed_dict={
-                                    images: image_data,
-                                    labels: label_data,
-                                    keep_prob: 1.0
-                                })
+                layer_ = []
+                if fuse_layer == 'conv1':
+                    fusion_layer = fuse_layer + '_a' 
+                    layer_path_a = 'Train'+self.modalities[mode]+'/'+self.modalities[mode]+\
+                                                fusion_layer+'/'+self.modalities[mode]+\
+                                                fusion_layer+':0'
+                    fusion_layer = fuse_layer + '_b' 
+                    layer_path_b = 'Train'+self.modalities[mode]+'/'+self.modalities[mode]+\
+                                                fusion_layer+'/'+self.modalities[mode]+\
+                                                fusion_layer+':0'
+                    fusion_layer = fuse_layer + '_c' 
+                    layer_path_c = 'Train'+self.modalities[mode]+'/'+self.modalities[mode]+\
+                                                fusion_layer+'/'+self.modalities[mode]+\
+                                                fusion_layer+':0'
+                    layer_a = model_graph.get_tensor_by_name(layer_path_a)
+                    layer_b = model_graph.get_tensor_by_name(layer_path_b)
+                    layer_c = model_graph.get_tensor_by_name(layer_path_c)
+                    layer_a_, layer_b_, layer_c_ = sess.run([layer_a, layer_b, layer_c],
+                                    feed_dict={
+                                        images: image_data,
+                                        labels: label_data,
+                                        keep_prob: 1.0
+                                    })
+                    layer_ = np.concatenate([layer_a_, layer_b_, layer_c_], 4)
+                else:
+                    layer_path = 'Train/conv7/conv7:0'
+                    layer = model_graph.get_tensor_by_name(layer_path)
+                    layer_ = sess.run(layer,
+                                    feed_dict={
+                                        images: image_data,
+                                        labels: label_data,
+                                        keep_prob: 1.0
+                                    })
                 print("Combining a layer with shape:", layer_.shape)
                 return layer_
             else:
@@ -357,7 +363,7 @@ class MultimodalCNN:
                                                 image_data[i],
                                                 label_data
                                             ),
-                                            axis=0)
+                                            axis=4)
         return patients, features_images, label_data
 
     def evaluation(self, sess, eval_op, dataset, images, fusion_input, labels,
@@ -438,7 +444,10 @@ class MultimodalCNN:
             labels = tf.placeholder(dtype=tf.int8,
                                     shape=[None, 2])
             fusion_input = tf.placeholder(dtype=tf.float32,
-                                          shape=[None, 1, 1, 1, 512])
+                                          shape=[None, self.param['fusion_depth'],
+                                                       self.param['fusion_height'],
+                                                       self.param['fusion_width'],
+                                                       self.param['fusion_channels']])
             keep_prob = tf.placeholder(tf.float32)
             var_lr = tf.placeholder(tf.float32)
             is_training = tf.placeholder(tf.bool, name='phase')

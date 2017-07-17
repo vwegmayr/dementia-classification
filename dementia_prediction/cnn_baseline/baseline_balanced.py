@@ -34,7 +34,7 @@ class CNN:
         Returns: the initialized weights created with given shape
 
         """
-        with tf.device('/cpu:0'):
+        with tf.device('/gpu:0'):
             var = tf.get_variable(name=name,
                                   shape=shape,
                                   initializer=initializer)
@@ -429,6 +429,7 @@ class CNN:
                     if step%(5*num_batches_epoch) == 0:
                         init_lr /= 2
                     _, image_data, label_data = train_data.next_batch()
+                    print("Shape of images:", image_data.shape)
                     summary_values, _, loss_value = sess.run(
                         [summary_op,
                          train_op,

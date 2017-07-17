@@ -22,7 +22,14 @@ class FusionFinetuneCNN:
 
     def __init__(self, params):
         self.param = params['cnn']
-        self.modalities = {0 : 'T1_brain', 1 : 'CBF', 2 : 'DTI_FA'}
+        self.modalities = {0: params['cnn']['mode1'],
+                           1: params['cnn']['mode2'],
+                           2: params['cnn']['mode3']
+                           }
+        self.checkpoints = {0 : params['cnn']['ckpt_mode1'],
+                           1: params['cnn']['ckpt_mode2'],
+                           2: params['cnn']['ckpt_mode3']
+                           }
 
     @classmethod
     def variable_on_cpu(cls, name, shape, initializer):
@@ -36,7 +43,7 @@ class FusionFinetuneCNN:
         Returns: the initialized weights created with given shape
 
         """
-        with tf.device('/cpu:0'):
+        with tf.device('/gpu:0'):
             var = tf.get_variable(name=name,
                                   shape=shape,
                                   initializer=initializer)
@@ -85,7 +92,7 @@ class FusionFinetuneCNN:
 
 
     def conv_relu(self, input_, kernel_shape, biases_shape, decay_constant,
-                  scope, padding, stride, is_training, keep_prob):
+                  scope, padding, stride):
         """
         This function builds a convolution layer of the 3D CNN
         Args:
@@ -124,8 +131,8 @@ class FusionFinetuneCNN:
         act_relu = tf.nn.relu(features=pre_activation, name=scope.name)
         # drop = tf.nn.dropout(act_relu, keep_prob)
         return act_relu
-    '''
-    def inference(self, images, keep_prob, is_training):
+
+    def inference(self, images, keep_prob, mode):
         """
         This function builds the 3D Convolutional Neural Network architecture
         Args:
@@ -135,33 +142,31 @@ class FusionFinetuneCNN:
             Logits calculated at the last layer of the 3D CNN.
         """
         print(images.get_shape())
+        prefix = self.modalities[mode]
         # Change 7,7,7 to 5,5,5
-        with tf.variable_scope('conv1_a') as scope:
+        with tf.variable_scope(prefix+'conv1_a') as scope:
             conv1_a = self.conv_relu(input_=images,
-                                     kernel_shape=[5, 5, 5, 3, 10],
+                                     kernel_shape=[5, 5, 5, 1, 10],
                                      biases_shape=[10],
                                      decay_constant=self.param['decay_const'],
                                      scope=scope, padding='SAME',
-                                     stride=2, is_training=is_training,
-                                     keep_prob=keep_prob)
+                                     stride=2)
         print("Conv1_a", conv1_a.get_shape())
-        with tf.variable_scope('conv1_b') as scope:
+        with tf.variable_scope(prefix+'conv1_b') as scope:
             conv1_b = self.conv_relu(input_=images,
-                                     kernel_shape=[6, 6, 6, 3, 10],
+                                     kernel_shape=[6, 6, 6, 1, 10],
                                      biases_shape=[10],
                                      decay_constant=self.param['decay_const'],
                                      scope=scope, padding='SAME',
-                                     stride=2, is_training=is_training,
-                                     keep_prob=keep_prob)
+                                     stride=2)
         print("Conv1_b", conv1_b.get_shape())
-        with tf.variable_scope('conv1_c') as scope:
+        with tf.variable_scope(prefix+'conv1_c') as scope:
             conv1_c = self.conv_relu(input_=images,
-                                     kernel_shape=[7, 7, 7, 3, 10],
+                                     kernel_shape=[7, 7, 7, 1, 10],
                                      biases_shape=[10],
                                      decay_constant=self.param['decay_const'],
                                      scope=scope, padding='SAME',
-                                     stride=2, is_training=is_training,
-                                     keep_prob=keep_prob)
+                                     stride=2)
         print("Conv1_c", conv1_c.get_shape())
         """
         pool1 = tf.nn.max_pool3d(conv1,
@@ -170,14 +175,17 @@ class FusionFinetuneCNN:
                                  padding="SAME")
         """
         conv1 = tf.concat([conv1_a, conv1_b, conv1_c], 4)
-        with tf.variable_scope('conv2') as scope:
-            conv2 = self.conv_relu(input_=conv1,
-                                   kernel_shape=[5, 5, 5, 30, 32],
-                                   biases_shape=[32],
+        return conv1
+    
+    def fcn_nw(self, fusion_input, keep_prob):
+        prefix = 'Fusion'
+        with tf.variable_scope(prefix+'conv2') as scope:
+            conv2 = self.conv_relu(input_=fusion_input,
+                                   kernel_shape=[5, 5, 5, 90, 100],
+                                   biases_shape=[100],
                                    decay_constant=self.param['decay_const'],
                                    scope=scope, padding='SAME',
-                                   stride=2, is_training=is_training,
-                                   keep_prob=keep_prob)
+                                   stride=2)
         print("Conv2", conv2.get_shape())
         """
         pool2 = tf.nn.max_pool3d(conv2,
@@ -185,14 +193,13 @@ class FusionFinetuneCNN:
                                  strides=[1, 2, 2, 2, 1],
                                  padding="SAME")
         """
-        with tf.variable_scope('conv3') as scope:
+        with tf.variable_scope(prefix+'conv3') as scope:
             conv3 = self.conv_relu(input_=conv2,
-                                   kernel_shape=[5, 5, 5, 32, 64],
-                                   biases_shape=[64],
+                                   kernel_shape=[5, 5, 5, 100, 110],
+                                   biases_shape=[110],
                                    decay_constant=self.param['decay_const'],
                                    scope=scope, padding='SAME',
-                                   stride=2, is_training=is_training,
-                                   keep_prob=keep_prob)
+                                   stride=2)
         print("Conv3", conv3.get_shape())
         """
         pool3 = tf.nn.max_pool3d(conv3,
@@ -201,14 +208,13 @@ class FusionFinetuneCNN:
                                  padding="SAME")
 
         """
-        with tf.variable_scope('conv4') as scope:
+        with tf.variable_scope(prefix+'conv4') as scope:
             conv4 = self.conv_relu(input_=conv3,
-                                   kernel_shape=[3, 3, 3, 64, 64],
-                                   biases_shape=[64],
+                                   kernel_shape=[3, 3, 3, 110, 120],
+                                   biases_shape=[120],
                                    decay_constant=self.param['decay_const'],
                                    scope=scope, padding='SAME',
-                                   stride=2, is_training=is_training,
-                                   keep_prob=keep_prob)
+                                   stride=2)
         print("Conv4", conv4.get_shape())
 
         """
@@ -217,14 +223,13 @@ class FusionFinetuneCNN:
                                  strides=[1, 2, 2, 2, 1],
                                  padding="SAME")
         """
-        with tf.variable_scope('conv5') as scope:
+        with tf.variable_scope(prefix+'conv5') as scope:
             conv5 = self.conv_relu(input_=conv4,
-                                   kernel_shape=[3, 3, 3, 64, 128],
+                                   kernel_shape=[3, 3, 3, 120, 128],
                                    biases_shape=[128],
                                    decay_constant=self.param['decay_const'],
                                    scope=scope, padding='SAME',
-                                   stride=2, is_training=is_training,
-                                   keep_prob=keep_prob)
+                                   stride=2)
         print("Conv5", conv5.get_shape())
         """
         pool5 = tf.nn.max_pool3d(conv5,
@@ -232,14 +237,13 @@ class FusionFinetuneCNN:
                                  strides=[1, 2, 2, 2, 1],
                                  padding="SAME")
         """
-        with tf.variable_scope('conv6') as scope:
+        with tf.variable_scope(prefix+'conv6') as scope:
             conv6 = self.conv_relu(input_=conv5,
                                    kernel_shape=[3, 3, 3, 128, 256],
                                    biases_shape=[256],
                                    decay_constant=self.param['decay_const'],
                                    scope=scope, padding='SAME',
-                                   stride=2, is_training=is_training,
-                                   keep_prob=keep_prob)
+                                   stride=2)
         print("Conv6", conv6.get_shape())
         """
         pool6 = tf.nn.max_pool3d(conv6,
@@ -247,92 +251,20 @@ class FusionFinetuneCNN:
                                  strides=[1, 2, 2, 2, 1],
                                  padding="SAME")
         """
-        with tf.variable_scope('conv7') as scope:
+        with tf.variable_scope(prefix+'conv7') as scope:
             conv7 = self.conv_relu(input_=conv6,
                                    kernel_shape=[3, 3, 3, 256, 512],
                                    biases_shape=[512],
                                    decay_constant=self.param['decay_const'],
                                    scope=scope, padding='SAME',
-                                   stride=2, is_training=is_training,
-                                   keep_prob=keep_prob)
+                                   stride=2)
         print("Conv7", conv7.get_shape())
-        """
-        pool7 = tf.nn.max_pool3d(conv7,
-                                 ksize=[1, 2, 2, 2, 1],
-                                 strides=[1, 2, 2, 2, 1],
-                                 padding="SAME")
-        with tf.variable_scope('conv8') as scope:
-            conv8 = self.conv_relu(input_=conv7,
-                                   kernel_shape=[3, 3, 3, 512, 512],
-                                   biases_shape=[512],
-                                   decay_constant=self.param['decay_const'],
-                                   scope=scope,padding='SAME',
-                                   stride=1, is_training=is_training, keep_prob=keep_prob)
-        print("Conv8", conv8.get_shape())
-        pool8 = tf.nn.max_pool3d(conv8,
-                                 ksize=[1, 2, 2, 2, 1],
-                                 strides=[1, 2, 2, 2, 1],
-                                 padding="SAME")
-        """
-        return conv7
-    '''
-    def get_features(self, sess, model_graph, mode):
-        with tf.name_scope('fusion'+self.modalities[mode]):
-            #meta_path = '/model.ckpt-895.meta'
-            meta_path = '/model.ckpt-2.meta'
-            #print("Mode:", mode, flush=True)
-            layer_path = 'TrainT1/T1conv7/T1conv7:0'
-            im_path = 'T1'
-            if self.modalities[mode] == 'DTI_FA':
-                layer_path = 'TrainDTI/DTIconv7/DTIconv7:0'
-                im_path = 'DTI'
-            if self.modalities[mode] == 'CBF':
-                #meta_path = '/model.ckpt-639.meta'
-                layer_path = 'TrainCBF/CBFconv7/CBFconv7:0'
-                im_path = 'CBF'
-            # Either run baslnies with add_to_coolection
-            if mode == 1 or mode == 2:
-                #saver = tf.train.Saver([self.modalities[mode]+v.name.lstrip("T1")[:-2] for v in tf.global_variables() if 'T1' in v.name])
-                trainable = {self.modalities[mode]+v.name.lstrip('T1')[:-2]: v for v in tf.trainable_variables() if 'T1' in v.name}
-                print("Trainable:", trainable)
-                #saver = tf.train.Saver(trainable)
-                saver = tf.train.import_meta_graph(self.param['checkpoint_path']+
-                                               self.modalities[mode]+'/'+meta_path)
 
-            if mode == 0:
-                saver = tf.train.import_meta_graph(self.param['checkpoint_path']+
-                                               self.modalities[mode]+'/'+meta_path)
-            ckpath = self.param['checkpoint_path'] + self.modalities[mode] + '/'
-            ckpt = tf.train.get_checkpoint_state(ckpath)
-            print(ckpath, ckpt)
-            #print(model_graph.get_operations())
-            if ckpt and ckpt.model_checkpoint_path:
-                #sess.run(tf.initialize_all_variables())
-                print([tensor.name for tensor in model_graph.as_graph_def().node])
-                saver.restore(sess, ckpt.model_checkpoint_path)
-                #print("Trainable:",tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='TrainT1'))
-                layer = model_graph.get_tensor_by_name(layer_path)
-                images = model_graph.get_tensor_by_name(im_path+'images:0')
-                print(layer)
-                #tf.reset_default_graph()
-                return images, layer
-
-
-
-    def fcn_nw(self, sess, model_graph, keep_prob):
-        images1, feature1 = self.get_features(sess, model_graph, 0)
-        #tf.reset_default_graph()
-        images2, feature2 = self.get_features(sess, model_graph, 1)
-        #tf.reset_default_graph()
-        images3, feature3 = self.get_features(sess, model_graph, 2)
-
-        fusion_input = tf.concat([feature1, feature2, feature3], axis=0)
-        print("Shape:", fusion_input.shape)
-        with tf.variable_scope('fullcn2') as scope:
-            vector_per_batch = tf.reshape(fusion_input, [self.param['batch_size'],
+        with tf.variable_scope('TLFusionfullcn2') as scope:
+            vector_per_batch = tf.reshape(conv7, [self.param['batch_size'],
                                                   -1])
             weights = self.weight_decay_variable(name="weights",
-                                                 shape=[1536, 512],
+                                                 shape=[512, 512],
                                                  decay_constant=self.param[
                                                      'decay_const'])
             biases = self.variable_on_cpu(name="biases",
@@ -342,23 +274,7 @@ class FusionFinetuneCNN:
             pre_activation2 = tf.matmul(vector_per_batch, weights) + biases
             fullcn = tf.nn.relu(pre_activation2, name=scope.name)
             fullcn_drop = tf.nn.dropout(fullcn, keep_prob)
-            # bn2 = tf.contrib.layers.batch_norm(pre_activation2,
-            #                                  center=True, scale=True,
-            #                                  is_training=is_training)
-            """
-            fullcn2 = tf.nn.relu(pre_activation2,
-                                name=scope.name)
-            fullcn2_drop = tf.nn.dropout(fullcn2, keep_prob)
-            """
-            """
-            fullcn2 = tf.nn.relu(pre_activation2,
-                                 name=scope.name)
-            bn2 = tf.contrib.layers.batch_norm(fullcn2_drop,
-                                              center=True, scale=True,
-                                              is_training=is_training)
-            """
-
-        with tf.variable_scope('logits') as scope:
+        with tf.variable_scope('TLFusionlogits') as scope:
             weights = self.weight_decay_variable(name="weights",
                                                  shape=[512, 2],
                                                  decay_constant=self.param[
@@ -370,7 +286,7 @@ class FusionFinetuneCNN:
             logits = tf.add(tf.matmul(fullcn_drop, weights), biases,
                             name=scope.name)
 
-        return images1, images2, images3, logits
+        return logits
 
 
 
@@ -398,9 +314,27 @@ class FusionFinetuneCNN:
 
 
 
+    def get_features(self, sess, saver, mode):
+        with tf.Graph().as_default() as model_graph:
+            ckpath = self.checkpoints[mode]
+            ckpt = tf.train.get_checkpoint_state(ckpath)
+            print(ckpath, ckpt)
+            #objects = tf.trainable_variables()
+            #objects = objects[:-2]
+            #print([v.name for v in objects])
+            #print(model_graph.get_operations())
+            if ckpt and ckpt.model_checkpoint_path:
+                #sess.run(tf.initialize_all_variables())
+                saver.restore(sess, ckpt.model_checkpoint_path)
+                #layer = tf.get_collection('restorevar')[0]
+                #print("Layer shape:", layer.get_shape())
+                #sys.exit()
+                #layer = model_graph.get_tensor_by_name('Train/conv7/conv_last:0')
+                #print([tensor.name for tensor in model_graph.as_graph_def().node])
+                #print([op.name for op in model_graph.get_operations()])
 
-    def evaluation(self, sess, eval_op, dataset, images, fusion_input, labels,
-                   keep_prob, is_training, loss, corr):
+    def evaluation(self, sess, eval_op, dataset, images, labels,
+                   keep_prob, loss, corr):
         """
         This function evaluates the accuracy of the model
         Args:
@@ -415,26 +349,48 @@ class FusionFinetuneCNN:
 
         """
         correct_predictions = 0
+        images1 = images[0]
+        images2 = images[1]
+        images3 = images[2]
         total_seen = 0
-        dataset_size = len(dataset.pos) + len(dataset.neg)
-        for step in range(int(dataset_size / self.param['batch_size'])):
-            feature_images, label_data = self.fuse_modalities()
+        pred_out = {}
+        class_max_size = 0
+        data_size = 0
+        for i in range(0, len(dataset.files)):
+            data_size += len(dataset.files[i])
+            if len(dataset.files[i]) > class_max_size:
+                class_max_size = len(dataset.files[i])
+        num_steps = int(class_max_size / (self.param['batch_size']/len(dataset.files)))
+        if class_max_size%(self.param['batch_size']/len(dataset.files)) != 0:
+            num_steps += 1
+        print("Num steps:", num_steps, "Data size:", data_size)
+        for step in range(num_steps):
+            patients, image_data, label_data = dataset.next_batch()
             predictions, correct_, loss_ = sess.run([eval_op, corr, loss],
-                                                    feed_dict={
-                                                        fusion_input: feature_images,
-                                                        labels: label_data,
-                                                        keep_prob: 1.0,
-                                                        is_training: 1
-                                                    })
+                feed_dict={
+                    images1: image_data[0],
+                    images2: image_data[1],
+                    images3: image_data[2],
+                    labels: label_data,
+                    keep_prob: 1.0
+                })
             print("Prediction:", correct_)
             correct_predictions += predictions
-
+            pred_out.update(dict(zip(patients, correct_)))
             total_seen += self.param['batch_size']
-            print("Accuracy until " + str(total_seen) + " data points is: " +
-                  str(correct_predictions / total_seen))
+            print("Accuracy until "+str(total_seen)+" data points is: " +
+                      str(correct_predictions/total_seen))
             print("loss", loss_)
-        accuracy = correct_predictions / total_seen
-        return accuracy
+            #print("logits:", logits_)
+        accuracy_ = 0
+        for key, value in pred_out.items():
+            if value == True:
+                accuracy_ += 1
+        accuracy_ /= len(pred_out)
+        print("Accuracy of ", len(pred_out)," images is ", accuracy_)
+        # TODO: Add accuracy [2]
+        sys.stdout.flush()
+        return accuracy_
 
     def train(self, train_data, validation_data, test):
         """
@@ -446,30 +402,59 @@ class FusionFinetuneCNN:
             validation_data: validation data to test the accuracy of the model.
 
         """
-        with tf.Graph().as_default() as model_graph:
+        mode = 'TLFusion'
+        with tf.Graph().as_default():
 
-            images = tf.placeholder(dtype=tf.float32,
+            images1 = tf.placeholder(dtype=tf.float32,
                                     shape=[None,
                                            self.param['depth'],
                                            self.param['height'],
                                            self.param['width'],
-                                           1])
+                                           1],
+                                     name=self.modalities[0]+'images')
+            images2 = tf.placeholder(dtype=tf.float32,
+                                     shape=[None,
+                                            self.param['depth'],
+                                            self.param['height'],
+                                            self.param['width'],
+                                            1],
+                                     name=self.modalities[1]+'images')
+
+            images3 = tf.placeholder(dtype=tf.float32,
+                                     shape=[None,
+                                            self.param['depth'],
+                                            self.param['height'],
+                                            self.param['width'],
+                                            1],
+                                     name=self.modalities[2] + 'images')
+
             labels = tf.placeholder(dtype=tf.int8,
-                                    shape=[None, 2])
-            fusion_input = tf.placeholder(dtype=tf.float32,
-                                          shape=[None, 1, 1, 1, 512])
-            keep_prob = tf.placeholder(tf.float32)
-            var_lr = tf.placeholder(tf.float32)
-            is_training = tf.placeholder(tf.bool, name='phase')
-            global_step = tf.get_variable(name='global_step',
+                                    shape=[None, 2],
+                                    name=mode+'labels')
+            #transfer_input = tf.placeholder(dtype=tf.float32,
+            #                              shape=[None, 1, 1, 1, 512])
+            transfer_input = tf.placeholder(dtype=tf.float32,
+                                          shape=[None, 512],
+                                          name=mode+'transfer_input')
+            keep_prob = tf.placeholder(tf.float32, name=mode+'keep_prob')
+            var_lr = tf.placeholder(tf.float32, name=mode+'var_lr')
+            global_step = tf.get_variable(name=mode+'global_step',
                                           shape=[],
                                           initializer=tf.constant_initializer(
                                               0),
                                           trainable=False)
-            train_size = len(train_data.pos) + len(train_data.neg)
-            num_batches_epoch = int(train_size / self.param['batch_size'])
-            num_steps = num_batches_epoch * self.param['num_epochs']
+            class_max_size = 0
+            train_size = 0
+            for i in range(0, len(train_data.files)):
+                train_size += len(train_data.files[i])
+                if len(train_data.files[i]) > class_max_size:
+                    class_max_size = len(train_data.files[i])
 
+            num_batches_epoch = int(class_max_size / (self.param['batch_size']/len(train_data.files)))
+            if class_max_size%(self.param['batch_size']/len(train_data.files)) != 0:
+                num_batches_epoch += 1
+            num_steps = num_batches_epoch * self.param['num_epochs']
+            print("Numsteps: ", num_steps, "Num batches/epoch:", num_batches_epoch, "Trainsize", train_size)
             learn_rate = tf.train.exponential_decay(
                 self.param['learning_rate'], global_step,
                 decay_steps=num_steps, decay_rate=self.param['decay_factor'],
@@ -478,16 +463,15 @@ class FusionFinetuneCNN:
                 learning_rate=self.param['learning_rate'])
 
             tf.summary.scalar('learning_rate', learn_rate)
-            config = tf.ConfigProto()
-            config.gpu_options.allow_growth = True
-            config.allow_soft_placement = True
-            sess = tf.InteractiveSession(config=config)
 
             with tf.variable_scope(tf.get_variable_scope()):
-                with tf.name_scope('Train') as scope:
-                    images1, images2, images3, logits = self.fcn_nw(sess, model_graph,
-                                            keep_prob)
-
+                with tf.name_scope('Train'+mode) as scope:
+                    conv7_1 = self.inference(images1, keep_prob, 0)
+                    conv7_2 = self.inference(images2, keep_prob, 1)
+                    conv7_3 = self.inference(images3, keep_prob, 2)
+                    conv7_fusion = tf.concat([conv7_1, conv7_2,
+                                              conv7_3], 4)
+                    logits = self.fcn_nw(conv7_fusion, keep_prob)
                     _ = self.inference_loss(logits, labels)
 
                     losses = tf.get_collection('losses', scope)
@@ -508,8 +492,22 @@ class FusionFinetuneCNN:
                 accuracy = tf.reduce_mean(tf.cast(correct_prediction,
                                                   tf.float32))
                 tf.summary.scalar('train_batch_accuracy', accuracy)
-                saver = tf.train.Saver()
                 init = tf.global_variables_initializer()
+                train_objects = tf.trainable_variables()[:-2]
+                dict_map_T1 =  {v.name[:-2]:v for v in train_objects if 'UHG_T1' in v.name[:-2]}
+                dict_map_T2 =  {v.name[:-2]:v for v in train_objects if 'UHG_T2' in v.name[:-2]}
+                dict_map_DTI_FA =  {v.name[:-2]:v for v in train_objects if 'UHG_DTI_FA' in v.name[:-2]}
+                print("Trainable variables:", dict_map_T1, dict_map_T2, dict_map_DTI_FA)
+                saver1 = tf.train.Saver(dict_map_T1)
+                saver2 = tf.train.Saver(dict_map_T2)
+                saver3 = tf.train.Saver(dict_map_DTI_FA)
+                config = tf.ConfigProto()
+                config.gpu_options.allow_growth = True
+                config.allow_soft_placement = True
+                sess = tf.InteractiveSession(config=config)
+                self.get_features(sess, saver1,0)
+                self.get_features(sess, saver2,1)
+                self.get_features(sess, saver3,2)
                 sess.run(init)
 
                 # Create a summary writer
@@ -518,12 +516,13 @@ class FusionFinetuneCNN:
                 summary_op = tf.summary.merge_all()
                 tf.get_default_graph().finalize()
                 init_lr = self.param['learning_rate']
+                sys.stdout.flush()
                 for step in range(1, num_steps):
                     start_time = time.time()
                     if step % (5 * num_batches_epoch) == 0:
                         init_lr /= 2
-
-                    image_data, label_data = train_data.next_batch()
+                    _, image_data, label_data = train_data.next_batch()
+                    #features_images = self.get_features(image_data)
                     summary_values, _, loss_value = sess.run(
                         [summary_op,
                          train_op,
@@ -533,8 +532,7 @@ class FusionFinetuneCNN:
                             images2: image_data[1],
                             images3: image_data[2],
                             labels: label_data,
-                            keep_prob: self.param['keep_prob'],
-                            is_training: 1
+                            keep_prob: self.param['keep_prob']
                         }
                     )
                     accuracy_ = sess.run(accuracy,
@@ -543,8 +541,7 @@ class FusionFinetuneCNN:
                                              images2: image_data[1],
                                              images3: image_data[2],
                                              labels: label_data,
-                                             keep_prob: 1.0,
-                                             is_training: 1
+                                             keep_prob: 1.0
                                          })
                     print("Train Batch Accuracy. %g step %d" % (accuracy_,
                                                                 step))
@@ -568,35 +565,38 @@ class FusionFinetuneCNN:
                     if step % num_batches_epoch == 0 or (step + 1) == num_steps:
                         if (step + 1) == num_steps:
                             checkpoint_path = self.param['checkpoint_path'] + \
-                                              'multimodal/fusion_model.ckpt'
-                            saver.save(sess, checkpoint_path, global_step=step)
-                        '''
+                                              'transfer_model.ckpt'
+                            #saver1.save(sess, checkpoint_path, global_step=step)
+                        for i in range(0, len(validation_data.files)):
+                            validation_data.batch_index[i] = 0
+                            train_data.batch_index[i] = 0
+
                         # Evaluate against the training data.
                         print("Step: %d Training accuracy: %g " %
                               (step, self.evaluation(sess=sess,
                                                      eval_op=eval_op,
                                                      dataset=train_data,
-                                                     images=images,
-                                                     fusion_input=fusion_input,
+                                                     images=[images1,
+                                                             images2,images3],
                                                      labels=labels,
                                                      keep_prob=keep_prob,
-                                                     is_training=is_training,
                                                      corr=correct_prediction,
                                                      loss=total_loss)))
-
                         # Evaluate against the validation data
                         print("Step: %d Validation accuracy: %g" %
                               (step, self.evaluation(sess=sess,
                                                      eval_op=eval_op,
                                                      dataset=validation_data,
-                                                     images=images,
-                                                     fusion_input=fusion_input,
+                                                     images=[images1,
+                                                             images2,images3],
                                                      labels=labels,
                                                      keep_prob=keep_prob,
-                                                     is_training=is_training,
                                                      corr=correct_prediction,
                                                      loss=total_loss)))
-                        '''
+                        for i in range(0, len(validation_data.files)):
+                            validation_data.batch_index[i] = 0
+                            train_data.batch_index[i] = 0
+
                     sys.stdout.flush()
                 '''
                 if test == True:
@@ -611,7 +611,6 @@ class FusionFinetuneCNN:
                                               images=images,
                                               labels=labels,
                                               keep_prob=keep_prob,
-                                              is_training=is_training,
                                               corr=correct_prediction,
                                               loss=total_loss))
                     else:

@@ -10,13 +10,13 @@ parameters:
     learning_rate: 0.00005
     decay_factor: 0.9
     decay_const: 0.005
-    checkpoint_path: './output/T1_brain/ADNI/data1/newlabels/rerun/'
-    summary_path: './output/T1_brain/ADNI/data1/newlabels/rerun/'
+    checkpoint_path: './output/ADNI_T1_random/'
+    summary_path: './output/ADNI_T1_random/'
     keep_prob: 0.3
     classes: 3
   regex: '_normalized\.nii\.gz'
   split_on: '_normalized.nii.gz'
 data_paths:
   datadir: '/local/adni_normalized/train/'
-  valid_data: '/local/ADNI_valid.pkl'
-  train_data: '/local/ADNI_train.pkl'
+  valid_data: '/local/adni_normalized/ADNI_valid.pkl'
+  train_data: '/local/adni_normalized/ADNI_train.pkl'

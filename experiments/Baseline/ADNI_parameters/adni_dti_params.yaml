@@ -6,12 +6,12 @@ parameters:
     width: 91
     mode: 'ADNI_DTI_FA'
     batch_size: 12 
-    num_epochs: 28 
-    learning_rate: 0.001
+    num_epochs: 30 
+    learning_rate: 0.00005
     decay_factor: 0.9
     decay_const: 0.005
-    checkpoint_path: './output/DTI_FA/ADNI/1e3/'
-    summary_path: './output/DTI_FA/ADNI/1e3/'
+    checkpoint_path: './output/ADNI_DTI_FA_random/'
+    summary_path: './output/ADNI_DTI_FA_random/'
     keep_prob: 0.3
     classes: 3
   regex: '_normalized\.nii\.gz'
