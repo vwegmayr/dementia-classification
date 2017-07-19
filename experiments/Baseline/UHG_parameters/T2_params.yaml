@@ -7,20 +7,21 @@ parameters:
     mode: 'UHG_T2'
     batch_size: 12
     num_epochs: 28 
-    learning_rate: 0.000005
+    learning_rate: 0.00005
     decay_factor: 0.9
     decay_const: 0.005
-    checkpoint_path: './output/UHG_T2_random/'
-    summary_path: './output/UHG_T2_random/'
+    checkpoint_path: './output/UHG_T2_aug/'
+    summary_path: './output/UHG_T2_aug/'
     keep_prob: 0.3
     classes: 2
+    decay_lr: 'False'
   regex: '_normalized\.nii\.gz'
   split_on: '_normalized.nii.gz'
 data_paths:
-  datadir: '/local/UHG_T2_normalized/train/'
+  datadir: '/local/UHG/UHG_T2_normalized/train/'
   logdir: '/local/home/saitharaju/Data/'
   norm_mean_var: './Dictionaries/cv/'
-  class_labels: './experiments/patients.pkl'
-  valid_data: './experiments/validation_patients.pkl'
-  train_data: '/local/home/saitharaju/source_code/mri-fusion/Dictionaries/UHG_T1/train_patients.pkl'
+  class_labels: '/local/UHG/T1_T2_DTIFA_dic.pkl'
+  valid_data: '/local/UHG/T1_T2_DTIFA_valid.pkl'
+  train_data: '/local/UHG/T1_T2_DTIFA_train.pkl'
   validation_split: 0.15

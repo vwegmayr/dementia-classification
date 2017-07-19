@@ -7,11 +7,12 @@ parameters:
     mode: 'ADNI_T1'
     batch_size: 12 
     num_epochs: 28 
-    learning_rate: 0.00005
+    learning_rate: 0.0005
     decay_factor: 0.9
+    decay_lr: 'True'
     decay_const: 0.005
-    checkpoint_path: './output/ADNI_T1_random/'
-    summary_path: './output/ADNI_T1_random/'
+    checkpoint_path: './output/ADNI_T1_random_5e4/'
+    summary_path: './output/ADNI_T1_random_5e4/'
     keep_prob: 0.3
     classes: 3
   regex: '_normalized\.nii\.gz'

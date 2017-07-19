@@ -50,7 +50,7 @@ train_patients, valid_patients = norm_object.get_files(params['per_image_out'],
                                                        )
 all_patients = train_patients + valid_patients
 
-print("Finding mean, var normalization of ", len(train_patients), "images")
+print("Finding mean, var normalization of ", len(train_patients), "images", flush=True)
 norm_object.mean_norm, norm_object.var_norm = norm_object.normalize(
                                                 train_patients)
 

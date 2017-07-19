@@ -11,7 +11,7 @@ import math
 from pathos.multiprocessing import ProcessPool
 from dementia_prediction.config_wrapper import Config
 from dementia_prediction.data_input import DataInput
-from dementia_prediction.cnn_baseline.baseline_balanced import CNN
+from dementia_prediction.cnn_baseline.baseline_balanced_vgg import CNN
 
 # Parse the parameter file
 config = Config()
@@ -32,9 +32,6 @@ train_patients = pickle.load(open(paths['train_data'], 'rb'))
 print("Total number of patients in Dict:",  len(patients_dict),
       "Validation patients count in Dict: ", len(valid_patients),
       "Train patients count in Dict:", len(train_patients))
-print("Train patients found:", len(train_patients),
-      "Validation patients found:", len(valid_patients),
-      "Total patients found:", len(set(train_patients+valid_patients)))
 # If data is not normalized, we can normalize it on-the-fly
 # Mean and Variance of the training data
 global_mean = [0 for i in range(0, IMG_SIZE)]
@@ -168,6 +165,17 @@ print("Validation Data: S: ", len(s_valid_filenames), "P: ", len(p_valid_filenam
 
 train = (s_train_filenames, p_train_filenames)
 validation = (s_valid_filenames, p_valid_filenames)
+
+# For augmentation of data
+aug_train = [[], []]
+for i in [0,1]:
+    for filename in train[i]:
+        aug_train[i].append(filename)
+        for direction in ['x','y','z']:
+            aug_train[i].append(filename+'rot'+direction)
+            aug_train[i].append(filename+'trans'+direction)
+train = (aug_train[0], aug_train[1])
+print("After augmentation: Train: S:", len(train[0]), "P:", len(train[1]))
 '''
 # Generate the normalized data on-fly
 mean_norm, var_norm = normalize(train)

@@ -71,7 +71,7 @@ class Normalize():
             im = nb.Nifti1Image(reshaped_image, affine=affine)
             patient = filename.rsplit('/', 1)[1]
             output = self.params['per_image_out'] + patient
-            print("Saving to output: ", output)
+            print("Saving to output: ", output, flush=True)
             nb.save(im, output)
 
     def store(self, data):
@@ -80,7 +80,7 @@ class Normalize():
             patient_code = pat_code[0].rsplit('/', 1)[1]
             output = self.params['norm_out'] + patient_code + \
                                            '_normalized.nii.gz'
-            print("Normalizing image", filename)
+            print("Normalizing image", filename, flush=True)
             if not os.path.exists(output):
                 mri_image = nb.load(filename)
                 affine = mri_image.get_affine()
@@ -98,7 +98,7 @@ class Normalize():
                                                     self.params['width'],
                                                     self.params['depth']])
                 im = nb.Nifti1Image(reshaped_image, affine=affine)
-                print("Saving to output: ", output)
+                print("Saving to output: ", output, flush=True)
                 nb.save(im, output)
 
     def normalize(self, train_data):

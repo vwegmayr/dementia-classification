@@ -7,11 +7,11 @@ parameters:
     mode: 'UHG_T1'
     batch_size: 12
     num_epochs: 30 
-    learning_rate: 0.00005
+    learning_rate: 0.000005
     decay_factor: 0.9
     decay_const: 0.005
-    checkpoint_path: './output/UHG_T1_aug/'
-    summary_path: './output/UHG_T1_aug/'
+    checkpoint_path: './output/UHG_T1_aug_vgg/'
+    summary_path: './output/UHG_T1_aug_vgg/'
     keep_prob: 0.3
     classes: 2
     decay_lr: 'False'

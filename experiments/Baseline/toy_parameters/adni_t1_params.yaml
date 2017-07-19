@@ -10,10 +10,11 @@ parameters:
     learning_rate: 0.00005
     decay_factor: 0.9
     decay_const: 0.005
-    checkpoint_path: './output/ADNI_T1/'
-    summary_path: './output/ADNI_T1/'
+    checkpoint_path: './smt_output/ADNI_T1_toy/'
+    summary_path: './smt_output/ADNI_T1_toy/'
     keep_prob: 0.3
     classes: 3
+    decay_lr: 'False'
   regex: '_normalized\.nii\.gz'
   split_on: '_normalized.nii.gz'
 data_paths:

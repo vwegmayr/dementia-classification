@@ -132,93 +132,111 @@ class CNN:
         """
         print(images.get_shape())
         # Change 7,7,7 to 5,5,5
-        with tf.variable_scope(self.param['mode']+'conv1_a') as scope:
-            conv1_a = self.conv_relu(input_=images,
-                                   kernel_shape=[5, 5, 5, 1, 10],
-                                   biases_shape=[10],
+        with tf.variable_scope(self.param['mode']+'conv1') as scope:
+            conv1 = self.conv_relu(input_=images,
+                                   kernel_shape=[5, 5, 5, 1, 64],
+                                   biases_shape=[64],
                                    decay_constant=self.param['decay_const'],
                                    scope=scope,padding='SAME',
                                    stride=2)
-        print("Conv1_a", conv1_a.get_shape())
-        with tf.variable_scope(self.param['mode']+'conv1_b') as scope:
-            conv1_b = self.conv_relu(input_=images,
-                                   kernel_shape=[6, 6, 6, 1, 10],
-                                   biases_shape=[10],
-                                   decay_constant=self.param['decay_const'],
-                                   scope=scope,padding='SAME',
-                                   stride=2)
-        print("Conv1_b", conv1_b.get_shape())
-        with tf.variable_scope(self.param['mode']+'conv1_c') as scope:
-            conv1_c = self.conv_relu(input_=images,
-                                   kernel_shape=[7, 7, 7, 1, 10],
-                                   biases_shape=[10],
-                                   decay_constant=self.param['decay_const'],
-                                   scope=scope,padding='SAME',
-                                   stride=2)
-        print("Conv1_c", conv1_c.get_shape())
-        conv1 = tf.concat([conv1_a, conv1_b, conv1_c], 4)
+        print("Conv1", conv1.get_shape())
+        pool1 = tf.nn.max_pool3d(conv1,
+                                 ksize=[1, 2, 2, 2, 1],
+                                 strides=[1, 2, 2, 2, 1],
+                                 padding="SAME")
+        print("pool1", pool1.get_shape())
         with tf.variable_scope(self.param['mode']+'conv2') as scope:
-            conv2 = self.conv_relu(input_=conv1,
-                                   kernel_shape=[5, 5, 5, 30, 32],
-                                   biases_shape=[32],
-                                   decay_constant=self.param['decay_const'],
-                                   scope=scope,padding='SAME',
-                                   stride=2)
-        print("Conv2", conv2.get_shape())
-        with tf.variable_scope(self.param['mode']+'conv3') as scope:
-            conv3 = self.conv_relu(input_=conv2,
-                                   kernel_shape=[5, 5, 5, 32, 64],
-                                   biases_shape=[64],
-                                   decay_constant=self.param['decay_const'],
-                                   scope=scope,padding='SAME',
-                                   stride=2)
-        print("Conv3", conv3.get_shape())
-        with tf.variable_scope(self.param['mode']+'conv4') as scope:
-            conv4 = self.conv_relu(input_=conv3,
-                                   kernel_shape=[3, 3, 3, 64, 64],
-                                   biases_shape=[64],
-                                   decay_constant=self.param['decay_const'],
-                                   scope=scope,padding='SAME',
-                                   stride=2)
-        print("Conv4", conv4.get_shape())
-
-        with tf.variable_scope(self.param['mode']+'conv5') as scope:
-            conv5 = self.conv_relu(input_=conv4,
+            conv2 = self.conv_relu(input_=pool1,
                                    kernel_shape=[3, 3, 3, 64, 128],
                                    biases_shape=[128],
                                    decay_constant=self.param['decay_const'],
                                    scope=scope,padding='SAME',
-                                   stride=2)
-        print("Conv5", conv5.get_shape())
-        with tf.variable_scope(self.param['mode']+'conv6') as scope:
-            conv6 = self.conv_relu(input_=conv5,
+                                   stride=1)
+        print("Conv2", conv2.get_shape())
+
+        pool2 = tf.nn.max_pool3d(conv2,
+                                 ksize=[1, 2, 2, 2, 1],
+                                 strides=[1, 2, 2, 2, 1],
+                                 padding="SAME")
+        print("pool2", pool2.get_shape())
+        with tf.variable_scope(self.param['mode']+'conv3_a') as scope:
+            conv3_a = self.conv_relu(input_=pool2,
                                    kernel_shape=[3, 3, 3, 128, 256],
                                    biases_shape=[256],
                                    decay_constant=self.param['decay_const'],
                                    scope=scope,padding='SAME',
-                                   stride=2)
-        print("Conv6", conv6.get_shape())
-        with tf.variable_scope(self.param['mode']+'conv7') as scope:
-            conv7 = self.conv_relu(input_=conv6,
+                                   stride=1)
+        print("Conv3_a", conv3_a.get_shape())
+        with tf.variable_scope(self.param['mode'] + 'conv3_b') as scope:
+            conv3_b = self.conv_relu(input_=conv3_a,
+                                   kernel_shape=[3, 3, 3, 256, 256],
+                                   biases_shape=[256],
+                                   decay_constant=self.param['decay_const'],
+                                   scope=scope, padding='SAME',
+                                   stride=1)
+        print("Conv3_b", conv3_b.get_shape())
+        pool3 = tf.nn.max_pool3d(conv3_b,
+                                 ksize=[1, 2, 2, 2, 1],
+                                 strides=[1, 2, 2, 2, 1],
+                                 padding="SAME")
+        print("pool3", pool3.get_shape())
+        with tf.variable_scope(self.param['mode']+'conv4_a') as scope:
+            conv4_a = self.conv_relu(input_=pool3,
                                    kernel_shape=[3, 3, 3, 256, 512],
                                    biases_shape=[512],
                                    decay_constant=self.param['decay_const'],
                                    scope=scope,padding='SAME',
-                                   stride=2)
-        print("Conv7", conv7.get_shape())
-        
-        with tf.variable_scope(self.param['mode']+'fullcn2') as scope:
-            vector_per_batch = tf.reshape(conv7, [self.param['batch_size'],
+                                   stride=1)
+        print("Conv4_a", conv4_a.get_shape())
+        with tf.variable_scope(self.param['mode']+'conv4_b') as scope:
+            conv4_b = self.conv_relu(input_=conv4_a,
+                                   kernel_shape=[3, 3, 3, 512, 512],
+                                   biases_shape=[512],
+                                   decay_constant=self.param['decay_const'],
+                                   scope=scope,padding='SAME',
+                                   stride=1)
+        print("Conv4_b", conv4_b.get_shape())
+        pool4 = tf.nn.max_pool3d(conv4_b,
+                                 ksize=[1, 2, 2, 2, 1],
+                                 strides=[1, 2, 2, 2, 1],
+                                 padding="SAME")
+        print("pool4", pool4.get_shape())
+
+        with tf.variable_scope(self.param['mode']+'conv5_a') as scope:
+            conv5_a = self.conv_relu(input_=pool4,
+                                   kernel_shape=[3, 3, 3, 512, 512],
+                                   biases_shape=[512],
+                                   decay_constant=self.param['decay_const'],
+                                   scope=scope,padding='SAME',
+                                   stride=1)
+        print("Conv5_a", conv5_a.get_shape())
+        with tf.variable_scope(self.param['mode']+'conv5_b') as scope:
+            conv5_b = self.conv_relu(input_=conv5_a,
+                                   kernel_shape=[3, 3, 3, 512, 512],
+                                   biases_shape=[512],
+                                   decay_constant=self.param['decay_const'],
+                                   scope=scope,padding='SAME',
+                                   stride=1)
+        print("Conv5_b", conv5_b.get_shape())
+
+        pool5 = tf.nn.max_pool3d(conv5_b,
+                                 ksize=[1, 2, 2, 2, 1],
+                                 strides=[1, 2, 2, 2, 1],
+                                 padding="SAME")
+        print("pool5", pool5.get_shape())
+
+        with tf.variable_scope(self.param['mode']+'fullcn1') as scope:
+            vector_per_batch = tf.reshape(pool5, [self.param['batch_size'],
                                           -1])
             weights = self.weight_decay_variable(name="weights",
-                                                 shape=[512, 512],
+                                                 shape=[4096, 4096],
                                    decay_constant=self.param['decay_const'])
             biases = self.variable_on_cpu(name="biases",
-                                          shape=[512],
+                                          shape=[4096],
                                           initializer=tf.constant_initializer(
                                               0.1))
-            pre_activation2 = tf.matmul(vector_per_batch, weights) + biases
-            fullcn = tf.nn.relu(pre_activation2, name=scope.name)
+            pre_activation = tf.matmul(vector_per_batch, weights) + biases
+            fullcn = tf.nn.relu(pre_activation, name=scope.name)
             fullcn_drop = tf.nn.dropout(fullcn, keep_prob)
             print('fullcn:', fullcn_drop.get_shape())
             #bn2 = tf.contrib.layers.batch_norm(pre_activation2,
@@ -236,16 +254,44 @@ class CNN:
                                               center=True, scale=True,
                                               is_training=is_training)
             """
+        with tf.variable_scope(self.param['mode'] + 'fullcn2') as scope:
+            weights = self.weight_decay_variable(name="weights",
+                                                 shape=[4096, 4096],
+                                                 decay_constant=self.param[
+                                                     'decay_const'])
+            biases = self.variable_on_cpu(name="biases",
+                                          shape=[4096],
+                                          initializer=tf.constant_initializer(
+                                              0.1))
+            pre_activation = tf.matmul(fullcn_drop, weights) + biases
+            fullcn2 = tf.nn.relu(pre_activation, name=scope.name)
+            fullcn2_drop = tf.nn.dropout(fullcn2, keep_prob)
+            print('fullcn2:', fullcn2_drop.get_shape())
+
+        with tf.variable_scope(self.param['mode'] + 'fullcn3') as scope:
+            weights = self.weight_decay_variable(name="weights",
+                                                 shape=[4096, 1000],
+                                                 decay_constant=self.param[
+                                                     'decay_const'])
+            biases = self.variable_on_cpu(name="biases",
+                                          shape=[1000],
+                                          initializer=tf.constant_initializer(
+                                              0.1))
+            pre_activation = tf.matmul(fullcn2_drop, weights) + biases
+            fullcn3 = tf.nn.relu(pre_activation, name=scope.name)
+            fullcn3_drop = tf.nn.dropout(fullcn3, keep_prob)
+            print('fullcn3:', fullcn3_drop.get_shape())
+
         with tf.variable_scope(self.param['mode']+'logits') as scope:
             weights = self.weight_decay_variable(name="weights",
-                                                 shape=[512, self.param[
+                                                 shape=[1000, self.param[
                                                      'classes']],
                                    decay_constant=self.param['decay_const'])
             biases = self.variable_on_cpu(name='biases',
                                           shape=[self.param['classes']],
                                           initializer=tf.constant_initializer(
                                               0.1))
-            logits = tf.add(tf.matmul(fullcn_drop, weights), biases,
+            logits = tf.add(tf.matmul(fullcn3_drop, weights), biases,
                             name=scope.name)
             print('logits:', logits.get_shape())
 
@@ -372,14 +418,14 @@ class CNN:
             num_steps = num_batches_epoch * self.param['num_epochs']
             print("Numsteps: ", num_steps, "Num batches/epoch:", num_batches_epoch, "Trainsize", train_size)
             sys.stdout.flush()
-            learn_rate = self.param['learning_rate']
-            if self.param['decay_lr'] == 'True':
-                learn_rate = tf.train.exponential_decay(
-                    self.param['learning_rate'], global_step,
-                    decay_steps=num_steps, decay_rate=self.param['decay_factor'],
-                    staircase=True)
+            '''
+            learn_rate = tf.train.exponential_decay(
+                self.param['learning_rate'], global_step,
+                decay_steps=num_steps, decay_rate=self.param['decay_factor'],
+                staircase=True)
+            '''
             opt = tf.train.AdamOptimizer(
-                learning_rate=learn_rate)
+                learning_rate=self.param['learning_rate'])
 
             #tf.summary.scalar('learning_rate', learn_rate)
             with tf.variable_scope(tf.get_variable_scope()):
@@ -423,14 +469,9 @@ class CNN:
                 # For var_lr - decreasing the learning rate after specific
                 # number of epochs
                 init_lr = self.param['learning_rate']
-                for i in range(0, len(validation_data.files)):
-                    validation_data.batch_index[i] = 0
-                    validation_data.shuffle()
-                    train_data.batch_index[i] = 0
-                    train_data.shuffle()
 
                 for step in range(1, num_steps):
-                    print("Step:", step,"Total:", num_steps)
+                    print("Step:", step, "Num Steps:", num_steps)
                     start_time = time.time()
                     if step%(5*num_batches_epoch) == 0:
                         init_lr /= 2
