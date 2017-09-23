@@ -6,7 +6,7 @@ import math
 import random
 import numpy as np
 import nibabel as nb
-
+import scipy.ndimage.interpolation as sni
 
 class FusionDataInput:
     """
@@ -16,7 +16,7 @@ class FusionDataInput:
     """
     def __init__(self, params, data, name, mean=0, var=0):
         self.params = params['cnn']
-        self.num_classes = len(data)
+        self.num_classes = len(data) # data contains only a single modality
         self.files = [data[i] for i in range(0, self.num_classes)]
         self.batch_index = [0 for i in range(0, self.num_classes)]
         self.name = name
@@ -50,7 +50,26 @@ class FusionDataInput:
             shuffle_indices = list(range(len(self.files[class_label])))
             random.shuffle(shuffle_indices)
             self.files[class_label] = [self.files[class_label][i] for i in shuffle_indices]
+    def rotate(self, filename, direction):
+        angle_rot = random.uniform(-3, 3)
+        mri_image = nb.load(filename).get_data()
+        if direction == 'x':
+            return sni.rotate(mri_image, angle_rot, (0,1), reshape=False)
+        if direction == 'y':
+            return sni.rotate(mri_image, angle_rot, (0,2), reshape=False)
+        if direction == 'z':
+            return sni.rotate(mri_image, angle_rot, (1,2), reshape=False)
 
+    def translate(self, filename, direction):
+        pixels = random.uniform(-4, 4)
+        mri_image = nb.load(filename).get_data()
+        if direction == 'x':
+            return sni.shift(mri_image, [pixels, 0, 0], mode='nearest')
+        if direction == 'y':
+            return sni.shift(mri_image, [0, pixels, 0], mode='nearest')
+        if direction == 'z':
+            return sni.shift(mri_image, [0, 0, pixels], mode='nearest')
+    
     def next_batch(self):
         """
         This functions retrieves the next batch of the data.
@@ -97,11 +116,17 @@ class FusionDataInput:
                 for index in range(0, len(self.modalities)):
                     mode_file = self.mode_folders[index]+\
                                 filename.rsplit('/',1)[1]
-                    mri_image = nb.load(mode_file)
+                    mri_image = []
+                    if 'rot' in filename:
+                        split_filename = mode_file.split('rot')
+                        mri_image = self.rotate(split_filename[0], split_filename[1])
+                    elif 'trans' in filename:
+                        split_filename = mode_file.split('trans')
+                        mri_image = self.translate(split_filename[0], split_filename[1])
+                    else:
+                        mri_image = nb.load(mode_file)
+                        mri_image = mri_image.get_data()
                     #print(self.name+" "+mode_file+" "+str(class_label), flush=True)
-                    #mri_image = mri_image.get_data().flatten()
-                    #mri_image = self.normalize(mri_image)
-                    mri_image = mri_image.get_data()
                     mri_image = np.reshape(mri_image, [1, self.params['depth'],
                                                        self.params['height'],
                                                        self.params['width'], 1])

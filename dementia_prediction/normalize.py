@@ -104,7 +104,7 @@ class Normalize():
     def normalize(self, train_data):
         mean = [0 for i in range(0, self.params['img_size'])]
         var = [0 for i in range(0, self.params['img_size'])]
-        num_parallel = 20
+        num_parallel = 10 
         split = int(len(train_data) / num_parallel)
         pool = ProcessPool(num_parallel)
         train_splits = []

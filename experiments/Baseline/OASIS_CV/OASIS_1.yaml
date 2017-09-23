@@ -1,0 +1,28 @@
+parameters:
+  cnn:
+    depth: 91
+    height: 109
+    width: 91
+    mode: 'OASIS_T1'
+    batch_size: 12
+    num_epochs: 30 
+    learning_rate: 0.000005
+    decay_factor: 0.9
+    decay_const: 0.005
+    checkpoint_path: '../models/OASIS_T1/CV1/'
+    summary_path: '../models/OASIS_T1/CV1/'
+    keep_prob: 0.3
+    classes: 2
+    channels: 1
+    decay_lr: 'False'
+    optimizer: 'Adam'
+  regex: '_normalized\.nii\.gz'
+  split_on: '_normalized.nii.gz'
+  mlp: 'False'
+  multitask: 'False'
+  multimodal: 'False'
+data_paths:
+  datadir: '/local/OASIS/OASIS_normalized/CV1/'
+  class_labels: '/local/OASIS/OASIS_normalized/oasis_dict.pkl'
+  valid_data: '/local/OASIS/OASIS_normalized/Dictionaries/OASIS_valid_1.pkl'
+  train_data: '/local/OASIS/OASIS_normalized/Dictionaries/OASIS_train_1.pkl'

@@ -1,0 +1,31 @@
+
+parameters:
+  cnn:
+    depth: 91
+    height: 109
+    width: 91
+    mode: 'OASIS_T1'
+    batch_size: 12
+    num_epochs: 50 
+    learning_rate: 0.00005
+    decay_factor: 0.9
+    decay_const: 0.5
+    checkpoint_path: '../models/OASIS_T1_perceptron/CV1/'
+    summary_path: '../models/OASIS_T1_perceptron/CV1/'
+    keep_prob: 0.1
+    classes: 2
+    channels: 1
+    decay_lr: 'False'
+    optimizer: 'Adam'
+    num_features: 22848
+  regex: '_normalized\.nii\.gz'
+  split_on: '_normalized.nii.gz'
+  mlp: 'True'
+  multitask: 'False'
+  multimodal: 'False'
+  features: '/local/OASIS/OASIS_normalized/CV1/robust_fisher/Top_10.0_features.pkl'
+data_paths:
+  datadir: '/local/OASIS/OASIS_normalized/CV1/'
+  class_labels: '/local/OASIS/OASIS_normalized/oasis_dict.pkl'
+  valid_data: '/local/OASIS/OASIS_normalized/Dictionaries/OASIS_valid_1.pkl'
+  train_data: '/local/OASIS/OASIS_normalized/Dictionaries/OASIS_train_1.pkl'

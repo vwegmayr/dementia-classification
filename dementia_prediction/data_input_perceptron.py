@@ -7,8 +7,9 @@ import random
 import numpy as np
 import nibabel as nb
 import scipy.ndimage.interpolation as sni
+import pickle
 
-class DataInput:
+class DataInputPerceptron:
     """
     This class provides helper functions to manage the input datasets.
     Initialize this class with the required parameter file and the dataset
@@ -19,6 +20,7 @@ class DataInput:
         self.num_classes = len(data)
         self.files = [data[i] for i in range(0, self.num_classes)]
         self.batch_index = [0 for i in range(0, self.num_classes)]
+        self.features = pickle.load(open(params['features'], 'rb'))
         self.name = name
         self.mean = mean
         self.var = var
@@ -73,7 +75,7 @@ class DataInput:
         Returns: (batch_images, batch_labels)
 
         """
-        batch_images = np.array([], np.float)
+        batch_images = [] 
         batch_labels = np.zeros((self.params['batch_size'], self.num_classes))
 
         iterate = 0
@@ -123,23 +125,13 @@ class DataInput:
 
                 else:
                     mri_image = nb.load(filename)
-                    #mri_image = mri_image.get_data().flatten()
-                    #mri_image = self.normalize(mri_image)
-                    mri_image = mri_image.get_data()
-                #print(self.name+" "+filename+" "+str(class_label), flush=True)
-                mri_image = np.reshape(mri_image, [1, self.params['depth'],
-                                                   self.params['height'],
-                                                   self.params['width'], 1])
-
-                if len(batch_images) == 0:
-                    batch_images = mri_image
-                else:
-                    batch_images = np.append(batch_images, mri_image, axis=0)
-                batch_labels[iterate][class_label] = 1 
-                # ADNI_AIBL: class_label: 0 - NC, 1 - MCI, 2 - AD
-                # UHG: class_label: 0 - Stable, 1 - Progressive
-                # OASIS: class_label: 0 - Healthy, 1 - Demented
+                    mri_image = mri_image.get_data().flatten()
+                    mri_image = np.take(mri_image, self.features)
+                    #print("Number of features selected:", len(self.features))
+                batch_images.append(mri_image)
+                batch_labels[iterate][class_label] = 1 #class_label: 0 - NC, 1 - MCI, 2 - AD
                 iterate += 1
             batch_files += class_files
-        
+        batch_images = np.array(batch_images, dtype=np.float) 
+        print(batch_images.shape)
         return batch_files, batch_images, batch_labels

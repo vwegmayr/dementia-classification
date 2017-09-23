@@ -1,0 +1,30 @@
+
+parameters:
+  cnn:
+    depth: 91 
+    height: 109
+    width: 91
+    mode: 'ADNI_T1_MCI_AD'
+    batch_size: 12 
+    num_epochs: 30 
+    learning_rate: 0.00005
+    decay_factor: 0.9
+    decay_lr: 'False'
+    decay_const: 0.005
+    checkpoint_path: '../models/ADNI_AIBL_T1_MCI_AD/'
+    summary_path: '../models/ADNI_AIBL_T1_MCI_AD/'
+    keep_prob: 0.3
+    classes: 2
+    channels: 1
+  regex: '_normalized\.nii\.gz'
+  split_on: '_normalized.nii.gz'
+  testing: 'False'
+  mlp: 'False'
+  multitask: 'False'
+  multimodal: 'False'
+data_paths:
+  datadir: '/local/ADNI_AIBL/ADNI_AIBL_T1_normalized/train_MCI_AD/'
+  class_labels: ''/local/ADNI_AIBL/ADNI_AIBL_T1_normalized/AIBL_ADNI_class_labels_T1_MCI_AD.pkl'
+  valid_data: '/local/ADNI_AIBL/ADNI_AIBL_T1_normalized/AIBL_ADNI_valid_T1_MCI_AD.pkl'
+  train_data: '/local/ADNI_AIBL/ADNI_AIBL_T1_normalized/AIBL_ADNI_train_T1_MCI_AD.pkl'
+  adni: 'True'

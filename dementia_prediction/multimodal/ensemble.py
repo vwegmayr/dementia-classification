@@ -12,7 +12,7 @@ import numpy as np
 import sys
 
 
-class CNN:
+class EnsembleCNN:
     """
     This class provides functions to train a 3D Convolutional Neural Network
     model. To train the network and evaluate it, initialize the class with the
@@ -22,8 +22,18 @@ class CNN:
 
     def __init__(self, params):
         self.param = params['cnn']
-        self.modalities = {0 : 'T1_brain', 1 : 'CBF', 2 : 'DTI_FA'}
-        print("Toptuning from fullcn2", params, flush=True)
+        self.modalities = {0 : params['cnn']['mode1'],
+                           1 : params['cnn']['mode2'],
+                           2 : params['cnn']['mode3']
+                           }
+        self.meta_paths = {0 : params['cnn']['meta_mode1'],
+                           1: params['cnn']['meta_mode2'],
+                           2: params['cnn']['meta_mode3']
+                           }
+        self.checkpoints = {0 : params['cnn']['ckpt_mode1'],
+                           1: params['cnn']['ckpt_mode2'],
+                           2: params['cnn']['ckpt_mode3']
+                           }
 
     @classmethod
     def variable_on_cpu(cls, name, shape, initializer):
@@ -82,12 +92,12 @@ class CNN:
                                    decay_constant,
                                    name='weight_loss')
         tf.add_to_collection('losses', weight_decay)
-        tf.add_to_collection('l2loss', weight_decay)
         return weights
 
 
-    def conv_relu(self, input_, kernel_shape, biases_shape, decay_constant,
-                  scope, padding, stride, is_training, keep_prob):
+    def conv_relu(self, input_, kernel_shape, biases_shape, scope,
+                  decay_constant=None,
+                  padding='SAME', stride=2):
         """
         This function builds a convolution layer of the 3D CNN
         Args:
@@ -95,24 +105,28 @@ class CNN:
                     feature representation
             kernel_shape: the shape of the kernel filters
             biases_shape: bias shape is equal to the shape of output channels
-            wd: Weight decay adds weight to the L2 regularization loss value.
-                For more training data, keep this value at minimum
-                For deeper networks, keep a little higher value
-                L1 regularization term is > L2 , so keep L1 wd < L2
+            decay_constant: 
+                Weight decay adds weight to the L2 regularization loss value.
+                For more training data, keep this value at minimum.
+                For deeper networks, keep a little higher value. L1
+                regularization term is > L2 , so keep L1 wd < L2
             scope: scope of the weights and biases in this convolution layer
+            padding: 'SAME' or 'VALID' padding
+            stride: integer, convolution stride
 
         Returns:
             Feature maps of the convolution layer
 
         """
-
+        if decay_constant == None:
+            decay_constant = self.param['decay_const']
         weights = self.weight_decay_variable("weights", kernel_shape,
                                              decay_constant)
         tf.summary.histogram('weights', weights)
         biases = self.variable_on_cpu(name="biases",
                                       shape=biases_shape,
                                       initializer=tf.constant_initializer(
-                                          0.001))
+                                          0.01))
         tf.summary.histogram('biases', biases)
 
         conv = tf.nn.conv3d(input=input_,
@@ -127,13 +141,83 @@ class CNN:
         # drop = tf.nn.dropout(act_relu, keep_prob)
         return act_relu
 
-    def fcn_nw(self, transfer_input, keep_prob, is_training):
-        '''
+    def inference(self, images, keep_prob):
+        """
+        This function builds the 3D Convolutional Neural Network architecture
+        Args:
+            images: Input MR Images
+
+        Returns:
+            Logits calculated at the last layer of the 3D CNN.
+        """
+        print(images.get_shape())
+        # Change 7,7,7 to 5,5,5
+        with tf.variable_scope('conv1_a') as scope:
+            conv1_a = self.conv_relu(input_=images,
+                                     kernel_shape=[5, 5, 5, 3, 10],
+                                     biases_shape=[10],scope=scope)
+        print("Conv1_a", conv1_a.get_shape())
+        with tf.variable_scope('conv1_b') as scope:
+            conv1_b = self.conv_relu(input_=images,
+                                     kernel_shape=[6, 6, 6, 3, 10],
+                                     biases_shape=[10],
+                                     scope=scope)
+        print("Conv1_b", conv1_b.get_shape())
+        with tf.variable_scope('conv1_c') as scope:
+            conv1_c = self.conv_relu(input_=images,
+                                     kernel_shape=[7, 7, 7, 3, 10],
+                                     biases_shape=[10],
+                                     scope=scope)
+        print("Conv1_c", conv1_c.get_shape())
+        conv1 = tf.concat([conv1_a, conv1_b, conv1_c], 4)
+        return conv1
+
+    def fcn_nw(self, fusion_input, keep_prob):
+        print("Fusion input:", fusion_input.shape)
+        with tf.variable_scope('conv2') as scope:
+            conv2 = self.conv_relu(input_=fusion_input,
+                                   kernel_shape=[5, 5, 5, self.param['fusion_channels'], 90],
+                                   biases_shape=[90],
+                                   scope=scope)
+        print("Conv2", conv2.get_shape())
+        with tf.variable_scope('conv3') as scope:
+            conv3 = self.conv_relu(input_=conv2,
+                                   kernel_shape=[5, 5, 5, 90, 100],
+                                   biases_shape=[100],
+                                   scope=scope)
+        print("Conv3", conv3.get_shape())
+        with tf.variable_scope('conv4') as scope:
+            conv4 = self.conv_relu(input_=conv3,
+                                   kernel_shape=[3, 3, 3, 100, 110],
+                                   biases_shape=[110],
+                                   scope=scope)
+        print("Conv4", conv4.get_shape())
+
+        with tf.variable_scope('conv5') as scope:
+            conv5 = self.conv_relu(input_=conv4,
+                                   kernel_shape=[3, 3, 3, 110, 128],
+                                   biases_shape=[128],
+                                   scope=scope)
+        print("Conv5", conv5.get_shape())
+        with tf.variable_scope('conv6') as scope:
+            conv6 = self.conv_relu(input_=conv5,
+                                   kernel_shape=[3, 3, 3, 128, 256],
+                                   biases_shape=[256],
+                                   scope=scope)
+        print("Conv6", conv6.get_shape())
+        with tf.variable_scope('conv7') as scope:
+            conv7 = self.conv_relu(input_=conv6,
+                                   kernel_shape=[3, 3, 3, 256, 512],
+                                   biases_shape=[512],
+                                   scope=scope)
+        print("Conv7", conv7.get_shape())
+
+
         with tf.variable_scope('fullcn2') as scope:
-            vector_per_batch = tf.reshape(transfer_input, [self.param['batch_size'],
+            vector_per_batch = tf.reshape(conv7, [self.param['batch_size'],
                                                   -1])
             weights = self.weight_decay_variable(name="weights",
-                                                 shape=[512, 512],
+                                                 shape=[512,512],
                                                  decay_constant=self.param[
                                                      'decay_const'])
             biases = self.variable_on_cpu(name="biases",
@@ -143,11 +227,22 @@ class CNN:
             pre_activation2 = tf.matmul(vector_per_batch, weights) + biases
             fullcn = tf.nn.relu(pre_activation2, name=scope.name)
             fullcn_drop = tf.nn.dropout(fullcn, keep_prob)
-        '''
-        #fullcn_drop = tf.nn.dropout(transfer_input, keep_prob)
-        #print(fullcn_drop.get_shape())
-        #fullcn_drop = tf.reshape(fullcn_drop, [-1, 512])
-        #fullcn_drop = transfer_input
+            # bn2 = tf.contrib.layers.batch_norm(pre_activation2,
+            #                                  center=True, scale=True,
+            #                                  is_training=is_training)
+            """
+            fullcn2 = tf.nn.relu(pre_activation2,
+                                name=scope.name)
+            fullcn2_drop = tf.nn.dropout(fullcn2, keep_prob)
+            """
+            """
+            fullcn2 = tf.nn.relu(pre_activation2,
+                                 name=scope.name)
+            bn2 = tf.contrib.layers.batch_norm(fullcn2_drop,
+                                              center=True, scale=True,
+                                              is_training=is_training)
+            """
+
         with tf.variable_scope('logits') as scope:
             weights = self.weight_decay_variable(name="weights",
                                                  shape=[512, 2],
@@ -156,8 +251,8 @@ class CNN:
             biases = self.variable_on_cpu(name='biases',
                                           shape=[2],
                                           initializer=tf.constant_initializer(
-                                              0.01))
-            logits = tf.add(tf.matmul(transfer_input, weights), biases,
+                                              0.1))
+            logits = tf.add(tf.matmul(fullcn_drop, weights), biases,
                             name=scope.name)
 
         return logits
@@ -183,55 +278,47 @@ class CNN:
         cross_entropy_mean = tf.reduce_mean(cross_entropy,
                                             name='batch_cross_entropy_loss')
         tf.add_to_collection('losses', cross_entropy_mean)
-        tf.add_to_collection('crossloss', cross_entropy_mean)
         return tf.add_n(tf.get_collection('losses'), name='total_loss')
 
 
 
 
-    def get_features(self, image_data):
+    def get_features(self, mode, image_data, label_data):
         with tf.Graph().as_default() as model_graph:
             sess = tf.Session(graph=model_graph)
-            meta_path = self.param['meta_path']
-            #'model.ckpt-57455.meta'
-            #meta_path = 'model.ckpt-32563.meta'
-            #meta_path = 'model.ckpt-17499.meta'
-            #meta_path = 'model.ckpt-1.meta'
-            saver = tf.train.import_meta_graph(self.param['transfer_checkpoint_path']+meta_path)
-            ckpath = self.param['transfer_checkpoint_path']
-            ckpt = tf.train.get_checkpoint_state(ckpath)
+            saver = tf.train.import_meta_graph(self.meta_paths[mode])
+            ckpt = tf.train.get_checkpoint_state(self.checkpoints[mode])
             #print(ckpath, ckpt)
             #print(model_graph.get_operations())
             if ckpt and ckpt.model_checkpoint_path:
                 #sess.run(tf.initialize_all_variables())
-                saver.restore(sess, ckpt.model_checkpoint_path)
-                #layer = tf.get_collection('restorevar')[0]
-                #print("Layer shape:", layer.get_shape())
-                #sys.exit()
-                #layer = model_graph.get_tensor_by_name('Train/conv7/conv_last:0')
                 #print([tensor.name for tensor in model_graph.as_graph_def().node])
-                #print([op.name for op in model_graph.get_operations()])
-                layer = model_graph.get_tensor_by_name('TrainADNI_T1/ADNI_T1fullcn2/ADNI_T1fullcn2:0')
-                print("fullcn2 Shape:", layer.get_shape())
-                images = model_graph.get_tensor_by_name('ADNI_T1images:0')
-                print("Image:", image_data.shape)
-
-                #labels = model_graph.get_tensor_by_name('labels:0')
-                keep_prob = model_graph.get_tensor_by_name('ADNI_T1keep_prob:0')
+                saver.restore(sess, ckpt.model_checkpoint_path)
+                images = model_graph.get_tensor_by_name(self.modalities[mode]+'images:0')
+                #images = model_graph.get_tensor_by_name('Placeholder:0')
+                labels = model_graph.get_tensor_by_name(self.modalities[mode]+'labels:0')
+                #labels = model_graph.get_tensor_by_name('Placeholder_1:0')
+                keep_prob = model_graph.get_tensor_by_name(self.modalities[mode]+'keep_prob:0')
+                #keep_prob = model_graph.get_tensor_by_name('Placeholder_3:0')
                 #is_training = model_graph.get_tensor_by_name('phase:0')
+                layer_ = []
+
+                layer_path = 'Train'+self.modalities[mode]+'/'+self.modalities[
+                    mode]+'logits/'+self.modalities[mode]+'logits:0'
+                layer = model_graph.get_tensor_by_name(layer_path)
                 layer_ = sess.run(layer,
                                 feed_dict={
                                     images: image_data,
-                                    keep_prob: 1.0,
+                                    labels: label_data,
+                                    keep_prob: 1.0
                                 })
-                #print(layer_.shape)
+                print("Combining a layer with shape:", layer_.shape)
                 return layer_
             else:
                 print("No checkpoint found")
                 return []
 
-    def evaluation(self, sess, eval_op, dataset, images, transfer_input,
-                   labels, keep_prob, is_training, loss, xloss, l2loss, corr):
+    def evaluation(self, dataset):
         """
         This function evaluates the accuracy of the model
         Args:
@@ -260,21 +347,17 @@ class CNN:
         print("Num steps:", num_steps, "Data size:", data_size)
         for step in range(num_steps):
             patients, image_data, label_data = dataset.next_batch()
-            features_images = self.get_features(image_data)
-            predictions, correct_, loss_, xloss_, l2loss_ = sess.run([eval_op, corr, loss, xloss, l2loss],
-                feed_dict={
-                    transfer_input: features_images,
-                    labels: label_data,
-                    keep_prob: 1.0,
-                    is_training: 0
-                })
-            print("Prediction:", correct_)
-            correct_predictions += predictions
+            logits_1 = self.get_features(0, image_data[0], label_data)
+            logits_2 = self.get_features(1, image_data[1], label_data)
+            logits_3 = self.get_features(2, image_data[2], label_data)
+            logits = np.average([logits_1, logits_2, logits_3], axis=0)
+            correct_ = np.equal(np.argmax(label_data, 1),
+                                  np.argmax(logits, 1))
             pred_out.update(dict(zip(patients, correct_)))
+            correct_predictions += np.sum(correct_.astype(float))
             total_seen += self.param['batch_size']
-            print("Accuracy until "+str(total_seen)+" data points is: " +
-                      str(correct_predictions/total_seen))
-            print("loss", loss_)
+            print("Accuracy until " + str(total_seen) + " data points is: " +
+                  str(correct_predictions / total_seen))
             #print("logits:", logits_)
         accuracy_ = 0
         for key, value in pred_out.items():
@@ -296,31 +379,30 @@ class CNN:
             validation_data: validation data to test the accuracy of the model.
 
         """
-        mode = self.param['mode']
         with tf.Graph().as_default():
+
             images = tf.placeholder(dtype=tf.float32,
                                     shape=[None,
                                            self.param['depth'],
                                            self.param['height'],
                                            self.param['width'],
-                                           1], name=mode+'images')
+                                           1])
             labels = tf.placeholder(dtype=tf.int8,
-                                    shape=[None, self.param['classes']],
-                                    name=mode+'labels')
-            #transfer_input = tf.placeholder(dtype=tf.float32,
-            #                              shape=[None, 1, 1, 1, 512])
-            transfer_input = tf.placeholder(dtype=tf.float32,
-                                          shape=[None, 512],
-                                          name=mode+'transfer_input')
-            adaptive_lr = tf.placeholder(dtype=tf.float32, shape=[])
-            keep_prob = tf.placeholder(tf.float32, name=mode+'keep_prob')
-            var_lr = tf.placeholder(tf.float32, name=mode+'var_lr')
-            is_training = tf.placeholder(tf.bool, name=mode+'phase')
-            global_step = tf.get_variable(name=mode+'global_step',
+                                    shape=[None, 2])
+            fusion_input = tf.placeholder(dtype=tf.float32,
+                                          shape=[None, self.param['fusion_depth'],
+                                                       self.param['fusion_height'],
+                                                       self.param['fusion_width'],
+                                                       self.param['fusion_channels']])
+            keep_prob = tf.placeholder(tf.float32)
+            var_lr = tf.placeholder(tf.float32)
+            is_training = tf.placeholder(tf.bool, name='phase')
+            global_step = tf.get_variable(name='global_step',
                                           shape=[],
                                           initializer=tf.constant_initializer(
                                               0),
                                           trainable=False)
+            """
             class_max_size = 0
             train_size = 0
             for i in range(0, len(train_data.files)):
@@ -334,34 +416,28 @@ class CNN:
             num_steps = num_batches_epoch * self.param['num_epochs']
             print("Numsteps: ", num_steps, "Num batches/epoch:", num_batches_epoch, "Trainsize", train_size)
             sys.stdout.flush()
-            learn_rate = self.param['learning_rate']
-            if self.param['decay_lr'] == 'True':
-                learn_rate = tf.train.exponential_decay(
-                    self.param['learning_rate'], global_step,
-                    decay_steps=num_batches_epoch, decay_rate=self.param['decay_factor'],
-                    staircase=True)
-            elif self.param['decay_lr'] == 'adaptive':
-                learn_rate = adaptive_lr
+            '''
+            learn_rate = tf.train.exponential_decay(
+                self.param['learning_rate'], global_step,
+                decay_steps=num_steps, decay_rate=self.param['decay_factor'],
+                staircase=True)
+            '''
             opt = tf.train.AdamOptimizer(
-                learning_rate=learn_rate)
+                learning_rate=self.param['learning_rate'])
 
             #tf.summary.scalar('learning_rate', learn_rate)
 
             with tf.variable_scope(tf.get_variable_scope()):
-                with tf.name_scope('Train'+mode) as scope:
-                    logits = self.fcn_nw(transfer_input,
-                                            keep_prob,
-                                            is_training)
-
+                with tf.name_scope('Train') as scope:
+                    logits = self.get_features(images,
+                                            keep_prob)
                     _ = self.inference_loss(logits, labels)
 
                     losses = tf.get_collection('losses', scope)
 
                     # Sum all the losses
                     total_loss = tf.add_n(losses, name='total_loss')
-                    xloss = tf.get_collection('crossloss', scope)[0]
-                    l2loss = tf.add_n(tf.get_collection('l2loss', scope))
-                    #tf.summary.scalar('total_loss', total_loss)
+                    tf.summary.scalar('total_loss', total_loss)
                 update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
                 with tf.control_dependencies(update_ops):
                     train_op = opt.minimize(total_loss,
@@ -389,59 +465,59 @@ class CNN:
                 summary_op = tf.summary.merge_all()
                 tf.get_default_graph().finalize()
                 init_lr = self.param['learning_rate']
-                sys.stdout.flush()
                 for step in range(1, num_steps):
-                    print("Step:", step,"Total:", num_steps)
                     start_time = time.time()
                     if step % (5 * num_batches_epoch) == 0:
                         init_lr /= 2
-                    _, image_data, label_data = train_data.next_batch()
-                    features_images = self.get_features(image_data)
-                    summary_values, _, loss_value, cross_loss, l2_loss = sess.run(
+
+                    _, features_images, label_data = self.fuse_modalities(
+                        train_data, images, labels, keep_prob)
+
+                    patients, image_data, label_data = dataset.next_batch()
+                    summary_values, _, loss_value = sess.run(
                         [summary_op,
                          train_op,
-                         total_loss,
-                         xloss,
-                         l2loss],
+                         total_loss],
                         feed_dict={
-                            transfer_input: features_images,
+                            fusion_input: features_images,
                             labels: label_data,
-                            keep_prob: self.param['keep_prob'],
-                            is_training: 1
+                            keep_prob: self.param['keep_prob']
                         }
                     )
-                    if step % num_batches_epoch == 0 or (step + 1) == num_steps:
-                        checkpoint_path = self.param['checkpoint_path'] + \
-                                          'transfer_model.ckpt'
-                        saver.save(sess, checkpoint_path, global_step=step)
-                    duration = time.time() - start_time
 
-                    assert not np.isnan(
-                        loss_value), 'Model diverged with loss = NaN'
-
-                    if step % 5 == 0:
+                    if step % 10 == 0:
                         accuracy_ = sess.run(accuracy,
                                          feed_dict={
-                                             transfer_input: features_images,
+                                             fusion_input: features_images,
                                              labels: label_data,
-                                             keep_prob: 1.0,
-                                             is_training: 1
+                                             keep_prob: 1.0
                                          })
                         print("Train Batch Accuracy. %g step %d" % (accuracy_,
                                                                     step))
+                        duration = time.time() - start_time
+
+                        assert not np.isnan(
+                            loss_value), 'Model diverged with loss = NaN'
+
                         num_examples_per_step = self.param['batch_size']
                         examples_per_sec = num_examples_per_step / duration
                         sec_per_batch = duration
 
-                        format_str = ('%s: step %d, loss = %.2f %.2f %.2f (%.1f '
+                        format_str = ('%s: step %d, loss = %.2f (%.1f '
                                       'examples/sec; %.3f sec/batch)')
                         print(format_str % (datetime.now(), step, loss_value,
-                               cross_loss, l2_loss, examples_per_sec, sec_per_batch))
+                                            examples_per_sec, sec_per_batch))
                         sys.stdout.flush()
-                        #summary_writer.add_summary(summary_values, step)
+                    #summary_writer.add_summary(summary_values, step)
 
                     # Saving Model Checkpoints for evaluation
                     if step % num_batches_epoch == 0 or (step + 1) == num_steps:
+                        if (step + 1) == num_steps:
+                            checkpoint_path = self.param['checkpoint_path'] + \
+                                              'fusion_model.ckpt'
+                            saver.save(sess, checkpoint_path, global_step=step)
+                            print("Saving checkpoint model...")
+                            sys.stdout.flush()
                         for i in range(0, len(validation_data.files)):
                             validation_data.batch_index[i] = 0
                             validation_data.shuffle()
@@ -454,28 +530,23 @@ class CNN:
                                                      eval_op=eval_op,
                                                      dataset=train_data,
                                                      images=images,
-                                                     transfer_input=transfer_input,
+                                                     fusion_input=fusion_input,
                                                      labels=labels,
                                                      keep_prob=keep_prob,
-                                                     is_training=is_training,
                                                      corr=correct_prediction,
-                                                     loss=total_loss,
-                                                     xloss=xloss,
-                                                     l2loss=l2loss)))
+                                                     loss=total_loss)))
+
                         # Evaluate against the validation data
                         print("Step: %d Validation accuracy: %g" %
                               (step, self.evaluation(sess=sess,
                                                      eval_op=eval_op,
                                                      dataset=validation_data,
                                                      images=images,
-                                                     transfer_input=transfer_input,
+                                                     fusion_input=fusion_input,
                                                      labels=labels,
                                                      keep_prob=keep_prob,
-                                                     is_training=is_training,
                                                      corr=correct_prediction,
-                                                     loss=total_loss,
-                                                     xloss=xloss,
-                                                     l2loss=l2loss)))
+                                                     loss=total_loss)))
                         for i in range(0, len(validation_data.files)):
                             validation_data.batch_index[i] = 0
                             validation_data.shuffle()
@@ -483,22 +554,20 @@ class CNN:
                             train_data.shuffle()
                     sys.stdout.flush()
                 '''
-                if test == True:
-                    ckpt = tf.train.get_checkpoint_state(
-                        self.param['checkpoint_path'])
-                    if ckpt and ckpt.model_checkpoint_path:
-                        saver.restore(sess, ckpt.model_checkpoint_path)
-                        print("Testing model")
-                        print(self.evaluation(sess=sess,
-                                              eval_op=eval_op,
-                                              dataset=validation_data,
-                                              images=images,
-                                              labels=labels,
-                                              keep_prob=keep_prob,
-                                              is_training=is_training,
-                                              corr=correct_prediction,
-                                              loss=total_loss))
-                    else:
-                        print("No checkpoint found.")
+                """
+            if test == True:
+                #ckpt = tf.train.get_checkpoint_state(
+                #    self.param['checkpoint_path'])
+                #if ckpt and ckpt.model_checkpoint_path:
+                #    saver.restore(sess, ckpt.model_checkpoint_path)
+                print("Testing model")
+                init = tf.global_variables_initializer()
+                config = tf.ConfigProto()
+                config.gpu_options.allow_growth = True
+                config.allow_soft_placement = True
+                sess = tf.InteractiveSession(config=config)
+                sess.run(init)
+                print(self.evaluation(dataset=validation_data))
+                    #else:
+                    #    print("No checkpoint found.")
 
-                '''

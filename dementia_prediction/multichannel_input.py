@@ -8,7 +8,7 @@ import numpy as np
 import nibabel as nb
 import scipy.ndimage.interpolation as sni
 
-class DataInput:
+class MultichannelDataInput:
     """
     This class provides helper functions to manage the input datasets.
     Initialize this class with the required parameter file and the dataset
@@ -22,6 +22,11 @@ class DataInput:
         self.name = name
         self.mean = mean
         self.var = var
+        self.mode_folders = [params['mode_folder'+str(i)] for i in range(1, 4)]
+        self.modalities = {0: params['cnn']['mode1'],
+                           1: params['cnn']['mode2'],
+                           2: params['cnn']['mode3']
+                           }
 
     def normalize(self, mri_image):
         norm_image = []
@@ -45,7 +50,6 @@ class DataInput:
             shuffle_indices = list(range(len(self.files[class_label])))
             random.shuffle(shuffle_indices)
             self.files[class_label] = [self.files[class_label][i] for i in shuffle_indices]
-
     def rotate(self, filename, direction):
         angle_rot = random.uniform(-3, 3)
         mri_image = nb.load(filename).get_data()
@@ -65,7 +69,7 @@ class DataInput:
             return sni.shift(mri_image, [0, pixels, 0], mode='nearest')
         if direction == 'z':
             return sni.shift(mri_image, [0, 0, pixels], mode='nearest')
-
+    
     def next_batch(self):
         """
         This functions retrieves the next batch of the data.
@@ -78,8 +82,6 @@ class DataInput:
 
         iterate = 0
         batch_files = []
-        # Increment batch_size/num_class for each class
-        inc = int(self.params['batch_size']/self.num_classes)
         inc = 1
         # If unbalanced, then increment the images of a specific class, say 0
         unbalanced = self.params['batch_size']%self.num_classes
@@ -109,37 +111,36 @@ class DataInput:
                 self.batch_index[class_label] = left_files
             for i in range(start, end):
                 class_files.append(self.files[class_label][i])
+            # class_files contains the filenames of the batch of one modality
             for filename in class_files:
-                # For augmentation
-                mri_image = []
-                if 'rot' in filename:
-                    split_filename = filename.split('rot')
-                    mri_image = self.rotate(split_filename[0],
-                                            split_filename[1])
-                elif 'trans' in filename:
-                    split_filename = filename.split('trans')
-                    mri_image = self.translate(split_filename[0],
-                                            split_filename[1])
+                channel_images = np.array([], np.float)
+                for index in range(0, len(self.modalities)):
+                    mode_file = self.mode_folders[index]+\
+                                filename.rsplit('/',1)[1]
+                    mri_image = []
+                    if 'rot' in filename:
+                        split_filename = mode_file.split('rot')
+                        mri_image = self.rotate(split_filename[0], split_filename[1])
+                    elif 'trans' in filename:
+                        split_filename = mode_file.split('trans')
+                        mri_image = self.translate(split_filename[0], split_filename[1])
+                    else:
+                        mri_image = nb.load(mode_file)
+                        mri_image = mri_image.get_data()
+                    #print(self.name+" "+mode_file+" "+str(class_label), flush=True)
+                    mri_image = np.reshape(mri_image, [1, self.params['depth'],
+                                                       self.params['height'],
+                                                       self.params['width'], 1])
 
-                else:
-                    mri_image = nb.load(filename)
-                    #mri_image = mri_image.get_data().flatten()
-                    #mri_image = self.normalize(mri_image)
-                    mri_image = mri_image.get_data()
-                #print(self.name+" "+filename+" "+str(class_label), flush=True)
-                mri_image = np.reshape(mri_image, [1, self.params['depth'],
-                                                   self.params['height'],
-                                                   self.params['width'], 1])
-
+                    if len(channel_images) == 0:
+                        channel_images = mri_image
+                    else:
+                        channel_images = np.append(channel_images, mri_image, axis=4)
                 if len(batch_images) == 0:
-                    batch_images = mri_image
+                    batch_images = channel_images
                 else:
-                    batch_images = np.append(batch_images, mri_image, axis=0)
-                batch_labels[iterate][class_label] = 1 
-                # ADNI_AIBL: class_label: 0 - NC, 1 - MCI, 2 - AD
-                # UHG: class_label: 0 - Stable, 1 - Progressive
-                # OASIS: class_label: 0 - Healthy, 1 - Demented
+                    batch_images = np.append(batch_images, channel_images, axis=0)
+                batch_labels[iterate][class_label] = 1 #class_label: 0 - NC, 1 - MCI, 2 - AD
                 iterate += 1
             batch_files += class_files
-        
         return batch_files, batch_images, batch_labels

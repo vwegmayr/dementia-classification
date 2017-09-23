@@ -1,0 +1,30 @@
+
+parameters:
+  cnn:
+    depth: 91 
+    height: 109
+    width: 91
+    mode: 'ADNI_DTI_FA'
+    batch_size: 12 
+    num_epochs: 40 
+    learning_rate: 0.000005
+    decay_factor: 0.9
+    decay_lr: 'False'
+    decay_const: 0.005
+    checkpoint_path: '../models/ADNI_DTI_FA/'
+    summary_path: '../models/ADNI_DTI_FA/'
+    keep_prob: 0.3
+    classes: 3
+    channels: 1
+  regex: '_normalized\.nii\.gz'
+  split_on: '_normalized.nii.gz'
+  testing: 'False'
+  mlp: 'False'
+  multitask: 'False'
+  multimodal: 'False'
+
+data_paths:
+  datadir: '/local/ADNI_AIBL/ADNI_DTI_FA_normalized/train/'
+  class_labels: '/local/ADNI_AIBL/ADNI_DTI_FA_normalized/ADNI_DTI_class_labels.pkl'
+  valid_data: '/local/ADNI_AIBL/ADNI_DTI_FA_normalized/ADNI_DTI_valid.pkl'
+  train_data: '/local/ADNI_AIBL/ADNI_DTI_FA_normalized/ADNI_DTI_train_new.pkl'

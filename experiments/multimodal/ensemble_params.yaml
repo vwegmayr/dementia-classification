@@ -1,0 +1,47 @@
+
+parameters:
+  cnn:
+    depth: 91
+    height: 109
+    width: 91
+    fusion_depth: 46
+    fusion_height: 55 
+    fusion_width: 46 
+    fusion_channels: 90 
+    batch_size: 12
+    num_epochs: 30 
+    learning_rate: 0.00005
+    decay_factor: 0.9
+    decay_const: 0.001
+    mode1: 'UHG_T1'
+    mode2: 'UHG_T2'
+    mode3: 'UHG_DTI_FA'
+    meta_mode1: '../models/UHG_T1/CV1/model.ckpt-899.meta'
+    meta_mode2: '../models/UHG_T2/CV1/model.ckpt-899.meta'
+    meta_mode3: '../models/UHG_DTI_FA/CV1/model.ckpt-899.meta'
+    ckpt_mode1: '../models/UHG_T1/CV1/'
+    ckpt_mode2: '../models/UHG_T2/CV1/'
+    ckpt_mode3: '../models/UHG_DTI_FA/CV1/'
+    checkpoint_path: '../models/UHG_Fusion_Conv7/'
+    summary_path: '../models/UHG_Fusion_Conv7/'
+    keep_prob: 0.3
+    classes: 2
+    channels: 1
+    fusion: 'ensemble'
+    fusion_layer: 'conv7'
+  regex: '_normalized\.nii\.gz'
+  split_on: '_normalized.nii.gz'
+  mode_folder1: '/local/UHG/UHG_T1_normalized/CV1/'
+  mode_folder2: '/local/UHG/UHG_T2_normalized/CV1/'
+  mode_folder3: '/local/UHG/UHG_DTI_FA_normalized/CV1/'
+  mlp: 'False'
+  multitask: 'False'
+  multimodal: 'ensemble'
+data_paths:
+  datadir: '/local/UHG/UHG_T1_normalized/CV1/'
+  logdir: '/local/home/saitharaju/Data/'
+  norm_mean_var: './Dictionaries/'
+  class_labels: '/local/UHG/Dictionaries/T1_T2_DTIFA_dic.pkl'
+  valid_data: '/local/UHG/Dictionaries/CV/T1_T2_DTIFA_valid_1.pkl'
+  train_data: '/local/UHG/Dictionaries/CV/T1_T2_DTIFA_train_1.pkl'
+  validation_split: 0.15
