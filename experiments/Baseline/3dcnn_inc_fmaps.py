@@ -16,9 +16,9 @@ from dementia_prediction.fusion_input import FusionDataInput
 from dementia_prediction.multichannel_input import MultichannelDataInput
 
 from dementia_prediction.data_input_perceptron import DataInputPerceptron
-from dementia_prediction.cnn_baseline.baseline_model import CNNBaseline
-from dementia_prediction.multimodal.finetuning_conv7 import CNNMultimodal
-from dementia_prediction.multimodal.ensemble import EnsembleCNN
+from dementia_prediction.cnn_baseline.cnn_model import CNN
+from dementia_prediction.multimodal.finetuning import CNNMultimodal
+from dementia_prediction.cnn_baseline.ensemble_models import CNNEnsembleModels
 
 # Parse the parameter file
 config = Config()
@@ -88,7 +88,7 @@ validation_data = DataInput(params=config.config.get('parameters'),
                             data=valid_filenames, name='valid', mean=0,
                             var=0)
 
-cnn_model = CNNBaseline(params=config.config.get('parameters'))
+cnn_model = CNN(params=config.config.get('parameters'))
 
 if params['mlp'] == 'True':
     train_data = DataInputPerceptron(params=config.config.get('parameters'),
@@ -122,6 +122,6 @@ if params['multimodal'] == 'ensemble':
                                       data=valid_filenames, name='valid',
                                       mean=0,
                                       var=0)
-    cnn_model = EnsembleCNN(params=config.config.get('parameters'))
+    cnn_model = CNNEnsembleModels(params=config.config.get('parameters'))
 cnn_model.train(train_data, validation_data, True)
 

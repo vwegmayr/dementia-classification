@@ -12,8 +12,9 @@ import numpy as np
 import sys
 import pickle
 import csv
+from dementia_prediction.cnn_utils import CNNUtils
 
-class CNNEnsemble:
+class CNNEnsembleModels:
     """
     This class provides functions to train a 3D Convolutional Neural Network
     model. To train the network and evaluate it, initialize the class with the
@@ -23,68 +24,9 @@ class CNNEnsemble:
 
     def __init__(self, params):
         self.param = params['cnn']
-        self.modalities = 'ADNI_T1'
-        self.model_paths = params['cnn']['models']
-        self.checkpoint = params['cnn']['checkpoint']
-
-    @classmethod
-    def inference_loss(cls, logits, labels):
-        """
-        This function calculates the cross entropy loss from the output of the
-        3D CNN model
-        Args:
-            logits: the output of 3D CNN [batch_size, 2]
-            labels: the actual class labels of the batch [batch_size, 2]
-
-        Returns: cross entropy loss
-
-        """
-
-        cross_entropy = tf.nn.softmax_cross_entropy_with_logits(
-            labels=labels, logits=logits, name='cross_entropy_loss')
-        tf.summary.tensor_summary('logits', logits)
-        cross_entropy_mean = tf.reduce_mean(cross_entropy,
-                                            name='batch_cross_entropy_loss')
-        tf.add_to_collection('losses', cross_entropy_mean)
-        return tf.add_n(tf.get_collection('losses'), name='total_loss')
-
-
-
-
-    def get_features(self, model, image_data, label_data):
-        with tf.Graph().as_default() as model_graph:
-            sess = tf.Session(graph=model_graph)
-            ckpt = tf.train.get_checkpoint_state(self.checkpoint)
-            #print(ckpath, ckpt)
-            #print(model_graph.get_operations())
-            if ckpt and ckpt.model_checkpoint_path:
-                #sess.run(tf.initialize_all_variables())
-                #print([tensor.name for tensor in model_graph.as_graph_def().node])
-                model_path = self.checkpoint + self.model_paths[model]
-                saver = tf.train.import_meta_graph(model_path+'.meta')
-                saver.restore(sess, model_path)
-                images = model_graph.get_tensor_by_name(self.modalities+'images:0')
-                #images = model_graph.get_tensor_by_name('Placeholder:0')
-                labels = model_graph.get_tensor_by_name(self.modalities+'labels:0')
-                #labels = model_graph.get_tensor_by_name('Placeholder_1:0')
-                keep_prob = model_graph.get_tensor_by_name(self.modalities+'keep_prob:0')
-                #keep_prob = model_graph.get_tensor_by_name('Placeholder_3:0')
-                #is_training = model_graph.get_tensor_by_name('phase:0')
-                layer_ = []
-
-                layer_path = 'Train'+self.modalities+'/'+self.modalities+'logits/'+self.modalities+'logits:0'
-                layer = model_graph.get_tensor_by_name(layer_path)
-                layer_ = sess.run(layer,
-                                feed_dict={
-                                    images: image_data,
-                                    labels: label_data,
-                                    keep_prob: 1.0
-                                })
-                print("Combining a layer with shape:", layer_.shape)
-                return layer_
-            else:
-                print("No checkpoint found")
-                return []
+        self.mode = params['cnn']['mode']
+        self.meta_paths = params['cnn']['meta']
+        self.cnnutils = CNNUtils(params)
 
     def evaluation(self, dataset):
         """
@@ -117,10 +59,17 @@ class CNNEnsemble:
         start_time = time.time()
         for step in range(num_steps):
             patients, image_data, label_data = dataset.next_batch()
+            if len(image_data) != self.param['ensemble_count']:
+                # Ensembling over epochs. Use same data
+                image_data = [image_data for i in range(0, self.param[
+                                'ensemble_count'])]
             logits_ = []
-            for model in range(0, self.param['ensemble_epochs']):
-                logits_.append(self.get_features(model, image_data,
-                                                 label_data))
+            for m in range(0, self.param['ensemble_count']):
+                print("Mode:", self.mode[m])
+                logits_.append(self.cnnutils.get_features(self.mode[m],
+                                                          self.meta_paths[m],
+                                                          image_data[m],
+                                                          label_data))
             logits = np.average(logits_, axis=0)
             correct_ = np.equal(np.argmax(label_data, 1),
                                   np.argmax(logits, 1))
@@ -139,7 +88,6 @@ class CNNEnsemble:
                 accuracy_ += 1
         accuracy_ /= len(pred_out)
         print("Accuracy of ", len(pred_out)," images is ", accuracy_, "Time", time_taken)
-        # TODO: Add accuracy [2]
         sys.stdout.flush()
         with open('./prediction_output.pkl', 'wb') as filep:
             pickle.dump(prediction_data, filep)
@@ -149,30 +97,24 @@ class CNNEnsemble:
         #print(prediction_data, flush=True)
         return accuracy_
 
-    def train(self, train_data, validation_data, cad_data, test):
+    def train(self, train_data, validation_data, flag):
         """
         This function creates the training operations and starts building and
         training the 3D CNN model.
 
         Args:
-            train_data: the training data required for 3D CNN
             validation_data: validation data to test the accuracy of the model.
-
         """
         with tf.Graph().as_default():
-
-
-            #ckpt = tf.train.get_checkpoint_state(
-            #    self.param['checkpoint_path'])
-            #if ckpt and ckpt.model_checkpoint_path:
-            #    saver.restore(sess, ckpt.model_checkpoint_path)
-            print("Testing model")
+            print("Ensembling models..")
             init = tf.global_variables_initializer()
             config = tf.ConfigProto()
             config.gpu_options.allow_growth = True
             config.allow_soft_placement = True
             sess = tf.InteractiveSession(config=config)
             sess.run(init)
-            print("CAD:", self.evaluation(dataset=cad_data))
-            print("ADNI+AIBL:", self.evaluation(dataset=validation_data))
+            print("Training Accuracy:",  self.evaluation(
+                dataset=train_data))
+            print("Validation Accuracy:", self.evaluation(
+                dataset=validation_data))
 

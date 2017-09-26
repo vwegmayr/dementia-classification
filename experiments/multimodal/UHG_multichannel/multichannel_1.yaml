@@ -14,9 +14,10 @@ parameters:
     decay_factor: 0.9
     decay_const: 0.005 
     mode: 'multichannel'
-    mode1: 'UHG_T1'
-    mode2: 'UHG_T2'
-    mode3: 'UHG_DTI_FA'
+    mode:
+      0: 'UHG_T1'
+      1: 'UHG_T2'
+      2: 'UHG_DTI_FA'
     checkpoint_path: '../models/UHG_multichannel/CV1/'
     summary_path: '../models/UHG_multichannel/CV1/'
     keep_prob: 0.3

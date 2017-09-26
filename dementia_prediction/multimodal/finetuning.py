@@ -22,10 +22,7 @@ class CNNMultimodal:
 
     def __init__(self, params):
         self.param = params['cnn']
-        self.modalities = {0: params['cnn']['mode1'],
-                           1: params['cnn']['mode2'],
-                           2: params['cnn']['mode3']
-                           }
+        self.modalities = params['cnn']['mode']
         self.cnnutils = CNNUtils(params)
         self.checkpoints = {0: params['cnn']['ckpt_mode1'],
                            1: params['cnn']['ckpt_mode2'],

@@ -11,7 +11,7 @@ import math
 from pathos.multiprocessing import ProcessPool
 from dementia_prediction.config_wrapper import Config
 from dementia_prediction.data_input import DataInput
-from dementia_prediction.cnn_baseline.ensemble_adni import CNNEnsemble
+from dementia_prediction.cnn_baseline.ensemble_models import CNNEnsembleModels
 
 # Parse the parameter file
 config = Config()
@@ -61,6 +61,10 @@ validation_data = DataInput(params=config.config.get('parameters'),
                             data=valid_filenames, name='valid', mean=0,
                             var=0)
 
+cnn_model = CNNEnsembleModels(params=config.config.get('parameters'))
+cnn_model.train(train_data, validation_data, True)
+
+print("CAD results:")
 for directory in os.walk(paths['caddir']):
     # Walk inside the directory
     for file in directory[2]:
@@ -81,7 +85,6 @@ cad_data = DataInput(params=config.config.get('parameters'),
                        data=cad_filenames,
                        name='train', mean=0, var=0)
 
-cnn_model = CNNEnsemble(params=config.config.get('parameters'))
-cnn_model.train(train_data, validation_data, cad_data, True)
+cnn_model.train(train_data, cad_data, True)
 
 

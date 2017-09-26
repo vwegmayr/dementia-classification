@@ -23,10 +23,7 @@ class FusionDataInput:
         self.mean = mean
         self.var = var
         self.mode_folders = [params['mode_folder'+str(i)] for i in range(1, 4)]
-        self.modalities = {0: params['cnn']['mode1'],
-                           1: params['cnn']['mode2'],
-                           2: params['cnn']['mode3']
-                           }
+        self.modalities = params['cnn']['mode']
 
     def normalize(self, mri_image):
         norm_image = []

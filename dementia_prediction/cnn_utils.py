@@ -146,6 +146,28 @@ class CNNUtils:
             num_steps += 1
         print("Num steps:", num_steps, "Data size:", data_size, flush=True)
         return num_steps
+
+    def get_features(self, mode, meta_path, image_data, label_data):
+        with tf.Graph().as_default() as model_graph:
+            sess = tf.Session(graph=model_graph)
+            saver = tf.train.import_meta_graph(meta_path)
+            saver.restore(sess, meta_path.split('.meta')[0])
+            images = model_graph.get_tensor_by_name(mode + 'images:0')
+            labels = model_graph.get_tensor_by_name(mode + 'labels:0')
+            keep_prob = model_graph.get_tensor_by_name(mode + 'keep_prob:0')
+
+            layer_path = 'Train' + mode + '/' + mode + 'logits/' +\
+                         mode + 'logits:0'
+            layer = model_graph.get_tensor_by_name(layer_path)
+            layer_ = sess.run(layer,
+                              feed_dict={
+                                  images: image_data,
+                                  labels: label_data,
+                                  keep_prob: 1.0
+                              })
+            print("Output layer shape:", layer_.shape)
+            return layer_
+
     def evaluation(self, sess, eval_op, dataset, images, labels, keep_prob,
                    loss, corr, xloss, l2loss):
         # TODO: Can placeholder be remove from args?

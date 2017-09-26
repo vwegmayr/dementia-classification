@@ -4,7 +4,6 @@ parameters:
     depth: 91 
     height: 109
     width: 91
-    mode: 'ADNI_T1'
     batch_size: 12 
     num_epochs: 30 
     learning_rate: 0.000005
@@ -12,17 +11,24 @@ parameters:
     decay_lr: 'False'
     decay_const: 0.005
     checkpoint: '../models/ADNI_AIBL_T1/'
-    models:
-      0: 'model.ckpt-62009'
-    ensemble_epochs: 1 
+    mode:
+      0: 'ADNI_T1'
+    meta:
+      0: '../models/ADNI_AIBL_T1/model.ckpt-62009.meta'
+    ensemble_count: 1
     summary_path: '../models/ADNI_AIBL_T1/'
     keep_prob: 0.3
     classes: 3
+    channels: 1
   regex: '_normalized\.nii\.gz'
   split_on: '_normalized.nii.gz'
   testing: 'False'
+  mlp: 'False'
+  multitask: 'False'
+  multimodal: 'ensemble'
 data_paths:
   datadir: '/local/ADNI_AIBL/ADNI_AIBL_T1_normalized/train/'
+  class_labels: '/local/ADNI_AIBL/ADNI_AIBL_T1_normalized/AIBL_ADNI_class_labels_T1.pkl'
   train_data: '/local/ADNI_AIBL/ADNI_AIBL_T1_normalized/AIBL_ADNI_train_T1.pkl'
   valid_data: '/local/ADNI_AIBL/ADNI_AIBL_T1_normalized/AIBL_ADNI_valid_T1.pkl'
   caddir: '/local/CAD/CAD_valid_normalized/train/'

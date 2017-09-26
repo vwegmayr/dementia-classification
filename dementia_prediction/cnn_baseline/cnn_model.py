@@ -9,10 +9,10 @@ import tensorflow as tf
 import numpy as np
 import sys
 from dementia_prediction.cnn_utils import CNNUtils
-# TODO Add transfer learning finetuning
-class CNNBaseline:
+
+class CNN:
     """
-    This class provides functions to train the baseline 3D Convolutional 
+    This class provides functions to train a 3D Convolutional 
     Neural Network model. To train the network and evaluate it, initialize the 
     class with the required parameter file and call the function train() with 
     training and validation datasets.

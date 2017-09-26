@@ -14,9 +14,10 @@ parameters:
     decay_factor: 0.9
     decay_lr: 'False'
     decay_const: 0.001 
-    mode1: 'UHG_T1'
-    mode2: 'UHG_T2'
-    mode3: 'UHG_DTI_FA'
+    mode:
+      0: 'UHG_T1'
+      1: 'UHG_T2'
+      2: 'UHG_DTI_FA'
     meta_mode1: '../models/UHG_T1/CV1/model.ckpt-899'
     meta_mode2: '../models/UHG_T2/CV1/model.ckpt-899'
     meta_mode3: '../models/UHG_DTI_FA/CV1/model.ckpt-899'

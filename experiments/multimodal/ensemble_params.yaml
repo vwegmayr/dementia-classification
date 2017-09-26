@@ -13,15 +13,15 @@ parameters:
     learning_rate: 0.00005
     decay_factor: 0.9
     decay_const: 0.001
-    mode1: 'UHG_T1'
-    mode2: 'UHG_T2'
-    mode3: 'UHG_DTI_FA'
-    meta_mode1: '../models/UHG_T1/CV1/model.ckpt-899.meta'
-    meta_mode2: '../models/UHG_T2/CV1/model.ckpt-899.meta'
-    meta_mode3: '../models/UHG_DTI_FA/CV1/model.ckpt-899.meta'
-    ckpt_mode1: '../models/UHG_T1/CV1/'
-    ckpt_mode2: '../models/UHG_T2/CV1/'
-    ckpt_mode3: '../models/UHG_DTI_FA/CV1/'
+    mode:
+      0: 'UHG_T1'
+      1: 'UHG_T2'
+      2: 'UHG_DTI_FA'
+    meta:
+      0: '../models/UHG_T1/CV1/model.ckpt-899.meta'
+      1: '../models/UHG_T2/CV1/model.ckpt-899.meta'
+      2: '../models/UHG_DTI_FA/CV1/model.ckpt-899.meta'
+    ensemble_count: 3
     checkpoint_path: '../models/UHG_Fusion_Conv7/'
     summary_path: '../models/UHG_Fusion_Conv7/'
     keep_prob: 0.3
