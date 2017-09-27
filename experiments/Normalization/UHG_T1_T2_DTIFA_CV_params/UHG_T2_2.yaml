@@ -1,0 +1,15 @@
+parameters:
+  img_size: 902629
+  height: 91
+  width: 109
+  depth: 91
+  mode: 'UHG_T2'
+  epsilon: 0.00001
+  regex: '-T2_mni_aligned\.nii\.gz'
+  split_on: '-T2_mni_aligned.nii.gz'
+  smooth_path: '/local/UHG/UHG_T2_smoothed/'
+  per_image_out: '/local/UHG/UHG_T2_normalized/per_image/'
+  norm_mean_var: './experiments/Normalization/Dictionaries/UHG_T2/CV2/'
+  valid_path: '/local/UHG/Dictionaries/CV/T1_T2_DTIFA_valid_2.pkl'
+  train_path: '/local/UHG/Dictionaries/CV/T1_T2_DTIFA_train_2.pkl'
+  norm_out: '/local/UHG/UHG_T2_normalized/CV2/'

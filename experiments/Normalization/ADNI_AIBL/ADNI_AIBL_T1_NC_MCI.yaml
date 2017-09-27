@@ -1,0 +1,15 @@
+parameters:
+  img_size: 902629
+  height: 91
+  width: 109
+  depth: 91
+  mode: 'ADNI_AIBL_T1'
+  epsilon: 0.00001
+  regex: '_mni_aligned\.nii\.gz'
+  split_on: '_mni_aligned.nii.gz'
+  smooth_path: '/local/ADNI_AIBL_T1_smoothed/'
+  per_image_out: '/local/ADNI_AIBL_T1_normalized/per_image/'
+  norm_mean_var: './experiments/Normalization/Dictionaries/ADNI_AIBL_T1_NC_MCI/'
+  valid_path: '/local/ADNI_AIBL_T1_normalized/AIBL_ADNI_valid_T1_NC_MCI.pkl'
+  train_path: '/local/ADNI_AIBL_T1_normalized/AIBL_ADNI_train_T1_NC_MCI.pkl'
+  norm_out: '/local/ADNI_AIBL_T1_normalized/train_NC_MCI/'

@@ -1,0 +1,15 @@
+parameters:
+  img_size: 902629
+  height: 91
+  width: 109
+  depth: 91
+  mode: 'ADNI_DTI_FA'
+  epsilon: 0.00001
+  regex: '_mni_aligned\.nii\.gz'
+  split_on: '_mni_aligned.nii.gz'
+  smooth_path: '/local/ADNI_DTI_FA_smoothed/'
+  per_image_out: '/local/ADNI_DTI_FA_normalized/per_image/'
+  norm_mean_var: './experiments/Normalization/Dictionaries/ADNI_DTI_FA/'
+  valid_path: '/local/ADNI_DTI_FA_normalized/ADNI_DTI_valid.pkl'
+  train_path: '/local/ADNI_DTI_FA_normalized/ADNI_DTI_train_new.pkl'
+  norm_out: '/local/ADNI_DTI_FA_normalized/train/'
