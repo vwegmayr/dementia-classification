@@ -64,7 +64,7 @@ class CNN:
 
         return logits
 
-    def inference(self, images, keep_prob):
+    def inference(self, images):
         """
         This function builds the 3D Convolutional Neural Network architecture
         Args:
@@ -93,73 +93,7 @@ class CNN:
                                          biases_shape=[15], scope=scope)
         print("Conv1_c", conv1_c.get_shape())
         conv1 = tf.concat([conv1_a, conv1_b, conv1_c], 4)
-        with tf.variable_scope(self.param['mode']+'conv2') as scope:
-            conv2 = self.cnnutils.conv_relu(input_=conv1,
-                                       kernel_shape=[5, 5, 5, 45, 60],
-                                       biases_shape=[60], scope=scope)
-        print("Conv2", conv2.get_shape())
-        with tf.variable_scope(self.param['mode']+'conv3') as scope:
-            conv3 = self.cnnutils.conv_relu(input_=conv2,
-                                   kernel_shape=[5, 5, 5, 60, 64],
-                                   biases_shape=[64], scope=scope)
-        print("Conv3", conv3.get_shape())
-        with tf.variable_scope(self.param['mode']+'conv4') as scope:
-            conv4 = self.cnnutils.conv_relu(input_=conv3,
-                                   kernel_shape=[3, 3, 3, 64, 100],
-                                   biases_shape=[100], scope=scope)
-        print("Conv4", conv4.get_shape())
-
-        with tf.variable_scope(self.param['mode']+'conv5') as scope:
-            conv5 = self.cnnutils.conv_relu(input_=conv4,
-                                   kernel_shape=[3, 3, 3, 100, 128],
-                                   biases_shape=[128], scope=scope)
-        print("Conv5", conv5.get_shape())
-        with tf.variable_scope(self.param['mode']+'conv6') as scope:
-            conv6 = self.cnnutils.conv_relu(input_=conv5,
-                                   kernel_shape=[3, 3, 3, 128, 256],
-                                   biases_shape=[256], scope=scope)
-        print("Conv6", conv6.get_shape())
-        with tf.variable_scope(self.param['mode']+'conv7') as scope:
-            conv7 = self.cnnutils.conv_relu(input_=conv6,
-                                   kernel_shape=[3, 3, 3, 256, 512],
-                                   biases_shape=[512], scope=scope)
-        print("Conv7", conv7.get_shape())
-
-        with tf.variable_scope(self.param['mode']+'fullcn') as scope:
-            vector_per_batch = tf.reshape(conv7, [self.param['batch_size'],
-                                          -1])
-            weights = self.cnnutils.weight_decay_variable(name="weights",
-                                                 shape=[512, 512])
-            biases = self.cnnutils.variable_on_gpu(name="biases",
-                                          shape=[512],
-                                          initializer=tf.constant_initializer(
-                                              0.01))
-            pre_activation = tf.matmul(vector_per_batch, weights) + biases
-            fullcn = tf.nn.relu(pre_activation, name=scope.name)
-            fullcn_drop = tf.nn.dropout(fullcn, keep_prob)
-            print('fullcn:', fullcn_drop.get_shape())
-
-        with tf.variable_scope(self.param['mode']+'logits') as scope:
-            weights = self.cnnutils.weight_decay_variable(name="weights",
-                                                 shape=[512, self.param[
-                                                     'classes']])
-            biases = self.cnnutils.variable_on_gpu(name='biases',
-                                          shape=[self.param['classes']],
-                                          initializer=tf.constant_initializer(
-                                              0.01))
-            logits = tf.add(tf.matmul(fullcn_drop, weights), biases,
-                            name=scope.name)
-            print('logits:', logits.get_shape())
-
-        return logits
-
-    def get_features(self, sess, saver):
-        with tf.Graph().as_default() as model_graph:
-            ckpath = self.param['transfer_checkpoint_path']
-            ckpt = tf.train.get_checkpoint_state(ckpath)
-            print(ckpath, ckpt)
-            if ckpt and ckpt.model_checkpoint_path:
-                saver.restore(sess, ckpt.model_checkpoint_path)
+        return conv1
 
     def train(self, train_data, validation_data, test):
         """
@@ -217,7 +151,9 @@ class CNN:
                 with tf.name_scope('Train' + mode) as scope:
                     logits = []
                     if self.mlp == 'False':
-                        logits = self.inference(images, keep_prob)
+                        conv1 = self.inference(images)
+                        logits = self.cnnutils.inference_conv2(conv1,
+                                                               keep_prob)
                     elif self.mlp == 'True':
                         logits = self.mlp_inference(images, keep_prob)
                     self.cnnutils.inference_loss(logits, labels)
@@ -263,7 +199,13 @@ class CNN:
                     print("Not used:", [v.name for v in
                                         tf.trainable_variables()[-tr_depth:]])
                     saver = tf.train.Saver(dict_map, max_to_keep=None)
-                    self.get_features(sess, saver)
+                    ckpath = self.param['transfer_checkpoint_path']
+                    ckpt = tf.train.get_checkpoint_state(ckpath)
+                    print(ckpath, ckpt)
+                    if ckpt and ckpt.model_checkpoint_path:
+                        saver.restore(sess, ckpt.model_checkpoint_path)
+
+                # Create a summary writer
                 summary_writer = tf.summary.FileWriter(
                     self.param['summary_path'], sess.graph)
                 summary_op = tf.summary.merge_all()

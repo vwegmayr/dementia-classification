@@ -21,6 +21,7 @@ parameters:
   mlp: 'False'
   multitask: 'True'
   multimodal: 'False'
+  tl: 'False'
 data_paths:
   datadir0: '/local/UHG/UHG_T1_normalized/CV1/'
   datadir1: '/local/UHG/UHG_T2_normalized/CV1/'

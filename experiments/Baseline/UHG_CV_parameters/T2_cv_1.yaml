@@ -22,6 +22,7 @@ parameters:
   mlp: 'False'
   multitask: 'False'
   multimodal: 'False'
+  tl: 'False'
 data_paths:
   datadir: '/local/UHG/UHG_T2_normalized/CV1/'
   class_labels: '/local/UHG/T1_T2_DTIFA_dic.pkl'

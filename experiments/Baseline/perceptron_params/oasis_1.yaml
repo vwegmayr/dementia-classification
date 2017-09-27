@@ -23,6 +23,7 @@ parameters:
   mlp: 'True'
   multitask: 'False'
   multimodal: 'False'
+  tl: 'False'
   features: '/local/OASIS/OASIS_normalized/CV1/robust_fisher/Top_10.0_features.pkl'
 data_paths:
   datadir: '/local/OASIS/OASIS_normalized/CV1/'

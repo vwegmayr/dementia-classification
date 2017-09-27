@@ -12,19 +12,26 @@ parameters:
     num_epochs: 30 
     learning_rate: 0.000005
     decay_factor: 0.9
-    decay_const: 0.005 
-    mode: 'multichannel'
+    decay_lr: 'False'
+    decay_const: 0.001 
     mode:
       0: 'UHG_T1'
       1: 'UHG_T2'
       2: 'UHG_DTI_FA'
-    checkpoint_path: '../models/UHG_multichannel/CV1/'
-    summary_path: '../models/UHG_multichannel/CV1/'
+    meta:
+      0: '../models/UHG_T1/CV1/model.ckpt-899.meta'
+      1: '../models/UHG_T2/CV1/model.ckpt-899.meta'
+      2: '../models/UHG_DTI_FA/CV1/model.ckpt-899.meta'
+    ckpt_mode1: '../models/UHG_T1/CV1/'
+    ckpt_mode2: '../models/UHG_T2/CV1/'
+    ckpt_mode3: '../models/UHG_DTI_FA/CV1/'
+    checkpoint_path: '../models/UHG_multimodal/CV1_toptune/'
+    summary_path: '../models/UHG_multimodal/CV1_toptune/'
     keep_prob: 0.3
+    channels: 1
     classes: 2
-    channels: 3
-    decay_lr: 'False'
-    optimizer: 'Adam'
+    fusion: 'scratch'
+    fusion_layer: 'conv7'
   regex: '_normalized\.nii\.gz'
   split_on: '_normalized.nii.gz'
   mode_folder1: '/local/UHG/UHG_T1_normalized/CV1/'
@@ -32,7 +39,7 @@ parameters:
   mode_folder3: '/local/UHG/UHG_DTI_FA_normalized/CV1/'
   mlp: 'False'
   multitask: 'False'
-  multimodal: 'False'
+  multimodal: 'toptune'
   tl: 'False'
 data_paths:
   datadir: '/local/UHG/UHG_T1_normalized/CV1/'

@@ -66,10 +66,12 @@ class CNNEnsembleModels:
             logits_ = []
             for m in range(0, self.param['ensemble_count']):
                 print("Mode:", self.mode[m])
+                layer_path = 'Train' + self.mode[m] + '/' + self.mode[m] + \
+                             'logits/' + self.mode[m] + 'logits:0'
                 logits_.append(self.cnnutils.get_features(self.mode[m],
                                                           self.meta_paths[m],
                                                           image_data[m],
-                                                          label_data))
+                                                          layer_path))
             logits = np.average(logits_, axis=0)
             correct_ = np.equal(np.argmax(label_data, 1),
                                   np.argmax(logits, 1))

@@ -17,9 +17,10 @@ from dementia_prediction.multichannel_input import MultichannelDataInput
 
 from dementia_prediction.data_input_perceptron import DataInputPerceptron
 from dementia_prediction.cnn_baseline.cnn_model import CNN
-from dementia_prediction.multimodal.finetuning import CNNMultimodal
+from dementia_prediction.multimodal.multimodal_fusion import CNNMultimodal
 from dementia_prediction.cnn_baseline.ensemble_models import CNNEnsembleModels
-
+from dementia_prediction.transfer_learning.adni_toptuning import TransferToptune
+from dementia_prediction.multimodal.multimodal_toptuning import FusionToptune
 # Parse the parameter file
 config = Config()
 parser = argparse.ArgumentParser(description="Run the Baseline model")
@@ -105,7 +106,7 @@ if params['cnn']['channels'] > 1:
     validation_data = MultichannelDataInput(params=config.config.get('parameters'),
                             data=valid_filenames, name='valid', mean=0,
                             var=0)
-if params['multimodal'] == 'True':
+if params['multimodal'] == 'scratch' or params['multimodal'] == 'finetune':
     train_data = FusionDataInput(params=config.config.get('parameters'),
                                  data=train_filenames,
                                  name='train', mean=0, var=0)
@@ -114,6 +115,14 @@ if params['multimodal'] == 'True':
                                       mean=0,
                                       var=0)
     cnn_model = CNNMultimodal(params=config.config.get('parameters'))
+if params['multimodal'] == 'toptune':
+    train_data = FusionDataInput(params=config.config.get('parameters'),
+                                 data=train_filenames,
+                                 name='train', mean=0, var=0)
+    validation_data = FusionDataInput(params=config.config.get('parameters'),
+                                      data=valid_filenames, name='valid',
+                                      mean=0, var=0)
+    cnn_model = FusionToptune(params=config.config.get('parameters'))
 if params['multimodal'] == 'ensemble':
     train_data = FusionDataInput(params=config.config.get('parameters'),
                                  data=train_filenames,
@@ -123,5 +132,7 @@ if params['multimodal'] == 'ensemble':
                                       mean=0,
                                       var=0)
     cnn_model = CNNEnsembleModels(params=config.config.get('parameters'))
+if params['tl'] == 'toptune':
+    cnn_model = TransferToptune(params=config.config.get('parameters'))
 cnn_model.train(train_data, validation_data, True)
 

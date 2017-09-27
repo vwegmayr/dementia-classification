@@ -1,0 +1,34 @@
+
+parameters:
+  cnn:
+    depth: 91
+    height: 109
+    width: 91
+    mode: 'ADNI_T1'
+    batch_size: 12 
+    num_epochs: 50 
+    learning_rate: 0.000005
+    decay_factor: 0.9
+    decay_const: 0.001 
+    transfer_checkpoint_path: '../models/ADNI_AIBL_T1_checkpoints/'
+    checkpoint_path: '../models/UHG_T1_transfer/CV1_5e6_toptuning/'
+    summary_path: '../models/UHG_T1_transfer/CV1_5e6_toptuning/'
+    meta_path: '../models/ADNI_AIBL_T1_checkpoints/model.ckpt-62009.meta'
+    keep_prob: 0.3
+    classes: 2
+    decay_lr: 'false'
+    optimizer: 'Adam'
+    transfer_depth: '8'
+    channels: 1
+    transfer: 'fullcn'
+  tl: 'toptune'
+  regex: '_normalized\.nii\.gz'
+  split_on: '_normalized.nii.gz'
+  mlp: 'False'
+  multimodal: 'False'
+  multitask: 'False'
+data_paths:
+  datadir: '/local/UHG/UHG_T1_normalized_masked/CV1/'
+  class_labels: '/local/UHG/T1_T2_DTIFA_dic.pkl'
+  valid_data: '/local/UHG/Dictionaries/CV/T1_T2_DTIFA_valid_1.pkl'
+  train_data: '/local/UHG/Dictionaries/CV/T1_T2_DTIFA_train_1.pkl'

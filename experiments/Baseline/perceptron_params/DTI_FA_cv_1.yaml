@@ -23,6 +23,7 @@ parameters:
   mlp: 'True'
   multitask: 'False'
   multimodal: 'False'
+  tl: 'False'
   features: '/local/UHG/UHG_DTI_FA_normalized_masked/CV1/general_fisher/Top_10.0_features.pkl'
 data_paths:
   datadir: '/local/UHG/UHG_DTI_FA_normalized_masked/CV1/'

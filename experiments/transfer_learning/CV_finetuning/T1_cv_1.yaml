@@ -19,7 +19,7 @@ parameters:
     decay_lr: 'false'
     optimizer: 'Adam'
     transfer: 'True'
-    transfer_depth: 7
+    transfer_depth: 8
   tl: 'finetune'
   regex: '_normalized\.nii\.gz'
   split_on: '_normalized.nii.gz'

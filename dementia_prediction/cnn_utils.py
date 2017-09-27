@@ -126,6 +126,67 @@ class CNNUtils:
         tf.add_to_collection('losses', cross_entropy_mean)
         tf.add_to_collection('crossloss', cross_entropy_mean)
 
+    def inference_conv2(self, conv1, keep_prob):
+        with tf.variable_scope(self.param['mode']+'conv2') as scope:
+            conv2 = self.conv_relu(input_=conv1,
+                                       kernel_shape=[5, 5, 5, 45, 60],
+                                       biases_shape=[60], scope=scope)
+        print("Conv2", conv2.get_shape())
+        with tf.variable_scope(self.param['mode']+'conv3') as scope:
+            conv3 = self.conv_relu(input_=conv2,
+                                   kernel_shape=[5, 5, 5, 60, 64],
+                                   biases_shape=[64], scope=scope)
+        print("Conv3", conv3.get_shape())
+        with tf.variable_scope(self.param['mode']+'conv4') as scope:
+            conv4 = self.conv_relu(input_=conv3,
+                                   kernel_shape=[3, 3, 3, 64, 100],
+                                   biases_shape=[100], scope=scope)
+        print("Conv4", conv4.get_shape())
+
+        with tf.variable_scope(self.param['mode']+'conv5') as scope:
+            conv5 = self.conv_relu(input_=conv4,
+                                   kernel_shape=[3, 3, 3, 100, 128],
+                                   biases_shape=[128], scope=scope)
+        print("Conv5", conv5.get_shape())
+        with tf.variable_scope(self.param['mode']+'conv6') as scope:
+            conv6 = self.conv_relu(input_=conv5,
+                                   kernel_shape=[3, 3, 3, 128, 256],
+                                   biases_shape=[256], scope=scope)
+        print("Conv6", conv6.get_shape())
+        with tf.variable_scope(self.param['mode']+'conv7') as scope:
+            conv7 = self.conv_relu(input_=conv6,
+                                   kernel_shape=[3, 3, 3, 256, 512],
+                                   biases_shape=[512], scope=scope)
+        print("Conv7", conv7.get_shape())
+
+        with tf.variable_scope(self.param['mode']+'fullcn') as scope:
+            vector_per_batch = tf.reshape(conv7, [self.param['batch_size'],
+                                          -1])
+            weights = self.weight_decay_variable(name="weights",
+                                                 shape=[512, 512])
+            biases = self.variable_on_gpu(name="biases",
+                                          shape=[512],
+                                          initializer=tf.constant_initializer(
+                                              0.01))
+            pre_activation = tf.matmul(vector_per_batch, weights) + biases
+            fullcn = tf.nn.relu(pre_activation, name=scope.name)
+            fullcn_drop = tf.nn.dropout(fullcn, keep_prob)
+            print('fullcn:', fullcn_drop.get_shape())
+
+        with tf.variable_scope(self.param['mode']+'logits') as scope:
+            weights = self.weight_decay_variable(name="weights",
+                                                 shape=[512, self.param[
+                                                     'classes']])
+            biases = self.variable_on_gpu(name='biases',
+                                          shape=[self.param['classes']],
+                                          initializer=tf.constant_initializer(
+                                              0.01))
+            logits = tf.add(tf.matmul(fullcn_drop, weights), biases,
+                            name=scope.name)
+            print('logits:', logits.get_shape())
+
+        return logits
+
     def num_steps(self, dataset):
         """
         This function returns the number of steps to run to iterate the dataset
@@ -147,30 +208,138 @@ class CNNUtils:
         print("Num steps:", num_steps, "Data size:", data_size, flush=True)
         return num_steps
 
-    def get_features(self, mode, meta_path, image_data, label_data):
+    def get_features(self, mode, meta_path, image_data, layer_path):
         with tf.Graph().as_default() as model_graph:
             sess = tf.Session(graph=model_graph)
             saver = tf.train.import_meta_graph(meta_path)
             saver.restore(sess, meta_path.split('.meta')[0])
             images = model_graph.get_tensor_by_name(mode + 'images:0')
-            labels = model_graph.get_tensor_by_name(mode + 'labels:0')
             keep_prob = model_graph.get_tensor_by_name(mode + 'keep_prob:0')
+            if layer_path == 'conv1':
+                fusion_layer = 'conv1_a'
+                layer_path_a = 'Train' + mode + '/' + mode + fusion_layer +\
+                               '/' + mode + fusion_layer + ':0'
+                fusion_layer = 'conv1_b'
+                layer_path_b = 'Train' + mode + '/' + mode + fusion_layer +\
+                               '/' + mode + fusion_layer + ':0'
+                fusion_layer = 'conv1_c'
+                layer_path_c = 'Train' + mode + '/' + mode + fusion_layer + \
+                               '/' + mode + fusion_layer + ':0'
+                layer_a = model_graph.get_tensor_by_name(layer_path_a)
+                layer_b = model_graph.get_tensor_by_name(layer_path_b)
+                layer_c = model_graph.get_tensor_by_name(layer_path_c)
+                layer_a_, layer_b_, layer_c_ = sess.run(
+                    [layer_a, layer_b, layer_c],
+                    feed_dict={
+                        images: image_data,
+                        keep_prob: 1.0
+                    })
+                layer_ = np.concatenate([layer_a_, layer_b_, layer_c_], 4)
+                print("Output layer shape:", layer_.shape)
+                return layer_
+            else:
+                layer = model_graph.get_tensor_by_name(layer_path)
+                layer_ = sess.run(layer,
+                                  feed_dict={
+                                      images: image_data,
+                                      keep_prob: 1.0
+                                  })
+                print("Output layer shape:", layer_.shape)
+                return layer_
 
-            layer_path = 'Train' + mode + '/' + mode + 'logits/' +\
-                         mode + 'logits:0'
-            layer = model_graph.get_tensor_by_name(layer_path)
-            layer_ = sess.run(layer,
-                              feed_dict={
-                                  images: image_data,
-                                  labels: label_data,
-                                  keep_prob: 1.0
-                              })
-            print("Output layer shape:", layer_.shape)
-            return layer_
+    def fusion_conv1(self, fusion_input, keep_prob):
+        prefix = 'Fusion'
+        with tf.variable_scope(prefix + 'conv2') as scope:
+            conv2 = self.conv_relu(input_=fusion_input,
+                                            kernel_shape=[5, 5, 5, 135, 135],
+                                            biases_shape=[135], scope=scope)
+        print("Conv2", conv2.get_shape())
+        with tf.variable_scope(prefix + 'conv3') as scope:
+            conv3 = self.conv_relu(input_=conv2,
+                                            kernel_shape=[5, 5, 5, 135, 140],
+                                            biases_shape=[140], scope=scope)
+        print("Conv3", conv3.get_shape())
+        with tf.variable_scope(prefix + 'conv4') as scope:
+            conv4 = self.conv_relu(input_=conv3,
+                                            kernel_shape=[3, 3, 3, 140, 145],
+                                            biases_shape=[145], scope=scope)
+        print("Conv4", conv4.get_shape())
+        with tf.variable_scope(prefix + 'conv5') as scope:
+            conv5 = self.conv_relu(input_=conv4,
+                                            kernel_shape=[3, 3, 3, 145, 150],
+                                            biases_shape=[150], scope=scope)
+        print("Conv5", conv5.get_shape())
+        with tf.variable_scope(prefix + 'conv6') as scope:
+            conv6 = self.conv_relu(input_=conv5,
+                                            kernel_shape=[3, 3, 3, 150, 256],
+                                            biases_shape=[256], scope=scope)
+        print("Conv6", conv6.get_shape())
+        with tf.variable_scope(prefix + 'conv7') as scope:
+            conv7 = self.conv_relu(input_=conv6,
+                                            kernel_shape=[3, 3, 3, 256, 512],
+                                            biases_shape=[512], scope=scope)
+        print("Conv7", conv7.get_shape())
+        with tf.variable_scope(prefix + 'fullcn') as scope:
+            vector_per_batch = tf.reshape(conv7, [self.param['batch_size'],
+                                                  -1])
+            weights = self.weight_decay_variable(name="weights",
+                                                          shape=[512, 512])
+            biases = self.variable_on_gpu(name="biases",
+                                                   shape=[512],
+                                                   initializer=tf.constant_initializer(
+                                                       0.01))
+            pre_activation = tf.matmul(vector_per_batch, weights) + biases
+            fullcn = tf.nn.relu(pre_activation, name=scope.name)
+            fullcn_drop = tf.nn.dropout(fullcn, keep_prob)
+            print('fullcn:', fullcn_drop.get_shape())
+
+        with tf.variable_scope(prefix + 'logits') as scope:
+            weights = self.weight_decay_variable(name="weights",
+                                                          shape=[512,
+                                                                 self.param[
+                                                                     'classes']])
+            biases = self.variable_on_gpu(name='biases',
+                                                   shape=[
+                                                       self.param['classes']],
+                                                   initializer=tf.constant_initializer(
+                                                       0.01))
+            logits = tf.add(tf.matmul(fullcn_drop, weights), biases,
+                            name=scope.name)
+            print('logits:', logits.get_shape())
+
+        return logits
+
+    def fusion_conv7(self, fusion_input, keep_prob):
+        with tf.variable_scope('Fusionfullcn') as scope:
+            vector_per_batch = tf.reshape(fusion_input, [self.param['batch_size'],
+                                                  -1])
+            weights = self.weight_decay_variable(name="weights",
+                                                 shape=[1536, 512])
+            biases = self.variable_on_gpu(name="biases",
+                                          shape=[512],
+                                          initializer=tf.constant_initializer(
+                                              0.01))
+            pre_activation = tf.matmul(vector_per_batch, weights) + biases
+            fullcn = tf.nn.relu(pre_activation, name=scope.name)
+            fullcn_drop = tf.nn.dropout(fullcn, keep_prob)
+            print('fullcn:', fullcn_drop.get_shape())
+
+        with tf.variable_scope('Fusionlogits') as scope:
+            weights = self.weight_decay_variable(name="weights",
+                                                 shape=[512, self.param[
+                                                     'classes']])
+            biases = self.variable_on_gpu(name='biases',
+                                          shape=[self.param['classes']],
+                                          initializer=tf.constant_initializer(
+                                              0.01))
+            logits = tf.add(tf.matmul(fullcn_drop, weights), biases,
+                            name=scope.name)
+            print('logits:', logits.get_shape())
+
+        return logits
 
     def evaluation(self, sess, eval_op, dataset, images, labels, keep_prob,
                    loss, corr, xloss, l2loss):
-        # TODO: Can placeholder be remove from args?
         """
         This function evaluates the accuracy of the model
         Args:

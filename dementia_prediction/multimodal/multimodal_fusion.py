@@ -10,6 +10,7 @@ import math
 import tensorflow as tf
 import numpy as np
 import sys
+import pprint
 from dementia_prediction.cnn_utils import CNNUtils
 
 
@@ -32,7 +33,9 @@ class CNNMultimodal:
                        1: params['cnn']['meta_mode2'],
                        2: params['cnn']['meta_mode3']
                       }
-        print("Multimodal", params, flush=True)
+        print("Multimodal params:")
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(params)
 
 
     def get_conv7(self, images, keep_prob, mode):
@@ -130,96 +133,6 @@ class CNNMultimodal:
         conv1 = tf.concat([conv1_a, conv1_b, conv1_c], 4)
         return conv1
 
-    def fusion_conv1(self, fusion_input, keep_prob):
-        prefix = 'Fusion'
-        with tf.variable_scope(prefix + 'conv2') as scope:
-            conv2 = self.cnnutils.conv_relu(input_=fusion_input,
-                                            kernel_shape=[5, 5, 5, 135, 135],
-                                            biases_shape=[135], scope=scope)
-        print("Conv2", conv2.get_shape())
-        with tf.variable_scope(prefix + 'conv3') as scope:
-            conv3 = self.cnnutils.conv_relu(input_=conv2,
-                                            kernel_shape=[5, 5, 5, 135, 140],
-                                            biases_shape=[140], scope=scope)
-        print("Conv3", conv3.get_shape())
-        with tf.variable_scope(prefix + 'conv4') as scope:
-            conv4 = self.cnnutils.conv_relu(input_=conv3,
-                                            kernel_shape=[3, 3, 3, 140, 145],
-                                            biases_shape=[145], scope=scope)
-        print("Conv4", conv4.get_shape())
-        with tf.variable_scope(prefix + 'conv5') as scope:
-            conv5 = self.cnnutils.conv_relu(input_=conv4,
-                                            kernel_shape=[3, 3, 3, 145, 150],
-                                            biases_shape=[150], scope=scope)
-        print("Conv5", conv5.get_shape())
-        with tf.variable_scope(prefix + 'conv6') as scope:
-            conv6 = self.cnnutils.conv_relu(input_=conv5,
-                                            kernel_shape=[3, 3, 3, 150, 256],
-                                            biases_shape=[256], scope=scope)
-        print("Conv6", conv6.get_shape())
-        with tf.variable_scope(prefix + 'conv7') as scope:
-            conv7 = self.cnnutils.conv_relu(input_=conv6,
-                                            kernel_shape=[3, 3, 3, 256, 512],
-                                            biases_shape=[512], scope=scope)
-        print("Conv7", conv7.get_shape())
-        with tf.variable_scope(prefix + 'fullcn') as scope:
-            vector_per_batch = tf.reshape(conv7, [self.param['batch_size'],
-                                                  -1])
-            weights = self.cnnutils.weight_decay_variable(name="weights",
-                                                          shape=[512, 512])
-            biases = self.cnnutils.variable_on_gpu(name="biases",
-                                                   shape=[512],
-                                                   initializer=tf.constant_initializer(
-                                                       0.01))
-            pre_activation = tf.matmul(vector_per_batch, weights) + biases
-            fullcn = tf.nn.relu(pre_activation, name=scope.name)
-            fullcn_drop = tf.nn.dropout(fullcn, keep_prob)
-            print('fullcn:', fullcn_drop.get_shape())
-
-        with tf.variable_scope(prefix + 'logits') as scope:
-            weights = self.cnnutils.weight_decay_variable(name="weights",
-                                                          shape=[512,
-                                                                 self.param[
-                                                                     'classes']])
-            biases = self.cnnutils.variable_on_gpu(name='biases',
-                                                   shape=[
-                                                       self.param['classes']],
-                                                   initializer=tf.constant_initializer(
-                                                       0.01))
-            logits = tf.add(tf.matmul(fullcn_drop, weights), biases,
-                            name=scope.name)
-            print('logits:', logits.get_shape())
-
-        return logits
-
-    def fusion_conv7(self, fusion_input, keep_prob):
-        with tf.variable_scope('Fusionfullcn') as scope:
-            vector_per_batch = tf.reshape(fusion_input, [self.param['batch_size'],
-                                                  -1])
-            weights = self.cnnutils.weight_decay_variable(name="weights",
-                                                 shape=[1536, 512])
-            biases = self.cnnutils.variable_on_gpu(name="biases",
-                                          shape=[512],
-                                          initializer=tf.constant_initializer(
-                                              0.01))
-            pre_activation = tf.matmul(vector_per_batch, weights) + biases
-            fullcn = tf.nn.relu(pre_activation, name=scope.name)
-            fullcn_drop = tf.nn.dropout(fullcn, keep_prob)
-            print('fullcn:', fullcn_drop.get_shape())
-
-        with tf.variable_scope('Fusionlogits') as scope:
-            weights = self.cnnutils.weight_decay_variable(name="weights",
-                                                 shape=[512, self.param[
-                                                     'classes']])
-            biases = self.cnnutils.variable_on_gpu(name='biases',
-                                          shape=[self.param['classes']],
-                                          initializer=tf.constant_initializer(
-                                              0.01))
-            logits = tf.add(tf.matmul(fullcn_drop, weights), biases,
-                            name=scope.name)
-            print('logits:', logits.get_shape())
-
-        return logits
 
 
 
@@ -253,16 +166,7 @@ class CNNMultimodal:
         images3 = images[2]
         total_seen = 0
         pred_out = {}
-        class_max_size = 0
-        data_size = 0
-        for i in range(0, len(dataset.files)):
-            data_size += len(dataset.files[i])
-            if len(dataset.files[i]) > class_max_size:
-                class_max_size = len(dataset.files[i])
-        num_steps = int(class_max_size / (self.param['batch_size']/len(dataset.files)))
-        if class_max_size%(self.param['batch_size']/len(dataset.files)) != 0:
-            num_steps += 1
-        print("Num steps:", num_steps, "Data size:", data_size)
+        num_steps = self.cnnutils.num_steps(dataset)
         for step in range(num_steps):
             patients, image_data, label_data = dataset.next_batch()
             predictions, correct_, loss_, xloss_, l2loss_ = \
@@ -286,9 +190,8 @@ class CNNMultimodal:
             if value == True:
                 accuracy_ += 1
         accuracy_ /= len(pred_out)
-        print("Accuracy of ", len(pred_out)," images is ", accuracy_)
-        # TODO: Add accuracy [2]
-        sys.stdout.flush()
+        print("Accuracy of ", len(pred_out)," images is ", accuracy_,
+              flush=True)
         return accuracy_
 
     def train(self, train_data, validation_data, test):
@@ -363,14 +266,16 @@ class CNNMultimodal:
                         conv_3 = self.get_conv7(images3, keep_prob, 2)
                         conv_fusion = tf.concat([conv_1, conv_2,
                                                   conv_3], 4)
-                        logits = self.fusion_conv7(conv_fusion, keep_prob)
+                        logits = self.cnnutils.fusion_conv7(conv_fusion,
+                                                         keep_prob)
                     elif self.param['fusion_layer'] == 'conv1':
                         conv_1 = self.get_conv1(images1, keep_prob, 0)
                         conv_2 = self.get_conv1(images2, keep_prob, 1)
                         conv_3 = self.get_conv1(images3, keep_prob, 2)
                         conv_fusion = tf.concat([conv_1, conv_2,
                                                   conv_3], 4)
-                        logits = self.fusion_conv1(conv_fusion, keep_prob)
+                        logits = self.cnnutils.fusion_conv1(conv_fusion,
+                                                         keep_prob)
 
                     self.cnnutils.inference_loss(logits, labels)
                     losses = tf.get_collection('losses', scope)
@@ -420,6 +325,13 @@ class CNNMultimodal:
                     self.get_features(sess, saver1, 0)
                     self.get_features(sess, saver2, 1)
                     self.get_features(sess, saver3, 2)
+                    '''
+                    # To initialize with FCN weights when fusing at conv7
+                    dict_map_fcn = {v.name[:-2]:v for v in train_objects if
+                                    'TLFusion' in v.name[:-2]}
+                    saver4 = tf.train.Saver(dict_map_fcn)
+                    self.get_features(sess, saver4, 3)
+                    '''
 
                 # Create a summary writer
                 summary_writer = tf.summary.FileWriter(

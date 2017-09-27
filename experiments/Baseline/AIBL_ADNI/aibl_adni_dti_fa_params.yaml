@@ -22,7 +22,7 @@ parameters:
   mlp: 'False'
   multitask: 'False'
   multimodal: 'False'
-
+  tl: 'False'
 data_paths:
   datadir: '/local/ADNI_AIBL/ADNI_DTI_FA_normalized/train/'
   class_labels: '/local/ADNI_AIBL/ADNI_DTI_FA_normalized/ADNI_DTI_class_labels.pkl'

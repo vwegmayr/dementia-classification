@@ -10,26 +10,24 @@ parameters:
     fusion_channels: 90 
     batch_size: 12
     num_epochs: 30 
-    learning_rate: 0.000005
+    learning_rate: 0.00005
     decay_factor: 0.9
-    decay_lr: 'False'
-    decay_const: 0.001 
+    decay_const: 0.001
     mode:
       0: 'UHG_T1'
       1: 'UHG_T2'
       2: 'UHG_DTI_FA'
-    meta_mode1: '../models/UHG_T1/CV1/model.ckpt-899'
-    meta_mode2: '../models/UHG_T2/CV1/model.ckpt-899'
-    meta_mode3: '../models/UHG_DTI_FA/CV1/model.ckpt-899'
-    ckpt_mode1: '../models/UHG_T1/CV1/'
-    ckpt_mode2: '../models/UHG_T2/CV1/'
-    ckpt_mode3: '../models/UHG_DTI_FA/CV1/'
-    checkpoint_path: '../models/UHG_multimodal/CV1_conv7_scratch_seed0/'
-    summary_path: '../models/UHG_multimodal/CV1_conv7_scratch_seed0/'
+    meta:
+      0: '../models/UHG_T1/CV1/model.ckpt-899.meta'
+      1: '../models/UHG_T2/CV1/model.ckpt-899.meta'
+      2: '../models/UHG_DTI_FA/CV1/model.ckpt-899.meta'
+    ensemble_count: 3
+    checkpoint_path: '../models/UHG_Fusion_Conv7/'
+    summary_path: '../models/UHG_Fusion_Conv7/'
     keep_prob: 0.3
-    channels: 1
     classes: 2
-    fusion: 'scratch'
+    channels: 1
+    fusion: 'ensemble'
     fusion_layer: 'conv7'
   regex: '_normalized\.nii\.gz'
   split_on: '_normalized.nii.gz'
@@ -38,7 +36,8 @@ parameters:
   mode_folder3: '/local/UHG/UHG_DTI_FA_normalized/CV1/'
   mlp: 'False'
   multitask: 'False'
-  multimodal: 'True'
+  multimodal: 'ensemble'
+  tl: 'False'
 data_paths:
   datadir: '/local/UHG/UHG_T1_normalized/CV1/'
   logdir: '/local/home/saitharaju/Data/'
