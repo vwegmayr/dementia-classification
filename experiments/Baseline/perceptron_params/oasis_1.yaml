@@ -18,6 +18,7 @@ parameters:
     decay_lr: 'False'
     optimizer: 'Adam'
     num_features: 22848
+    transfer: 'False'
   regex: '_normalized\.nii\.gz'
   split_on: '_normalized.nii.gz'
   mlp: 'True'

@@ -15,6 +15,7 @@ parameters:
     summary_path: '../models/ADNI_DTI_FA/'
     keep_prob: 0.3
     classes: 3
+    transfer: 'False'
     channels: 1
   regex: '_normalized\.nii\.gz'
   split_on: '_normalized.nii.gz'

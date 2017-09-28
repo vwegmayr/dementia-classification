@@ -15,6 +15,7 @@ parameters:
     classes: 2
     channels: 1
     decay_lr: 'False'
+    transfer: 'False'
     optimizer: 'Adam'
   regex: '_normalized\.nii\.gz'
   split_on: '_normalized.nii.gz'

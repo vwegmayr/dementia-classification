@@ -16,6 +16,7 @@ parameters:
     keep_prob: 0.3
     classes: 2
     channels: 1
+    transfer: 'False'
   regex: '_normalized\.nii\.gz'
   split_on: '_normalized.nii.gz'
   testing: 'False'
