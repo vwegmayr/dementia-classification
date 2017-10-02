@@ -1,0 +1,13 @@
+parameters:
+  data_path: '/local/UHG/UHG_T1_normalized_masked/CV3/'
+  patient_dict: '/local/UHG/Dictionaries/T1_T2_DTIFA_dic.pkl'
+  valid_dict: '/local/UHG/Dictionaries/CV/T1_T2_DTIFA_valid_3.pkl'
+  train_dict: '/local/UHG/Dictionaries/CV/T1_T2_DTIFA_train_3.pkl'
+  mode0_folder: '/local/UHG/UHG_T1_normalized_masked/CV3/'
+  mode1_folder: '/local/UHG/UHG_T2_normalized/CV3/'
+  mode2_folder: '/local/UHG/UHG_DTI_FA_normalized_masked/CV3/'
+  depth: 91
+  height: 109
+  width: 91
+  regex: '_normalized\.nii\.gz'
+  split_on: '_normalized.nii.gz'

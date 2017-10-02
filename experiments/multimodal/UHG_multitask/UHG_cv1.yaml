@@ -14,8 +14,10 @@ parameters:
     summary_path: '../models/UHG_multitask/CV1/'
     keep_prob: 0.3
     classes: 2
+    channels: 1
     decay_lr: 'False'
     optimizer: 'Adam'
+    transfer: 'False'
   regex: '_normalized\.nii\.gz'
   split_on: '_normalized.nii.gz'
   mlp: 'False'

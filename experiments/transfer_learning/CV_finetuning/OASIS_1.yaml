@@ -18,7 +18,7 @@ parameters:
     channels: 1
     decay_lr: 'False'
     optimizer: 'Adam'
-    transfer_depth: 8
+    transfer_depth: 8 
     transfer: 'True'
   tl: 'finetune'
   regex: '_normalized\.nii\.gz'

@@ -24,8 +24,8 @@ parameters:
     ckpt_mode1: '../models/UHG_T1/CV1/'
     ckpt_mode2: '../models/UHG_T2/CV1/'
     ckpt_mode3: '../models/UHG_DTI_FA/CV1/'
-    checkpoint_path: '../models/UHG_multimodal/CV1_conv7_scratch_seed0/'
-    summary_path: '../models/UHG_multimodal/CV1_conv7_scratch_seed0/'
+    checkpoint_path: '../models/UHG_multimodal/CV1/'
+    summary_path: '../models/UHG_multimodal/CV1/'
     keep_prob: 0.3
     channels: 1
     classes: 2

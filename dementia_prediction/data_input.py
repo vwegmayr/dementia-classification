@@ -70,7 +70,7 @@ class DataInput:
         """
         This functions retrieves the next batch of the data.
 
-        Returns: (batch_images, batch_labels)
+        Returns: (batch_filenames, batch_images, batch_labels)
 
         """
         batch_images = np.array([], np.float)

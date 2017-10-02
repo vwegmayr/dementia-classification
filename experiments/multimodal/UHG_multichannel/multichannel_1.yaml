@@ -14,7 +14,7 @@ parameters:
     decay_factor: 0.9
     decay_const: 0.005 
     mode: 'multichannel'
-    mode:
+    modality:
       0: 'UHG_T1'
       1: 'UHG_T2'
       2: 'UHG_DTI_FA'
@@ -25,6 +25,7 @@ parameters:
     channels: 3
     decay_lr: 'False'
     optimizer: 'Adam'
+    transfer: 'False'
   regex: '_normalized\.nii\.gz'
   split_on: '_normalized.nii.gz'
   mode_folder1: '/local/UHG/UHG_T1_normalized/CV1/'

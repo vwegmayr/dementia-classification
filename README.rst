@@ -82,137 +82,115 @@ e. Normalize the dataset using the following three steps:
 Model Training Tutorial
 ======================
 
-For this tutorial, we will use the preprocessed toy data in ./Data/ folder.
+We use the preprocessed data in /local/UHG/UHG_<modality>/, /local/ADNI/ and /local/OASIS folders.
 
 Data conventions: 
 
-UHG - University Hospitals Geneva [6 images each in training and validation data balanced across 2 classes]
+UHG - University Hospitals Geneva 
+ADNI - Alzeimers Disease Neuroimaging Iniative
+AIBL - Australian Imaging, Biomarker & Lifestyle 
+OASIS - Open Access Series of Imaging Studies 
 
-ADNI - Alzeimers Disease Neuroimaging Iniative [6 images each in training and validation data balanced across 3 classes]
+There are three imaging modalities of data from UHG, ADNI, AIBL - T1, T2 and DTI FA and T1 image modality from OASIS
 
+UHG and OASIS data are split into 10 folds. Each parameter file in the code uses first fold of the data.
+Change the fold number from 1 to [2,10] to change the data set.
 
-There are three modalities of data from each institute - T1, T2 and DTI FA
-
-Models Conventions:
-
-Baseline model - 3D CNN model trained on any single modality.
-
-Fusion model - 3D CNN model trained by fusing baseline models.
-
-Transfer finetuning model - 3D CNN model trained by transferring weights from another model and finetuned.
-
-UHG T1 Baseline model:
+UHG/OASIS/ADNI+AIBL T1/T2/DTI FA Baseline models:
 ---------------------
 
 .. code-block:: shell
 
-       python experiments/Baseline/3dcnn.py experiments/Baseline/toy_parameters/UHG_T1_params.yaml
+       python experiments/main.py experiments/Baseline/<data_set_name>/<modality_name>.yaml
 
        
-This model uses the UHG T1 data from ./Data/UHG_T1 directory and stores the baseline model in ./output/UHG_T1
+This command trains the Baseline 3D CNN model on a single image modality data and stores the model checkpoints
+for each epoch at ../models/<data_set>/ folder.
 
-UHG DTI FA Baseline model:
+ADNI Binary Classification Tasks (NC vs MCI, MCI vs AD, NC vs AD):
+--------------------------
+
+.. code-block:: shell
+
+       python experiments/main_run.py experiments/Baseline/AIBL_ADNI/aibl_adni_t1_nc_ad_params.yaml
+
+Multi layer perceptron with 2 layers:
+----------------------
+
+.. code-block:: shell
+
+       python experiments/main_run.py experiments/Baseline/perceptron_params/<data_set_and_modality>.yaml
+
+Ensembling over epochs for ADNI model:
 -------------------------
 
 .. code-block:: shell
 
-       python experiments/Baseline/3dcnn.py experiments/Baseline/toy_parameters/UHG_DTI_FA_params.yaml
-
-This model uses the UHG DTI FA data from ./Data/UHG_DTI_FA directory and stores the baseline model in ./output/UHG_DTI_FA
-
-UHG T2 Baseline model:
----------------------
-
-.. code-block:: shell
-
-       python experiments/Baseline/3dcnn.py experiments/Baseline/toy_parameters/UHG_T2_params.yaml
-
-This model uses the UHG T2 data from ./Data/UHG_T2 directory and stores the baseline model in ./output/UHG_T2
+       python experiments/Baseline/adni_3dcnn_ensemble.py experiments/Baseline/AIBL_ADNI/ensemble_params.yaml
 
 Fusion model:
 ------------
 
 .. code-block:: shell
 
-       python experiments/multimodal/multimodal_fusion.py experiments/multimodal/toy_parameters/MNI_aligned_params.yaml
+       python experiments/main_run.py experiments/multimodal/CV_fusion/multimodal_cv_1.yaml
 
-This model uses the models stored in ./output/UH_T2 ./output/UHG_T1 ./output/UHG_DTI_FA as fixed feature extractors
-and then trains a fully connected layer on top of it and stores the model in ./output/UHG_multimodal/
+This code runs the multimodal fusion architecture. The individual image modality pipelines can be fused either at
+the first convolutional layer (parameter: 'fusion_layer': 'conv1') or at the 7th convolutional layer
+(parameter: 'fusion_layer': 'conv7'). This architecture can be trained from scratch with all the weights initialized
+with modified Xavier init (parameters: 'multimodal': 'scratch', 'fusion': 'scratch') or with the weights from the 
+individual image modality baseline models (parameter: 'multimodal': 'finetune', 'fusion': 'finetune'). To freeze these
+weights and only toptune the top layers, use parameter: 'multimodal': 'toptune', 'fusion_layer': 'conv1' or 'conv7'
+
+Ensembling model:
+----------------
+
+.. code-block:: shell
+
+       python experiments/main_run.py experiments/multimodal/UHG_ensembling/ensemble_params.yaml
+
+This code ensembles the predictions from the three imaging modalities. A 3D CNN is trained on each image modality
+of a subject and the logits are averaged for the final prediction.
+
+
+Multichannel model:
+-----------------
+
+.. code-block:: shell
+
+       python experiments/main_run.py experiments/multimodal/UHG_multichannel/multichannel_1.yaml
+
+
+This code runs the multichannel model where each image modality is given as input as a separate channel to the first layer
+of 3D CNN.
+       
+Multitask model:
+--------------
+
+.. code-block:: shell
+
+       python experiments/main_run.py experiments/multimodal/UHG_multitask/UHG_cv1.yaml
 
 Transfer Learning
 =================
 
 To improve the performance of the baselines and the fusion model, transfer learning is employed by using ADNI dataset.
-For transfer learning, initially all the inidividual modality baselines are run and then the weights are transferred
-to the UHG baselines and the UHG models are further finetuned.
 
-ADNI T1 Baseline model:
-----------------------
-
-.. code-block:: shell
-
-       python experiments/Baseline/adni_3dcnn.py experiments/Baseline/toy_parameters/adni_t1_params.yaml
-
-This model uses the ADNI T1 data from ./Data/ADNI_T1 directory and stores the baseline model in ./output/ADNI_T1
-
-UHG T1 Transfer finetuning model:
---------------------------------
+To freeze the weights and only train the top layers, run the below code:
+At present, toptuning for transfer until 1st layer i.e., parameter: 'transfer': 'conv1' or 
+until fully connected layer ('transfer': 'fullcn') are only supported.
 
 .. code-block:: shell
 
-       python experiments/transfer_learning/tl.py experiments/transfer_learning/toy_parameters/T1_params.yaml
+       python experiments/main_run.py experiments/transfer_learning/CV_toptuning/<OASIS_or_UHG_modality>.yaml
 
-This model uses the model stored in ./output/ADNI_T1 and finetunes using the data from ./Data/UHG_T1 and stores the
-finetuned model at ./output/UHG_T1/transfer
 
-UHG T2 Baseline model:
-----------------------
+For finetuning,  weights can be transferred from any number of layers from bottom to top with the parameter
+'transfer_depth': <num> where <num> is 1 for 1st convolution layer and 8 for the last fully connected layer.
 
 .. code-block:: shell
 
-       python experiments/Baseline/adni_3dcnn.py experiments/Baseline/toy_parameters/adni_t2_params.yaml
+       python experiments/main_run.py experiments/transfer_learning/CV_finetuning/<OASIS_or_UHG_modality>.yaml
 
-This model uses the ADNI T2 data from ./Data/ADNI_T2 directory and stores the baseline model in ./output/ADNI_T2
 
-UHG T2 Transfer finetuning model:
---------------------------------
-
-.. code-block:: shell
-
-       python experiments/transfer_learning/tl.py experiments/transfer_learning/toy_parameters/T2_params.yaml
-
-This model uses the model stored in ./output/ADNI_T2 and finetunes using the data from ./Data/UHG_T2 and stores the
-finetuned model at ./output/UHG_T2/transfer
-
-UHG DTI FA Baseline model:
--------------------------
-
-.. code-block:: shell
-
-       python experiments/Baseline/adni_3dcnn.py experiments/Baseline/toy_parameters/adni_dti_fa_params.yaml
-
-This model uses the ADNI DTI FA data from ./Data/ADNI_DTI_FA directory and stores the baseline model in ./output/ADNI_DTI_FA
-
-UHG DTI FA Transfer finetuning model:
-------------------------------------
-
-.. code-block:: shell
-
-       python experiments/transfer_learning/tl.py experiments/transfer_learning/toy_parameters/DTI_FA_params.yaml
-
-This model uses the model stored in ./output/ADNI_DTI_FA and finetunes using the data from ./Data/UHG_DTI_FA and stores the
-finetuned model at ./output/UHG_DTI_FA/transfer
-
-Fusing the transferred models:
------------------------------
-
-The transferred and finetuned models can be fused as fixed feature extractors similar to fusing the individual baselines
-
-.. code-block:: shell
-
-       python experiments/multimodal/multimodal_fusion.py experiments/multimodal/toy_parameters/transfer_toptuning.yaml
-
-This model uses the transferred finetuned models stored in ./output/UHG_T1/transfer ./output/UHG_T2/transfer ./output/UHG_DTI_FA/transfer
-and trains a fully connected layer on top of it and stores the model in ./output/UHG_multimodal/transfer_toptuning/
-Better performance is expected to be from finetuning this fusion model rather than toptuning.
-
+ 

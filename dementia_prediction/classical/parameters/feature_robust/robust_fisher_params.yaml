@@ -1,0 +1,22 @@
+parameters:
+  patch_size: 3
+  num_bins: 5
+  pad: 1
+  epsilon: 0.00001
+  datadir: '/local/UHG/UHG_DTI_FA_normalized_masked/CV10/'
+  patient_dict: '/local/UHG/Dictionaries/T1_T2_DTIFA_dic.pkl'
+  valid_dict: '/local/UHG/Dictionaries/CV/T1_T2_DTIFA_valid_10.pkl'
+  train_dict: '/local/UHG/Dictionaries/CV/T1_T2_DTIFA_train_10.pkl'
+  features_path: '/local/UHG/UHG_DTI_FA_normalized_masked/CV10/robust_fisher/features.pkl'
+  min_path: '/local/UHG/UHG_DTI_FA_normalized_masked/CV10/robust_fisher/min.pkl'
+  max_path: '/local/UHG/UHG_DTI_FA_normalized_masked/CV10/robust_fisher/max.pkl'
+  bin_path: '/local/UHG/UHG_DTI_FA_normalized_masked/CV10/robust_fisher/bins.pkl'
+  mean_prog_path: '/local/UHG/UHG_DTI_FA_normalized_masked/CV10/robust_fisher/mean_prog.pkl'
+  mean_stab_path: '/local/UHG/UHG_DTI_FA_normalized_masked/CV10/robust_fisher/mean_stab.pkl'
+  std_prog_path: '/local/UHG/UHG_DTI_FA_normalized_masked/CV10/robust_fisher/std_prog.pkl'
+  std_stab_path: '/local/UHG/UHG_DTI_FA_normalized_masked/CV10/robust_fisher/std_stab.pkl'
+  depth: 91
+  height: 109
+  width: 91
+  regex: '_normalized\.nii\.gz'
+  split_on: '_normalized.nii.gz'

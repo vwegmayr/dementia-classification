@@ -31,7 +31,7 @@ parameters:
     channels: 1
     classes: 2
     fusion: 'scratch'
-    fusion_layer: 'conv7'
+    fusion_layer: 'conv1'
   regex: '_normalized\.nii\.gz'
   split_on: '_normalized.nii.gz'
   mode_folder1: '/local/UHG/UHG_T1_normalized/CV1/'

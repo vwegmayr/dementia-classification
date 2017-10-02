@@ -1,9 +1,3 @@
-"""
-This module contains the class 'CNN' which enables to build a 3D convolutional
-neural network. This neural network convolves along X, Y and Z axis of
-the input images to find spatial correlations along all three dimensions.
-"""
-
 from datetime import datetime
 import time
 import math
@@ -14,8 +8,7 @@ from dementia_prediction.cnn_utils import CNNUtils
 
 class TransferToptune:
     """
-    This class provides functions to train a 3D Convolutional Neural Network
-    model. To train the network and evaluate it, initialize the class with the
+    To train the network and evaluate it, initialize the class with the
     required parameter file and call the function train() with training and
     validation datasets.
     """
@@ -69,7 +62,7 @@ class TransferToptune:
             patients, image_data, label_data = dataset.next_batch()
             layer_path = ''
             if self.param['transfer'] == 'fullcn':
-                layer_path = 'TrainADNI_T1/ADNI_T1fullcn/ADNI_T1fullcn:0'
+                layer_path = 'TrainADNI_T1/ADNI_T1fullcn2/ADNI_T1fullcn2:0'
             elif self.param['transfer'] == 'conv1':
                 layer_path = 'conv1'
             features_images = self.cnnutils.get_features("ADNI_T1",
@@ -109,7 +102,7 @@ class TransferToptune:
         Args:
             train_data: the training data required for 3D CNN
             validation_data: validation data to test the accuracy of the model.
-
+            test: Test the final model on the validation data
         """
         mode = self.param['mode']
         with tf.Graph().as_default():
@@ -213,7 +206,7 @@ class TransferToptune:
                     _, image_data, label_data = train_data.next_batch()
                     layer_path = ''
                     if self.param['transfer'] == 'fullcn':
-                        layer_path = 'TrainADNI_T1/ADNI_T1fullcn/ADNI_T1fullcn:0'
+                        layer_path = 'TrainADNI_T1/ADNI_T1fullcn2/ADNI_T1fullcn2:0'
                     elif self.param['transfer'] == 'conv1':
                         layer_path = 'conv1'
                     features_images = self.cnnutils.get_features("ADNI_T1",

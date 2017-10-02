@@ -1,9 +1,3 @@
-"""
-This module contains the class 'CNN' which enables to build a 3D convolutional
-neural network. This neural network convolves along X, Y and Z axis of
-the input images to find spatial correlations along all three dimensions.
-"""
-
 from datetime import datetime
 import time
 import math
@@ -16,7 +10,7 @@ from dementia_prediction.cnn_utils import CNNUtils
 class FusionToptune:
     """
     This class provides functions to train a 3D Convolutional Neural Network
-    model. To train the network and evaluate it, initialize the class with the
+    fusion model. To train the network and evaluate it, initialize the class with the
     required parameter file and call the function train() with training and
     validation datasets.
     """
@@ -73,8 +67,14 @@ class FusionToptune:
             dataset: input dataset either train or validation
             images: the images placeholder
             labels: the labels placeholder
+            keep_prob: Dropout parameter
+            loss: Total loss
+            xloss: Cross-entropy loss
+            l2loss: L2 penalty on weights loss
+            corr: Number of correct predictions
 
-        Returns: the accuracy of the 3D CNN model
+
+        Returns: the accuracy of the 3D CNN fusion model
 
         """
         correct_predictions = 0
@@ -116,6 +116,7 @@ class FusionToptune:
         Args:
             train_data: the training data required for 3D CNN
             validation_data: validation data to test the accuracy of the model.
+            test: If true, tests the final model on the validation data
 
         """
         with tf.Graph().as_default():

@@ -26,7 +26,7 @@ parameters:
   tl: 'False'
 data_paths:
   datadir: '/local/ADNI_AIBL/ADNI_AIBL_T1_normalized/train_MCI_AD/'
-  class_labels: ''/local/ADNI_AIBL/ADNI_AIBL_T1_normalized/AIBL_ADNI_class_labels_T1_MCI_AD.pkl'
+  class_labels: '/local/ADNI_AIBL/ADNI_AIBL_T1_normalized/AIBL_ADNI_class_labels_T1_MCI_AD.pkl'
   valid_data: '/local/ADNI_AIBL/ADNI_AIBL_T1_normalized/AIBL_ADNI_valid_T1_MCI_AD.pkl'
   train_data: '/local/ADNI_AIBL/ADNI_AIBL_T1_normalized/AIBL_ADNI_train_T1_MCI_AD.pkl'
   adni: 'True'

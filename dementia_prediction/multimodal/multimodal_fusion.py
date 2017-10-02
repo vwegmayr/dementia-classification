@@ -1,9 +1,3 @@
-"""
-This module contains the class 'CNN' which enables to build a 3D convolutional
-neural network. This neural network convolves along X, Y and Z axis of
-the input images to find spatial correlations along all three dimensions.
-"""
-
 from datetime import datetime
 import time
 import math
@@ -40,12 +34,14 @@ class CNNMultimodal:
 
     def get_conv7(self, images, keep_prob, mode):
         """
-        This function builds the 3D Convolutional Neural Network architecture
+        This function builds the first 7 layers of 3D CNN architecture
         Args:
             images: Input MR Images
+            keep_prob: Dropout parameter
+            mode: Image modality name
 
         Returns:
-            Logits calculated at the last layer of the 3D CNN.
+            Feature maps at the last conv layer of the 3D CNN.
         """
         print(images.get_shape())
         prefix = self.modalities[mode]
@@ -102,12 +98,14 @@ class CNNMultimodal:
 
     def get_conv1(self, images, keep_prob, mode):
         """
-        This function builds the 3D Convolutional Neural Network architecture
+        This function builds the 1st conv layer of 3D CNN architecture
         Args:
             images: Input MR Images
+            keep_prob: Dropout parameter
+            mode: Input image modality name
 
         Returns:
-            Logits calculated at the last layer of the 3D CNN.
+            Feature maps from the 3D CNN first conv layer.
         """
         print(images.get_shape())
         prefix = self.modalities[mode]
@@ -156,6 +154,11 @@ class CNNMultimodal:
             dataset: input dataset either train or validation
             images: the images placeholder
             labels: the labels placeholder
+            keep_prob: Dropout parameter
+            loss: Total loss
+            xloss: Cross-entropy loss
+            l2loss: L2 penalty on weights loss
+            corr: Number of correct predictions
 
         Returns: the accuracy of the 3D CNN model
 
@@ -197,11 +200,12 @@ class CNNMultimodal:
     def train(self, train_data, validation_data, test):
         """
         This function creates the training operations and starts building and
-        training the 3D CNN model.
+        training the 3D CNN fusion model.
 
         Args:
             train_data: the training data required for 3D CNN
             validation_data: validation data to test the accuracy of the model.
+            test: Test the final model on validation data
 
         """
         mode = 'Fusion'
@@ -312,11 +316,11 @@ class CNNMultimodal:
                 if self.param['fusion'] == 'finetune':
                     train_objects = tf.trainable_variables()[:-2]
                     dict_map_T1 =  {v.name[:-2]:v for v in train_objects
-                                    if self.param['mode1'] in v.name[:-2]}
+                                    if self.modalities[0] in v.name[:-2]}
                     dict_map_T2 =  {v.name[:-2]:v for v in train_objects
-                                    if self.param['mode2'] in v.name[:-2]}
+                                    if self.modalities[1] in v.name[:-2]}
                     dict_map_DTI_FA =  {v.name[:-2]:v for v in train_objects
-                                        if self.param['mode3'] in v.name[:-2]}
+                                        if self.modalities[2] in v.name[:-2]}
                     print("Trainable variables:",
                           dict_map_T1, dict_map_T2, dict_map_DTI_FA)
                     saver1 = tf.train.Saver(dict_map_T1)

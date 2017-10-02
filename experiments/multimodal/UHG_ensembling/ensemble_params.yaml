@@ -22,13 +22,11 @@ parameters:
       1: '../models/UHG_T2/CV1/model.ckpt-899.meta'
       2: '../models/UHG_DTI_FA/CV1/model.ckpt-899.meta'
     ensemble_count: 3
-    checkpoint_path: '../models/UHG_Fusion_Conv7/'
-    summary_path: '../models/UHG_Fusion_Conv7/'
+    checkpoint_path: '../models/UHG_Fusion_ensemble/'
+    summary_path: '../models/UHG_Fusion_ensemble/'
     keep_prob: 0.3
     classes: 2
     channels: 1
-    fusion: 'ensemble'
-    fusion_layer: 'conv7'
   regex: '_normalized\.nii\.gz'
   split_on: '_normalized.nii.gz'
   mode_folder1: '/local/UHG/UHG_T1_normalized/CV1/'

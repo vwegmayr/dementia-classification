@@ -19,7 +19,6 @@ parameters:
     channels: 1
     decay_lr: 'False'
     optimizer: 'Adam'
-    transfer_depth: 8
     transfer: 'fullcn'
   tl: 'toptune'
   regex: '_normalized\.nii\.gz'

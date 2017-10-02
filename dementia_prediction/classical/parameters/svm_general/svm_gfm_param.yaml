@@ -1,0 +1,10 @@
+parameters:
+  data_path: '/local/UHG/UHG_DTI_FA_normalized_masked/CV1/'
+  brain_mask: '/local/fsl/data/standard/MNI152_T1_2mm_brain_mask.nii.gz'
+  fisher_score_all: '/local/UHG/UHG_DTI_FA_normalized_masked/CV1/general_fisher/fisher_score_all.pkl'
+  out: '/local/UHG/UHG_DTI_FA_normalized_masked/CV1/general_fisher/'
+  valid_dict: '/local/UHG/Dictionaries/CV/T1_T2_DTIFA_valid_1.pkl'
+  train_dict: '/local/UHG/Dictionaries/CV/T1_T2_DTIFA_train_1.pkl'
+  patient_dict: '/local/UHG/Dictionaries/T1_T2_DTIFA_dic.pkl'
+  regex: '_normalized\.nii\.gz'
+  split_on: '_normalized.nii.gz'

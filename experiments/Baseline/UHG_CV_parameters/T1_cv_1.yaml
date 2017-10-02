@@ -6,12 +6,12 @@ parameters:
     width: 91
     mode: 'UHG_T1'
     batch_size: 12
-    num_epochs: 1 
+    num_epochs: 30 
     learning_rate: 0.000005
     decay_factor: 0.9
     decay_const: 0.005
-    checkpoint_path: '../models/UHG_T1/CV1_repeat_2/'
-    summary_path: '../models/UHG_T1/CV1_repeat_2/'
+    checkpoint_path: '../models/UHG_T1/CV1/'
+    summary_path: '../models/UHG_T1/CV1/'
     keep_prob: 0.3
     classes: 2
     channels: 1

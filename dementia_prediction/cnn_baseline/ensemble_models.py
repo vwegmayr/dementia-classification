@@ -1,7 +1,5 @@
 """
-This module contains the class 'CNN' which enables to build a 3D convolutional
-neural network. This neural network convolves along X, Y and Z axis of
-the input images to find spatial correlations along all three dimensions.
+This class ensembles over the models for final prediction.
 """
 
 from datetime import datetime
@@ -16,8 +14,7 @@ from dementia_prediction.cnn_utils import CNNUtils
 
 class CNNEnsembleModels:
     """
-    This class provides functions to train a 3D Convolutional Neural Network
-    model. To train the network and evaluate it, initialize the class with the
+    To train the network and evaluate it, initialize the class with the
     required parameter file and call the function train() with training and
     validation datasets.
     """
@@ -32,14 +29,9 @@ class CNNEnsembleModels:
         """
         This function evaluates the accuracy of the model
         Args:
-            sess: tensorflow session
-            eval_op: evaluation operation which calculates number of correct
-                    predictions
             dataset: input dataset either train or validation
-            images: the images placeholder
-            labels: the labels placeholder
 
-        Returns: the accuracy of the 3D CNN model
+        Returns: the accuracy of the model on the input data
 
         """
         correct_predictions = 0
@@ -101,10 +93,10 @@ class CNNEnsembleModels:
 
     def train(self, train_data, validation_data, flag):
         """
-        This function creates the training operations and starts building and
-        training the 3D CNN model.
+        This function calculates the ensembled accuracy on the train/validation data.
 
         Args:
+            train_data: To test the accuracy on the training data.
             validation_data: validation data to test the accuracy of the model.
         """
         with tf.Graph().as_default():

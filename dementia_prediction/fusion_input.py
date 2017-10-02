@@ -1,5 +1,5 @@
 """
-This module contains functions to handle the input data to the CNN model.
+This module contains functions to handle the fusion input data to the CNN model.
 """
 
 import math
@@ -71,7 +71,7 @@ class FusionDataInput:
         """
         This functions retrieves the next batch of the data.
 
-        Returns: (batch_images, batch_labels)
+        Returns: (batch_filenames, batch_images, batch_labels)
 
         """
         batch_images = [np.array([], np.float) for i in range(0,

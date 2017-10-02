@@ -159,7 +159,7 @@ class CNNUtils:
                                    biases_shape=[512], scope=scope)
         print("Conv7", conv7.get_shape())
 
-        with tf.variable_scope(self.param['mode']+'fullcn') as scope:
+        with tf.variable_scope(self.param['mode']+'fullcn2') as scope:
             vector_per_batch = tf.reshape(conv7, [self.param['batch_size'],
                                           -1])
             weights = self.weight_decay_variable(name="weights",

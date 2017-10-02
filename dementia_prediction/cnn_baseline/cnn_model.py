@@ -1,5 +1,8 @@
 """
-This module builds the Baseline 3D CNN architecture 
+This module contains the class 'CNN' to build a 3D convolutional
+neural network. This neural network convolves along X, Y and Z axis of
+the input images to find spatial correlations along all three dimensions.
+This class also has a helper function to build an MLP architecture
 """
 
 from datetime import datetime
@@ -26,12 +29,13 @@ class CNN:
 
     def mlp_inference(self, images, keep_prob):
         """
-        This function builds the 3D Convolutional Neural Network architecture
+        This function builds the multi layer perceptron architecture
         Args:
             images: Input MR Images
+            keep_prob: Dropout parameter
 
         Returns:
-            Logits calculated at the last layer of the 3D CNN.
+            Logits calculated at the last layer.
         """
         print(images.get_shape())
         with tf.variable_scope(self.param['mode'] + 'fullcn') as scope:
@@ -66,12 +70,12 @@ class CNN:
 
     def inference(self, images):
         """
-        This function builds the 3D Convolutional Neural Network architecture
+        This function builds the 1st layer of 3D CNN model.
         Args:
             images: Input MR Images
 
         Returns:
-            Logits calculated at the last layer of the 3D CNN.
+            convolution layer 1st conv layer feature maps
         """
         print("Input shape:", images.get_shape())
         with tf.variable_scope(self.param['mode']+'conv1_a') as scope:
@@ -189,6 +193,7 @@ class CNN:
                 config.allow_soft_placement = True
                 sess = tf.InteractiveSession(config=config)
                 sess.run(init)
+                # If transfer is 'True', weights from source task are transferred
                 if self.param['transfer'] == 'True':
                     tr_depth = 2 * (9 - self.param['transfer_depth'])
                     train_objects = tf.trainable_variables()[:-tr_depth]

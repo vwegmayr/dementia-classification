@@ -18,9 +18,8 @@ parameters:
     classes: 2
     decay_lr: 'false'
     optimizer: 'Adam'
-    transfer_depth: '8'
     channels: 1
-    transfer: 'fullcn'
+    transfer: 'conv1'
   tl: 'toptune'
   regex: '_normalized\.nii\.gz'
   split_on: '_normalized.nii.gz'

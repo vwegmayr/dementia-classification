@@ -1,0 +1,15 @@
+parameters:
+  naive_scores: '/local/UHG/UHG_T1_normalized_masked/CV1/general_fisher/Top_10.0_scores.pkl'
+  robust_scores: '/local/UHG/UHG_T1_normalized_masked/CV1/robust_fisher/Top_10.0_scores.pkl'
+  naive_all_scores: '/local/UHG/UHG_T1_normalized_masked/CV1/general_fisher/fisher_score_all.pkl'
+  robust_all_scores: '/local/UHG/UHG_T1_normalized_masked/CV1/robust_fisher/features.pkl'
+  naive_features: '/local/UHG/UHG_T1_normalized_masked/CV1/general_fisher/Top_10.0_features.pkl'
+  robust_features: '/local/UHG/UHG_T1_normalized_masked/CV1/robust_fisher/Top_10.0_features.pkl'
+  mask_path: '/local/fsl/data/standard/MNI152_T1_2mm_brain_mask.nii.gz'
+  xlabel: 'General Fisher Score'
+  ylabel: 'Robust Fisher Score'
+  title: 'UHG T1'
+  fig_name: '/local/UHG/UHG_T1_normalized_masked/CV1/scatterplot_uhg_t1.png'
+  depth: 91
+  height: 109
+  width: 91

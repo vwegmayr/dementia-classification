@@ -1,0 +1,7 @@
+parameters:
+  file_path: '/local/fsl/data/standard/MNI152_T1_2mm_brain.nii.gz'
+  features_path: '/local/UHG/UHG_DTI_FA_normalized_masked/CV1/general_fisher/Top_10.0_features.pkl'
+  out_path: '/local/UHG/UHG_DTI_FA_normalized_masked/CV1/general_fisher/reconstruct_general_uhg_dti_fa_10.nii.gz'
+  depth: 91
+  height: 109
+  width: 91

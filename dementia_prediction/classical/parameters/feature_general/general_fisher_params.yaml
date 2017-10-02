@@ -1,0 +1,11 @@
+parameters:
+  patient_dict: '/local/UHG/Dictionaries/T1_T2_DTIFA_dic.pkl'
+  valid_dict: '/local/UHG/Dictionaries/CV/T1_T2_DTIFA_valid_10.pkl'
+  train_dict: '/local/UHG/Dictionaries/CV/T1_T2_DTIFA_train_10.pkl'
+  datadir: '/local/UHG/UHG_DTI_FA_normalized_masked/CV10/'
+  features_path: '/local/UHG/UHG_DTI_FA_normalized_masked/CV10/general_fisher/'
+  depth: 91
+  height: 109
+  width: 91
+  regex: '_normalized\.nii\.gz'
+  split_on: '_normalized.nii.gz'
