@@ -44,11 +44,11 @@ class CNNUtils:
             name: name of the weights
             shape: shape of these weights
             stddev: this is the standard deviation for initializing the 
-                    weights. If we initialize the weights to a unit standard
-                    deviation, the variance of the outputs of neuron increases
-                    linearly with inputs. Hence, at present, the weights
-                    are normalized by scaling it with square root of number of
-                    inputs.
+            weights. If we initialize the weights to a unit standard
+            deviation, the variance of the outputs of neuron increases
+            linearly with inputs. Hence, at present, the weights
+            are normalized by scaling it with square root of number of
+            inputs.
             Reference: http://cs231n.github.io/neural-networks-2/#init
         Returns: the initialized weights with weight decay
 
@@ -81,13 +81,14 @@ class CNNUtils:
         """
         This function builds a convolution layer of the 3D CNN
         Args:
-            input_: input of the CNN layer maybe an image or an intermediate
-                    feature representation
+            input: input of the CNN layer maybe an image or an intermediate
+            feature representation
             kernel_shape: the shape of the kernel filters
             biases_shape: bias shape is equal to the shape of output channels
             scope: scope of the weights and biases in this convolution layer
-        Returns:
-            Feature maps of the convolution layer
+
+        Returns: Feature maps of the convolution layer
+
         """
 
         weights = self.weight_decay_variable("weights", kernel_shape)
@@ -98,7 +99,7 @@ class CNNUtils:
                                           0.001))
         tf.summary.histogram('biases', biases)
 
-        conv = tf.nn.conv3d(input=input_,
+        conv = tf.nn.conv3d(input=input,
                             filter=weights,
                             strides=[1, 2, 2, 2, 1],
                             padding="SAME")
@@ -345,7 +346,7 @@ class CNNUtils:
         Args:
             sess: tensorflow session
             eval_op: evaluation operation which calculates number of correct
-                    predictions
+            predictions
             dataset: input dataset
             images: the images placeholder
             labels: the labels placeholder
