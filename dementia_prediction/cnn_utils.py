@@ -99,7 +99,7 @@ class CNNUtils:
                                           0.001))
         tf.summary.histogram('biases', biases)
 
-        conv = tf.nn.conv3d(input=input,
+        conv = tf.nn.conv3d(input=input_,
                             filter=weights,
                             strides=[1, 2, 2, 2, 1],
                             padding="SAME")
